@@ -23,7 +23,7 @@
     "express": "^4.19.2",
     "mongodb": "^6.9.0",
     "mongoose": "^8.6.2",
-    "react-scripts": "^5.0.0",
+    "react-scripts": "^5.0.0"
   },
   "devDependencies": {
     "@types/bn.js": "^5.1.0",
