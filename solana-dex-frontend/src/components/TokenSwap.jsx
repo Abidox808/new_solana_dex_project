@@ -128,7 +128,15 @@ const TokenSwap = () => {
         walletAddress,
         slippage
       });
-      
+      console.log({
+        fromToken,
+        toToken,
+        fromAmount,
+        toAmount,
+        walletAddress,
+        slippage
+      });
+
       setTransactionStatus('Signing transaction...');
       const swapTransaction = res.data.swapResult;
       const swapTransactionBuf = Buffer.from(swapTransaction,'base64');
@@ -149,6 +157,7 @@ const TokenSwap = () => {
       console.log(`https://solscan.io/tx/${txid}`);
     } catch (error) {
       console.error('Error during transaction:', error);
+      console.error('Response:', error.response);
       setTransactionStatus('Transaction failed. Please try again.');
     }
   };
