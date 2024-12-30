@@ -35,21 +35,19 @@ const TokenSwap = () => {
     const fetchTokens = async () => {
       try {
         const response = await axios.get(`${API_BASE_URL}/api/tokens`);
-        console.log('Tokens API response:', response.data);
-
-        // Check if the response is an array or object
-        const tokenData = Array.isArray(response.data) ? response.data : response.data.tokens;
-        
+        const tokenData = response.data;
+  
         if (!Array.isArray(tokenData)) {
           throw new Error('Expected an array of tokens but received something else');
         }
+  
         setTokens(tokenData);
       } catch (error) {
         console.error('Error fetching tokens:', error);
         setError('Failed to fetch tokens');
       }
     };
-
+  
     fetchTokens();
   }, [API_BASE_URL]);
 
@@ -96,16 +94,19 @@ const TokenSwap = () => {
     }
   }, [fromAmount, prices, fromToken, toToken]);
 
-  const handleSelectToken = (token, type) => {
-    if (type === 'from') {
-      console.log("token->", token);
-      setFromToken(token);
-    } else {
-      setToToken(token);
+  const handleSelectToken = (tokenSymbol, type) => {
+    const token = tokens.find(t => t.symbol === tokenSymbol);
+    if (token) {
+      if (type === 'from') {
+        setFromToken(token.symbol);
+        setFromTokenAddress(token.address); 
+      } else {
+        setToToken(token.symbol);
+        setToTokenAddress(token.address); 
+      }
     }
     setShowFromDropdown(false);
     setShowToDropdown(false);
-    console.log(`Selected ${type} Token:`, token);
   };
 
   const handleFlip = () => {

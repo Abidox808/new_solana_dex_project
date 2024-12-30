@@ -1,32 +1,38 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 
 const Dropdown = ({ tokens, selectedToken, onSelectToken, showDropdown, setShowDropdown }) => {
-  const dropdownRef = useRef(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setShowDropdown(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [setShowDropdown]);
+  const filteredTokens = tokens.filter(token =>
+    token.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    token.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div className="dropdown-container" ref={dropdownRef}>
-      <div className="dropdown-selected" onClick={() => setShowDropdown(!showDropdown)}>
-        {selectedToken || 'Select Token'}
+    <div className="dropdown">
+      <div className="dropdown-header" onClick={() => setShowDropdown(!showDropdown)}>
+        {selectedToken}
       </div>
       {showDropdown && (
-        <div className="dropdown-menu">
-          <input type="text" placeholder="Search by token or paste address" className="dropdown-search" />
-          {tokens.map((token) => (
-            <div key={token.address} className="dropdown-item" onClick={() => onSelectToken(token.symbol)}>
-              {token.symbol}
+        <div className="dropdown-list">
+          <input
+            type="text"
+            placeholder="Search tokens..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          {filteredTokens.map(token => (
+            <div
+              key={token.address}
+              className="dropdown-item"
+              onClick={() => {
+                onSelectToken(token.symbol);
+                setShowDropdown(false);
+              }}
+            >
+              <img src={token.logoURI} alt={token.symbol} className="token-logo" />
+              <span>{token.symbol}</span>
+              <span>{token.name}</span>
             </div>
           ))}
         </div>

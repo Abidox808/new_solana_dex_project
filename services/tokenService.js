@@ -64,9 +64,11 @@ async function combineAndDeduplicateData() {
 
     // Convert BirdEye tokens to a uniform format
     const birdEyeTokensArray = birdEyeTokens.map(token => ({
-      address: token.address,
+      address: token.address, 
       symbol: token.symbol,
-      price: token.price // Ensure this field is correct for price
+      name: token.name,
+      logoURI: token.logoURI, 
+      price: token.price 
     }));
 
     // Merge all tokens
