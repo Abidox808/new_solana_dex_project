@@ -119,25 +119,22 @@ const TokenSwap = () => {
   };
 
   const handleSwap = async () => {
+    console.log(connection);
     setTransactionStatus('Initiating transaction...');
     const walletAddress = wallet.publicKey;
     try {
-      const res = await axios.post(`${API_BASE_URL}/api/swap`, {
-        fromToken: fromTokenAddress, // Use mint address
-        toToken: toTokenAddress, // Use mint address
+      const payload = {
+        fromToken: fromTokenAddress,
+        toToken: toTokenAddress,
         fromAmount,
         toAmount,
         walletAddress,
         slippage
-      });
-      console.log({
-        fromToken,
-        toToken,
-        fromAmount,
-        toAmount,
-        walletAddress,
-        slippage
-      });
+      };
+      console.log('Swap Payload:', payload);
+  
+      const res = await axios.post(`${API_BASE_URL}/api/swap`, payload);
+      console.log('Swap Response:', res.data);
 
       setTransactionStatus('Signing transaction...');
       const swapTransaction = res.data.swapResult;
