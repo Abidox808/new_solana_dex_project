@@ -120,49 +120,40 @@ const TokenSwap = () => {
     setTransactionStatus('Initiating transaction...');
     const walletAddress = wallet.publicKey;
     try {
-      
-      const fromTokenInfo = tokens.find(t => t.symbol === fromToken);
-      const toTokenInfo = tokens.find(t => t.symbol === toToken);
-  
-      if (!fromTokenInfo || !toTokenInfo) {
-        throw new Error('Invalid token selection');
-      }
-  
       const res = await axios.post(`${API_BASE_URL}/api/swap`, {
-        fromToken: fromTokenInfo.address, 
-        toToken: toTokenInfo.address,     
+        fromToken,
+        toToken,
         fromAmount,
         toAmount,
         walletAddress,
         slippage
       });
-  
       console.log({
-        fromToken: fromTokenInfo.address,
-        toToken: toTokenInfo.address,
+        fromToken,
+        toToken,
         fromAmount,
         toAmount,
         walletAddress,
         slippage
       });
-  
+
       setTransactionStatus('Signing transaction...');
       const swapTransaction = res.data.swapResult;
-      const swapTransactionBuf = Buffer.from(swapTransaction, 'base64');
+      const swapTransactionBuf = Buffer.from(swapTransaction,'base64');
       const transaction = VersionedTransaction.deserialize(swapTransactionBuf);
       const signTransaction = await wallet.signTransaction(transaction);
       setTransactionStatus('Sending signed transaction to Solana Network');
       const latestBlockhash = await connection.getLatestBlockhash();
       const txid = await connection.sendRawTransaction(signTransaction.serialize());
-  
+      
       setTransactionStatus('Confirming...');
       await connection.confirmTransaction({
-        blockhash: latestBlockhash,
-        lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
-        signature: txid
+        blockhash:latestBlockhash,
+        lastValidBlockHeight:latestBlockhash.lastValidBlockHeight,
+        signature:txid
       });
-  
-      setTransactionStatus(`Transaction succeed! Transaction ID: ${txid}`);
+
+      setTransactionStatus(`Transaction succeed! Transaction ID: ${txid}`);  
       console.log(`https://solscan.io/tx/${txid}`);
     } catch (error) {
       console.error('Error during transaction:', error);
