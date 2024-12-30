@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import '../../styles/dropdown.css';
+import '../styles/dropdown.css';
 const Dropdown = ({ tokens, selectedToken, onSelectToken, showDropdown, setShowDropdown }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const dropdownRef = useRef(null);
