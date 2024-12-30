@@ -54,23 +54,33 @@ async function fetchFromSolanaBlockchain() {
   return tokens;
 }
 
+const jupiterAxios = axios.create({
+  headers: {
+    'referer': 'https://newsolanadexproject-production.up.railway.app',
+    'origin': 'https://newsolanadexproject-production.up.railway.app'
+  }
+});
+
 async function fetchJupiterTokens() {
   try {
-    const response = await axios.get('https://tokens.jup.ag/tokens?tags=verified');
+    const response = await jupiterAxios.get('https://tokens.jup.ag/tokens?tags=verified');
+    if (!response.data || !Array.isArray(response.data)) {
+      throw new Error('Invalid response format from Jupiter API');
+    }
     return response.data;
   } catch (error) {
-    console.error('Error fetching Jupiter tokens:', error);
-    throw new Error('Failed to fetch tokens from Jupiter');
+    console.error('Jupiter API error:', error.response || error);
+    throw new Error(`Failed to fetch Jupiter tokens: ${error.message}`);
   }
 }
 
 async function getTokenInfo(mintAddress) {
   try {
-    const response = await axios.get(`https://tokens.jup.ag/token/${mintAddress}`);
+    const response = await jupiterAxios.get(`https://tokens.jup.ag/token/${mintAddress}`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching token info:', error);
-    throw new Error('Failed to fetch token info');
+    console.error('Token info error:', error.response || error);
+    throw new Error(`Failed to fetch token info: ${error.message}`);
   }
 }
 
@@ -85,8 +95,8 @@ async function combineAndDeduplicateData() {
       logoURI: token.logoURI
     }));
   } catch (error) {
-    console.error('Error in combineAndDeduplicateData:', error);
-    throw new Error('Failed to combine token data');
+    console.error('Token combination error:', error);
+    throw error;
   }
 }
 
