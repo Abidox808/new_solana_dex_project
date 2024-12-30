@@ -57,7 +57,6 @@ async function fetchFromSolanaBlockchain() {
 const jupiterAxios = axios.create({
   headers: {
     'referer': 'https://newsolanadexproject-production.up.railway.app',
-    'origin': 'https://newsolanadexproject-production.up.railway.app'
   }
 });
 
