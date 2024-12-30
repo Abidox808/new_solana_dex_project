@@ -54,40 +54,39 @@ async function fetchFromSolanaBlockchain() {
   return tokens;
 }
 
+async function fetchJupiterTokens() {
+  try {
+    const response = await axios.get('https://tokens.jup.ag/tokens?tags=verified');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching Jupiter tokens:', error);
+    throw new Error('Failed to fetch tokens from Jupiter');
+  }
+}
+
+async function getTokenInfo(mintAddress) {
+  try {
+    const response = await axios.get(`https://tokens.jup.ag/token/${mintAddress}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching token info:', error);
+    throw new Error('Failed to fetch token info');
+  }
+}
+
 async function combineAndDeduplicateData() {
   try {
-    // Only fetching from BirdEye and blockchain now
-    const birdEyeTokens = await fetchFromBirdeye();
-    const blockchainTokens = await fetchFromSolanaBlockchain();
-
-    console.log('BirdEye Tokens:', birdEyeTokens);
-    console.log('Blockchain Tokens:', blockchainTokens);
-
-    // Convert BirdEye tokens to a uniform format
-    const birdEyeTokensArray = birdEyeTokens.map(token => ({
-      address: token.address, 
+    const tokens = await fetchJupiterTokens();
+    return tokens.map(token => ({
+      address: token.address,
       symbol: token.symbol,
       decimals: token.decimals,
       name: token.name,
-      logoURI: token.logoURI, 
-      price: token.price 
+      logoURI: token.logoURI
     }));
-
-    // Merge all tokens
-    const allTokens = [...birdEyeTokensArray, ...blockchainTokens];
-
-    // Deduplicate by address
-    const uniqueTokens = allTokens.reduce((acc, token) => {
-      if (!acc.find(t => t.address === token.address)) {
-        acc.push(token);
-      }
-      return acc;
-    }, []);
-
-    return uniqueTokens;
   } catch (error) {
     console.error('Error in combineAndDeduplicateData:', error);
-    throw new Error('Failed to combine and deduplicate data');
+    throw new Error('Failed to combine token data');
   }
 }
 
@@ -136,4 +135,4 @@ exports.getTokenBySymbol = async (symbol) => {
   return Token.findOne({ symbol });
 };
 
-module.exports = { combineAndDeduplicateData, placeDCAOrder, placePerpsOrder };
+module.exports = { combineAndDeduplicateData, getTokenInfo ,placeDCAOrder, placePerpsOrder };
