@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import '../styles/dropdown.css';
+
 const Dropdown = ({ tokens, selectedToken, onSelectToken, showDropdown, setShowDropdown }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const dropdownRef = useRef(null);
@@ -19,10 +20,14 @@ const Dropdown = ({ tokens, selectedToken, onSelectToken, showDropdown, setShowD
   }, [setShowDropdown]);
 
   // Filter tokens based on search term
-  const filteredTokens = tokens.filter(token =>
+  const filteredTokens = tokens.filter((token) =>
     token.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    token.name.toLowerCase().includes(searchTerm.toLowerCase())
+    token.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    token.address.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Limit to top 100 tokens if no search term is entered
+  const displayedTokens = searchTerm ? filteredTokens : filteredTokens.slice(0, 100);
 
   return (
     <div className="dropdown-container" ref={dropdownRef}>
@@ -39,7 +44,7 @@ const Dropdown = ({ tokens, selectedToken, onSelectToken, showDropdown, setShowD
             onChange={(e) => setSearchTerm(e.target.value)}
           />
           <div className="dropdown-items">
-            {filteredTokens.map((token) => (
+            {displayedTokens.map((token) => (
               <div
                 key={token.address}
                 className="dropdown-item"
