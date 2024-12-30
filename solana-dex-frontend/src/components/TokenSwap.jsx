@@ -17,6 +17,8 @@ const TokenSwap = () => {
   const [tokens, setTokens] = useState([]);
   const [fromToken, setFromToken] = useState('SOL');
   const [toToken, setToToken] = useState('USDC');
+  const [fromTokenAddress, setFromTokenAddress] = useState('');
+  const [toTokenAddress, setToTokenAddress] = useState('');
   const [fromAmount, setFromAmount] = useState('');
   const [toAmount, setToAmount] = useState('');
   const [showFromDropdown, setShowFromDropdown] = useState(false);
