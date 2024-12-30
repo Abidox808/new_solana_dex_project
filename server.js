@@ -28,19 +28,23 @@ client.connect();
 console.log('db connected');
 const database = client.db('solana_dex');
 
-const getMintAddress = async (symbol) => {
-  try {
-    const collection = database.collection('mint_addresses');
-    const result = await collection.findOne({ symbol: symbol }, { projection: { address: 1, decimal: 1 } });
-    if (!result) {
-      throw new Error(`Token ${symbol} not found in the database`);
-    }
-    return { address: result.address, decimal: parseInt(result.decimal, 10) };
-  } catch (error) {
-    console.error("Error occurred while fetching mint address:", error);
-    throw new Error(`Failed to fetch mint address for token: ${symbol}`);
+const fetchMintAddressFromBirdeye = async (symbol) => {
+  const apiKey = '7707fff5284b4debbdc6487845ea9218';
+  const headers = {
+    'X-API-KEY': apiKey,
+    'Content-Type': 'application/json'
+  };
+
+  const response = await axios.get('https://public-api.birdeye.so/defi/tokenlist', { headers });
+  const token = response.data.data.tokens.find(t => t.symbol === symbol);
+
+  if (!token) {
+    throw new Error(`Token ${symbol} not found in Birdeye API`);
   }
+
+  return { address: token.address, decimal: token.decimals };
 };
+
 
 app.use(cors());
 app.use(express.json());
@@ -57,13 +61,13 @@ app.get('/api/tokens', async (req, res) => {
 
 const performSwap = async (fromToken, toToken, fromAmount, toAmount, slippage, walletAddress) => {
   try {
-    // Fetch mint addresses and decimals
-    const inputMintTokenData = await getMintAddress(fromToken);
+    // Fetch mint addresses from Birdeye API
+    const inputMintTokenData = await fetchMintAddressFromBirdeye(fromToken);
     console.log('Input Mint Data:', inputMintTokenData);
     const inputMint = inputMintTokenData.address;
     const decimal = inputMintTokenData.decimal;
 
-    const outputMintTokenData = await getMintAddress(toToken);
+    const outputMintTokenData = await fetchMintAddressFromBirdeye(toToken);
     console.log('Output Mint Data:', outputMintTokenData);
     if (!outputMintTokenData || !outputMintTokenData.address) {
       throw new Error(`Failed to fetch mint address for token: ${toToken}`);
