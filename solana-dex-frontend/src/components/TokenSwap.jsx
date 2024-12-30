@@ -20,6 +20,8 @@ const TokenSwap = () => {
   const [fromTokenAddress, setFromTokenAddress] = useState('');
   const [toTokenAddress, setToTokenAddress] = useState('');
   const [Decimals, setDecimals] = useState('');
+  const [fromTokenDecimals, setFromTokenDecimals] = useState(0);
+  const [toTokenDecimals, setToTokenDecimals] = useState(0);
   const [fromAmount, setFromAmount] = useState('');
   const [toAmount, setToAmount] = useState('');
   const [showFromDropdown, setShowFromDropdown] = useState(false);
@@ -97,18 +99,17 @@ const TokenSwap = () => {
     }
   }, [fromAmount, prices, fromToken, toToken]);
 
-  const handleSelectToken = (tokenSymbol, type) => {
-    const token = tokens.find(t => t.symbol === tokenSymbol);
-    console.log(token)
+  const handleSelectToken = async (tokenSymbol, type) => {
+    const token = tokens.find((t) => t.symbol === tokenSymbol);
     if (token) {
       if (type === 'from') {
         setFromToken(token.symbol);
         setFromTokenAddress(token.address);
-        setDecimals(token.decimals);
-        console.log(token) 
+        setFromTokenDecimals(token.decimals); // Set fromToken decimals
       } else {
         setToToken(token.symbol);
-        setToTokenAddress(token.address); 
+        setToTokenAddress(token.address);
+        setToTokenDecimals(token.decimals); // Set toToken decimals
       }
     }
     setShowFromDropdown(false);
@@ -118,6 +119,10 @@ const TokenSwap = () => {
   const handleFlip = () => {
     setFromToken(toToken);
     setToToken(fromToken);
+    setFromTokenAddress(toTokenAddress);
+    setToTokenAddress(fromTokenAddress);
+    setFromTokenDecimals(toTokenDecimals); // Swap decimals
+    setToTokenDecimals(fromTokenDecimals);
     setFromAmount(toAmount);
     setToAmount(fromAmount);
   };
@@ -130,11 +135,11 @@ const TokenSwap = () => {
       const payload = {
         fromToken: fromTokenAddress,
         toToken: toTokenAddress,
-        decimals: Decimals,
+        decimals: fromTokenDecimals,
         fromAmount,
         toAmount,
         walletAddress,
-        slippage
+        slippage,
       };
       console.log('Swap Payload:', payload);
   
