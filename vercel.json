@@ -1,19 +1,20 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "solana-dex-frontend/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "solana-dex-frontend/dist", 
-        "buildCommand": "yarn --cwd solana-dex-frontend build" 
+    "version": 2,
+    "builds": [
+      {
+        "src": "package.json",
+        "use": "@vercel/static-build",
+        "config": {
+          "buildCommand": "npm run build",
+          "distDir": "build"
+        }
       }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/solana-dex-frontend/dist/$1" 
-    }
-  ]
-}
+    ],
+    "routes": [
+      {
+        "src": "/(.*)",
+        "dest": "/index.html"
+      }
+    ]
+  }
+  
