@@ -28,21 +28,20 @@ client.connect();
 console.log('db connected');
 const database = client.db('solana_dex');
 
-const fetchMintAddressFromBirdeye = async (symbol) => {
-  const apiKey = '7707fff5284b4debbdc6487845ea9218';
-  const headers = {
-    'X-API-KEY': apiKey,
-    'Content-Type': 'application/json'
-  };
+const fetchMintAddressFromJupiter = async (symbol) => {
+  try {
+    const response = await axios.get('https://tokens.jup.ag/tokens?tags=verified');
+    const token = response.data.find(t => t.symbol === symbol);
 
-  const response = await axios.get('https://public-api.birdeye.so/defi/tokenlist', { headers });
-  const token = response.data.data.tokens.find(t => t.symbol === symbol);
+    if (!token) {
+      throw new Error(`Token ${symbol} not found in Jupiter API`);
+    }
 
-  if (!token) {
-    throw new Error(`Token ${symbol} not found in Birdeye API`);
+    return { address: token.address, decimal: token.decimals };
+  } catch (error) {
+    console.error('Error fetching token from Jupiter API:', error);
+    throw new Error('Failed to fetch token from Jupiter API');
   }
-
-  return { address: token.address, decimal: token.decimals };
 };
 
 
