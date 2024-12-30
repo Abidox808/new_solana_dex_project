@@ -5,15 +5,15 @@
       "src": "solana-dex-frontend/package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "solana-dex-frontend/dist",
-        "buildCommand": "yarn --cwd solana-dex-frontend build"
+        "distDir": "dist",
+        "buildCommand": "cd solana-dex-frontend && yarn install && yarn build"
       }
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/solana-dex-frontend/$1" 
+      "dest": "/solana-dex-frontend/dist/$1"
     }
   ]
 }
