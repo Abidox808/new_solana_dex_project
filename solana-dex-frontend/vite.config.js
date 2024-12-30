@@ -4,7 +4,6 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import path from 'path';
 
 export default defineConfig({
-  root: path.resolve(__dirname, 'solana-dex-frontend'),
   plugins: [
     react(),
     nodePolyfills({
