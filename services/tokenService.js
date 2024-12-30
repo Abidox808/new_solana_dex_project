@@ -67,6 +67,7 @@ async function combineAndDeduplicateData() {
     const birdEyeTokensArray = birdEyeTokens.map(token => ({
       address: token.address, 
       symbol: token.symbol,
+      decimals: token.decimals,
       name: token.name,
       logoURI: token.logoURI, 
       price: token.price 
