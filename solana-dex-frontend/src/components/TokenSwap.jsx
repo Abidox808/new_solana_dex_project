@@ -157,6 +157,7 @@ const TokenSwap = () => {
       console.log(`https://solscan.io/tx/${txid}`);
     } catch (error) {
       console.error('Error during transaction:', error);
+      console.error('Response:', error.response);
       setTransactionStatus('Transaction failed. Please try again.');
     }
   };
