@@ -36,6 +36,7 @@ async function fetchFromBirdeye() {
   };
   
   const data = await fetchWithRetry('https://public-api.birdeye.so/defi/tokenlist', { headers });
+  console.log('Birdeye Token Data:', data);
   
   if (!data || !data.data || !Array.isArray(data.data.tokens)) {
     console.error('Invalid data from BirdEye API:', data);
