@@ -54,48 +54,40 @@ async function fetchFromSolanaBlockchain() {
   return tokens;
 }
 
-const jupiterAxios = axios.create({
-  headers: {
-    'referer': 'https://newsolanadexproject-production.up.railway.app',
-  }
-});
-
-async function fetchJupiterTokens() {
-  try {
-    const response = await jupiterAxios.get('https://tokens.jup.ag/tokens?tags=verified');
-    if (!response.data || !Array.isArray(response.data)) {
-      throw new Error('Invalid response format from Jupiter API');
-    }
-    return response.data;
-  } catch (error) {
-    console.error('Jupiter API error:', error.response || error);
-    throw new Error(`Failed to fetch Jupiter tokens: ${error.message}`);
-  }
-}
-
-async function getTokenInfo(mintAddress) {
-  try {
-    const response = await jupiterAxios.get(`https://tokens.jup.ag/token/${mintAddress}`);
-    return response.data;
-  } catch (error) {
-    console.error('Token info error:', error.response || error);
-    throw new Error(`Failed to fetch token info: ${error.message}`);
-  }
-}
-
 async function combineAndDeduplicateData() {
   try {
-    const tokens = await fetchJupiterTokens();
-    return tokens.map(token => ({
-      address: token.address,
+    // Only fetching from BirdEye and blockchain now
+    const birdEyeTokens = await fetchFromBirdeye();
+    const blockchainTokens = await fetchFromSolanaBlockchain();
+
+    console.log('BirdEye Tokens:', birdEyeTokens);
+    console.log('Blockchain Tokens:', blockchainTokens);
+
+    // Convert BirdEye tokens to a uniform format
+    const birdEyeTokensArray = birdEyeTokens.map(token => ({
+      address: token.address, 
       symbol: token.symbol,
       decimals: token.decimals,
       name: token.name,
-      logoURI: token.logoURI
+      logoURI: token.logoURI, 
+      price: token.price 
     }));
+
+    // Merge all tokens
+    const allTokens = [...birdEyeTokensArray, ...blockchainTokens];
+
+    // Deduplicate by address
+    const uniqueTokens = allTokens.reduce((acc, token) => {
+      if (!acc.find(t => t.address === token.address)) {
+        acc.push(token);
+      }
+      return acc;
+    }, []);
+
+    return uniqueTokens;
   } catch (error) {
-    console.error('Token combination error:', error);
-    throw error;
+    console.error('Error in combineAndDeduplicateData:', error);
+    throw new Error('Failed to combine and deduplicate data');
   }
 }
 
@@ -144,4 +136,4 @@ exports.getTokenBySymbol = async (symbol) => {
   return Token.findOne({ symbol });
 };
 
-module.exports = { combineAndDeduplicateData, getTokenInfo ,placeDCAOrder, placePerpsOrder };
+module.exports = { combineAndDeduplicateData, placeDCAOrder, placePerpsOrder };

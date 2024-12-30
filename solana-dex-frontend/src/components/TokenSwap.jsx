@@ -105,17 +105,17 @@ const TokenSwap = () => {
       if (type === 'from') {
         setFromToken(token.symbol);
         setFromTokenAddress(token.address);
-        setFromTokenDecimals(token.decimals);
+        setFromTokenDecimals(token.decimals); // Set fromToken decimals
       } else {
         setToToken(token.symbol);
         setToTokenAddress(token.address);
-        setToTokenDecimals(token.decimals);
+        setToTokenDecimals(token.decimals); // Set toToken decimals
       }
     }
     setShowFromDropdown(false);
     setShowToDropdown(false);
   };
-  
+
   const handleFlip = () => {
     setFromToken(toToken);
     setToToken(fromToken);

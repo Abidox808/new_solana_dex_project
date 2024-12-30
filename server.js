@@ -4,8 +4,10 @@ const {MongoClient} = require('mongodb');
 const express = require('express');
 const cors = require('cors');
 const { Keypair } = require('@solana/web3.js');
-const { combineAndDeduplicateData, getTokenInfo,  placePerpsOrder } = require('./services/tokenService');
+const { combineAndDeduplicateData,  placePerpsOrder } = require('./services/tokenService');
 const axios = require('axios');
+
+
 
 // Load keypair from environment variables
 let keypairData;
@@ -26,6 +28,24 @@ client.connect();
 console.log('db connected');
 const database = client.db('solana_dex');
 
+const fetchMintAddressFromBirdeye = async (symbol) => {
+  const apiKey = '7707fff5284b4debbdc6487845ea9218';
+  const headers = {
+    'X-API-KEY': apiKey,
+    'Content-Type': 'application/json'
+  };
+
+  const response = await axios.get('https://public-api.birdeye.so/defi/tokenlist', { headers });
+  const token = response.data.data.tokens.find(t => t.symbol === symbol);
+
+  if (!token) {
+    throw new Error(`Token ${symbol} not found in Birdeye API`);
+  }
+
+  return { address: token.address, decimal: token.decimals };
+};
+
+
 app.use(cors());
 app.use(express.json());
 
@@ -34,25 +54,14 @@ app.get('/api/tokens', async (req, res) => {
     const tokens = await combineAndDeduplicateData();
     res.json(tokens);
   } catch (error) {
-    console.error('Error fetching tokens:', error);
-    res.status(500).json({ error: 'Failed to fetch tokens', details: error.message });
-  }
-});
-
-app.get('/api/token/:mintAddress', async (req, res) => {
-  try {
-    const { mintAddress } = req.params;
-    const tokenInfo = await getTokenInfo(mintAddress);
-    res.json(tokenInfo);
-  } catch (error) {
-    console.error('Error fetching token info:', error);
-    res.status(500).json({ error: 'Failed to fetch token info', details: error.message });
+    //console.error('Error fetching tokens:', error);
+    res.status(500).json({ error: 'Failed to fetch tokens' });
   }
 });
 
 const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, slippage, walletAddress) => {
   try {
-    
+    // Fetch mint addresses from Birdeye API
     const inputMint = fromToken;
     const decimal = decimals;
     const outputMint = toToken;
