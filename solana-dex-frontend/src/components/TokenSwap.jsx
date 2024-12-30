@@ -99,15 +99,18 @@ const TokenSwap = () => {
 
   const handleSelectToken = (tokenSymbol, type) => {
     const token = tokens.find(t => t.symbol === tokenSymbol);
+    console.log(token)
     if (token) {
       if (type === 'from') {
         setFromToken(token.symbol);
         setFromTokenAddress(token.address);
-        setDecimals(token.decimals); 
+        setDecimals(token.decimals);
+        console.log(token) 
       } else {
         setToToken(token.symbol);
         setToTokenAddress(token.address);
-        setDecimals(token.decimals); 
+        setDecimals(token.decimals);
+        console.log(token) 
       }
     }
     setShowFromDropdown(false);
