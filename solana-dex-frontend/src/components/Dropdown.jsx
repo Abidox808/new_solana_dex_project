@@ -53,8 +53,9 @@ const Dropdown = ({ tokens, selectedToken, onSelectToken, showDropdown, setShowD
                   setShowDropdown(false);
                 }}
               >
+                {/* Lazy load the image */}
                 <img
-                  src={token.logoURI}
+                  src={showDropdown ? token.logoURI : ''} // Only load the image if the dropdown is open
                   alt={token.symbol}
                   className="token-logo"
                   onError={(e) => {
