@@ -47,6 +47,20 @@ const TokenSwap = () => {
         }
   
         setTokens(tokenData);
+  
+        // Set default token info (SOL and USDC) on initial load
+        const solToken = tokenData.find((t) => t.symbol === 'SOL');
+        const usdcToken = tokenData.find((t) => t.symbol === 'USDC');
+  
+        if (solToken) {
+          setFromTokenAddress(solToken.address);
+          setFromTokenDecimals(solToken.decimals);
+        }
+  
+        if (usdcToken) {
+          setToTokenAddress(usdcToken.address);
+          setToTokenDecimals(usdcToken.decimals);
+        }
       } catch (error) {
         console.error('Error fetching tokens:', error);
         setError('Failed to fetch tokens');
@@ -131,7 +145,13 @@ const TokenSwap = () => {
     console.log(connection);
     setTransactionStatus('Initiating transaction...');
     const walletAddress = wallet.publicKey;
+  
     try {
+      // Ensure token info is available
+      if (!fromTokenAddress || !toTokenAddress || !fromTokenDecimals) {
+        throw new Error('Token information is missing. Please reselect the tokens.');
+      }
+  
       const payload = {
         fromToken: fromTokenAddress,
         toToken: toTokenAddress,
@@ -145,24 +165,24 @@ const TokenSwap = () => {
   
       const res = await axios.post(`${API_BASE_URL}/api/swap`, payload);
       console.log('Swap Response:', res.data);
-
+  
       setTransactionStatus('Signing transaction...');
       const swapTransaction = res.data.swapResult;
-      const swapTransactionBuf = Buffer.from(swapTransaction,'base64');
+      const swapTransactionBuf = Buffer.from(swapTransaction, 'base64');
       const transaction = VersionedTransaction.deserialize(swapTransactionBuf);
       const signTransaction = await wallet.signTransaction(transaction);
       setTransactionStatus('Sending signed transaction to Solana Network');
       const latestBlockhash = await connection.getLatestBlockhash();
       const txid = await connection.sendRawTransaction(signTransaction.serialize());
-      
+  
       setTransactionStatus('Confirming...');
       await connection.confirmTransaction({
-        blockhash:latestBlockhash,
-        lastValidBlockHeight:latestBlockhash.lastValidBlockHeight,
-        signature:txid
+        blockhash: latestBlockhash,
+        lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+        signature: txid,
       });
-
-      setTransactionStatus(`Transaction succeed! Transaction ID: ${txid}`);  
+  
+      setTransactionStatus(`Transaction succeed! Transaction ID: ${txid}`);
       console.log(`https://solscan.io/tx/${txid}`);
     } catch (error) {
       console.error('Error during transaction:', error);
