@@ -108,9 +108,7 @@ const TokenSwap = () => {
         console.log(token) 
       } else {
         setToToken(token.symbol);
-        setToTokenAddress(token.address);
-        setDecimals(token.decimals);
-        console.log(token) 
+        setToTokenAddress(token.address); 
       }
     }
     setShowFromDropdown(false);
