@@ -2,11 +2,11 @@
   "version": 2,
   "builds": [
     {
-      "src": "solana-dex-frontend/package.json", 
-      "use": "@vercel/static-build",  
+      "src": "solana-dex-frontend/package.json",
+      "use": "@vercel/static-build",
       "config": {
-        "distDir": "solana-dex-frontend/dist", 
-        "buildCommand": "yarn --cwd solana-dex-frontend build"  
+        "distDir": "solana-dex-frontend/dist",
+        "buildCommand": "yarn --cwd solana-dex-frontend build"
       }
     }
   ],
