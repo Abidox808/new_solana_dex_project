@@ -63,6 +63,10 @@ const performSwap = async (fromToken, toToken, fromAmount, toAmount, slippage, w
     const inputMint = inputMintTokenData.address;
     const decimal = inputMintTokenData.decimal;  
     const outputMintTokenData = await getMintAddress(toToken);
+    console.log('Output Mint Data:', outputMintTokenData);
+    if (!outputMintTokenData || !outputMintTokenData.address) {
+      throw new Error(`Failed to fetch mint address for token: ${toToken}`);
+    }
     const outputMint = outputMintTokenData.address;
     const res = await axios.get(process.env.JUPITER_SWAP_QUOTE_API_URL,{
       params:{
@@ -74,6 +78,7 @@ const performSwap = async (fromToken, toToken, fromAmount, toAmount, slippage, w
     });
 
     const quoteRes = res.data;
+    console.log('Jupiter API Response:', quoteRes);
     const swapTransaction = await axios.post(process.env.JUPITER_SWAP_API_URL,{
       quoteResponse:quoteRes,
       userPublicKey: walletAddress,
