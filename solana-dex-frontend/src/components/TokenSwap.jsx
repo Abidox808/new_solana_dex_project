@@ -128,7 +128,15 @@ const TokenSwap = () => {
         walletAddress,
         slippage
       });
-      
+      console.log({
+        fromToken,
+        toToken,
+        fromAmount,
+        toAmount,
+        walletAddress,
+        slippage
+      });
+
       setTransactionStatus('Signing transaction...');
       const swapTransaction = res.data.swapResult;
       const swapTransactionBuf = Buffer.from(swapTransaction,'base64');
