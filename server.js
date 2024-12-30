@@ -4,10 +4,8 @@ const {MongoClient} = require('mongodb');
 const express = require('express');
 const cors = require('cors');
 const { Keypair } = require('@solana/web3.js');
-const { combineAndDeduplicateData,  placePerpsOrder } = require('./services/tokenService');
+const { combineAndDeduplicateData, getTokenInfo,  placePerpsOrder } = require('./services/tokenService');
 const axios = require('axios');
-
-
 
 // Load keypair from environment variables
 let keypairData;
@@ -54,7 +52,7 @@ app.get('/api/token/:mintAddress', async (req, res) => {
 
 const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, slippage, walletAddress) => {
   try {
-    // Fetch mint addresses from Birdeye API
+    
     const inputMint = fromToken;
     const decimal = decimals;
     const outputMint = toToken;
