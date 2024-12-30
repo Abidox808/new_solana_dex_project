@@ -116,68 +116,58 @@ const TokenSwap = () => {
   };
 
   const handleSwap = async () => {
-    if (!wallet.publicKey) {
-      setTransactionStatus('Please connect your wallet');
-      return;
-    }
-
+    console.log(connection);
     setTransactionStatus('Initiating transaction...');
-    const walletAddress = wallet.publicKey.toString();
-
+    const walletAddress = wallet.publicKey;
     try {
-
+      
       const fromTokenInfo = tokens.find(t => t.symbol === fromToken);
       const toTokenInfo = tokens.find(t => t.symbol === toToken);
-
+  
       if (!fromTokenInfo || !toTokenInfo) {
-        throw new Error('Token information not found');
+        throw new Error('Invalid token selection');
       }
-
-      const swapRequest = {
+  
+      const res = await axios.post(`${API_BASE_URL}/api/swap`, {
+        fromToken: fromTokenInfo.address, 
+        toToken: toTokenInfo.address,     
+        fromAmount,
+        toAmount,
+        walletAddress,
+        slippage
+      });
+  
+      console.log({
         fromToken: fromTokenInfo.address,
         toToken: toTokenInfo.address,
-        fromAmount: parseFloat(fromAmount),
-        toAmount: parseFloat(toAmount),
+        fromAmount,
+        toAmount,
         walletAddress,
-        slippage: parseFloat(slippage)
-      };
-
-      const res = await axios.post(`${API_BASE_URL}/api/swap`, swapRequest);
-      
-      if (!res.data || !res.data.swapResult) {
-        throw new Error('Invalid swap response from server');
-      }
-
+        slippage
+      });
+  
       setTransactionStatus('Signing transaction...');
-      const swapTransactionBuf = Buffer.from(res.data.swapResult, 'base64');
+      const swapTransaction = res.data.swapResult;
+      const swapTransactionBuf = Buffer.from(swapTransaction, 'base64');
       const transaction = VersionedTransaction.deserialize(swapTransactionBuf);
-      
-      const signedTransaction = await wallet.signTransaction(transaction);
-      
-      setTransactionStatus('Sending transaction...');
+      const signTransaction = await wallet.signTransaction(transaction);
+      setTransactionStatus('Sending signed transaction to Solana Network');
       const latestBlockhash = await connection.getLatestBlockhash();
-      const txid = await connection.sendRawTransaction(signedTransaction.serialize());
-      
-      setTransactionStatus('Confirming transaction...');
+      const txid = await connection.sendRawTransaction(signTransaction.serialize());
+  
+      setTransactionStatus('Confirming...');
       await connection.confirmTransaction({
-        blockhash: latestBlockhash.blockhash,
+        blockhash: latestBlockhash,
         lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
         signature: txid
       });
-
-      setTransactionStatus(`Transaction successful! Txn ID: ${txid}`);
-      
-      setFromAmount('');
-      setToAmount('');
-      
-      const token1 = tokens.find(t => t.symbol === fromToken);
-      const token2 = tokens.find(t => t.symbol === toToken);
-      await fetchPrices([token1.address, token2.address]);
-
+  
+      setTransactionStatus(`Transaction succeed! Transaction ID: ${txid}`);
+      console.log(`https://solscan.io/tx/${txid}`);
     } catch (error) {
-      console.error('Swap error:', error);
-      setTransactionStatus(error.response?.data?.message || 'Transaction failed. Please try again.');
-      setError(error.response?.data?.message || 'Swap failed. Please try again.');
+      console.error('Error during transaction:', error);
+      console.error('Response:', error.response);
+      setTransactionStatus('Transaction failed. Please try again.');
     }
   };
 
