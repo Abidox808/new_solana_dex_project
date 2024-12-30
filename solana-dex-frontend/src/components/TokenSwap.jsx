@@ -19,6 +19,7 @@ const TokenSwap = () => {
   const [toToken, setToToken] = useState('USDC');
   const [fromTokenAddress, setFromTokenAddress] = useState('');
   const [toTokenAddress, setToTokenAddress] = useState('');
+  const [Decimals, setDecimals] = useState('');
   const [fromAmount, setFromAmount] = useState('');
   const [toAmount, setToAmount] = useState('');
   const [showFromDropdown, setShowFromDropdown] = useState(false);
@@ -101,10 +102,12 @@ const TokenSwap = () => {
     if (token) {
       if (type === 'from') {
         setFromToken(token.symbol);
-        setFromTokenAddress(token.address); 
+        setFromTokenAddress(token.address);
+        setDecimals(token.decimals); 
       } else {
         setToToken(token.symbol);
-        setToTokenAddress(token.address); 
+        setToTokenAddress(token.address);
+        setDecimals(token.decimals); 
       }
     }
     setShowFromDropdown(false);
@@ -126,6 +129,7 @@ const TokenSwap = () => {
       const payload = {
         fromToken: fromTokenAddress,
         toToken: toTokenAddress,
+        decimals: Decimals,
         fromAmount,
         toAmount,
         walletAddress,

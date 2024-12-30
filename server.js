@@ -59,20 +59,12 @@ app.get('/api/tokens', async (req, res) => {
   }
 });
 
-const performSwap = async (fromToken, toToken, fromAmount, toAmount, slippage, walletAddress) => {
+const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, slippage, walletAddress) => {
   try {
     // Fetch mint addresses from Birdeye API
-    const inputMintTokenData = await fetchMintAddressFromBirdeye(fromToken);
-    console.log('Input Mint Data:', inputMintTokenData);
-    const inputMint = inputMintTokenData.address;
-    const decimal = inputMintTokenData.decimal;
-
-    const outputMintTokenData = await fetchMintAddressFromBirdeye(toToken);
-    console.log('Output Mint Data:', outputMintTokenData);
-    if (!outputMintTokenData || !outputMintTokenData.address) {
-      throw new Error(`Failed to fetch mint address for token: ${toToken}`);
-    }
-    const outputMint = outputMintTokenData.address;
+    const inputMint = fromToken;
+    const decimal = decimals;
+    const outputMint = toToken;
 
     // Fetch swap quote from Jupiter API
     const quoteResponse = await axios.get(process.env.JUPITER_SWAP_QUOTE_API_URL, {
@@ -105,13 +97,13 @@ const performSwap = async (fromToken, toToken, fromAmount, toAmount, slippage, w
 
 app.post('/api/swap', async (req, res) => {
   try {
-    const { fromToken, toToken, fromAmount, toAmount, slippage, walletAddress } = req.body;
+    const { fromToken, toToken, decimals, fromAmount, toAmount, slippage, walletAddress } = req.body;
 
-    if (!fromToken || !toToken || !fromAmount || !toAmount || !slippage || !walletAddress) {
+    if (!fromToken || !toToken || !fromAmount || !decimals || !toAmount || !slippage || !walletAddress) {
       return res.status(400).json({ message: 'Invalid input parameters' });
     }
 
-    const swapResult = await performSwap(fromToken, toToken, fromAmount, toAmount, slippage, walletAddress);
+    const swapResult = await performSwap(fromToken, toToken, decimals, fromAmount, toAmount, slippage, walletAddress);
 
     res.json({ message: 'Swap successful', swapResult });
   } catch (error) {
