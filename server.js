@@ -113,33 +113,47 @@ app.post('/api/swap', async (req, res) => {
 
 async function placeLimitOrder(fromToken, toToken, price, amount, walletAddress, totalUSDC, sendingBase) {
   try {
+    // Fetch mint addresses and decimals for the tokens
     const inputMintTokenData = await fetchMintAddressFromJupiter(toToken);
     const inputMint = inputMintTokenData.address;
     const inDecimal = inputMintTokenData.decimal;
-    
+
     const outputMintTokenData = await fetchMintAddressFromJupiter(fromToken);
     const outputMint = outputMintTokenData.address;
     const outDecimal = outputMintTokenData.decimal;
-    const inAmount = totalUSDC * Math.pow(10, outDecimal);
-    const outAmount =  amount * Math.pow(10, inDecimal);
-    console.log('JUPITER_LIMIT_ORDER_API_URL:', process.env.JUPITER_LIMIT_ORDER_API_URL);
-    console.log('All Environment Variables:', process.env);
-    const {data:tx} = await axios.post(`${process.env.JUPITER_LIMIT_ORDER_API_URL}createOrder`,{
-      owner: walletAddress,
-      inAmount: inAmount,
-      outAmount: outAmount,
-      inputMint: inputMint,
-      outputMint: outputMint,
-      expiredAt: null,
-      base: sendingBase
-    },{
+
+    // Calculate amounts in lamports (smallest units of the tokens)
+    const makingAmount = totalUSDC * Math.pow(10, outDecimal); // Amount of the "from" token
+    const takingAmount = amount * Math.pow(10, inDecimal); // Amount of the "to" token
+
+    // Create the request body for the Jupiter Limit Order v2 API
+    const createOrderBody = {
+      maker: walletAddress, // Wallet address of the maker
+      payer: walletAddress, // Wallet address of the payer
+      inputMint: inputMint, // Mint address of the "to" token
+      outputMint: outputMint, // Mint address of the "from" token
+      params: {
+        makingAmount: makingAmount.toString(), // Amount of the "from" token in lamports
+        takingAmount: takingAmount.toString(), // Amount of the "to" token in lamports
+        expiredAt: null, // Optional: Set an expiry date for the order
+      },
+      computeUnitPrice: "auto", // Use "auto" for priority fee
+    };
+
+    // Log the request body for debugging
+    console.log('Request Body:', createOrderBody);
+
+    // Send the request to the Jupiter Limit Order v2 API
+    const response = await axios.post(`${process.env.JUPITER_LIMIT_ORDER_API_URL}createOrder`, createOrderBody, {
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     });
-    return tx;
+
+    // Return the transaction data
+    return response.data;
   } catch (error) {
-    console.error('Error in placeLimitOrder:', error);
+    console.error('Error in placeLimitOrder:', error.response ? error.response.data : error.message);
     throw new Error('Limit order placement failed');
   }
 }
