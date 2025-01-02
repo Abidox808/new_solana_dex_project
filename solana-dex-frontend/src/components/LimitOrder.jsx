@@ -119,8 +119,11 @@ const LimitOrder = () => {
     setIframeSrc(`https://birdeye.so/tv-widget/${inputMintToken}/${outputMintToken}?chain=solana&viewMode=base%2Fquote&chartInterval=1D&chartType=CANDLE&chartTimezone=America%2FLos_Angeles&chartLeftToolbar=show&theme=dark`);
   }, [inputMintToken, outputMintToken]);
 
+
   // Handle placing the order
   const handlePlaceOrder = async () => {
+    const { wallet } = useWallet(); // Get the wallet object
+
     if (!wallet) {
       setOrderStatus('Please Connect Wallet!');
       return;
@@ -142,6 +145,14 @@ const LimitOrder = () => {
         sendingBase,
       });
 
+      // Log the API response for debugging
+      console.log('API Response:', res.data);
+
+      // Check if the transaction data is valid
+      if (!res.data.orderResult || !res.data.orderResult.tx) {
+        throw new Error('Invalid transaction data returned from the backend');
+      }
+
       setOrderStatus('Sending transaction...');
 
       // Deserialize the transaction as a VersionedTransaction
@@ -150,13 +161,13 @@ const LimitOrder = () => {
       const transaction = VersionedTransaction.deserialize(transactionBuf);
 
       // Sign the transaction with the wallet
-      transaction.sign([wallet]);
+      const signedTransaction = await wallet.signTransaction(transaction);
 
       // Send the signed transaction to the Solana network
       const latestBlockhash = await connection.getLatestBlockhash();
       console.log('LATEST BLOCKHASH:', latestBlockhash);
 
-      const txid = await connection.sendRawTransaction(transaction.serialize(), {
+      const txid = await connection.sendRawTransaction(signedTransaction.serialize(), {
         skipPreflight: true,
         maxRetries: 2,
       });
