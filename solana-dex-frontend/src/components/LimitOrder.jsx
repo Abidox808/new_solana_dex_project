@@ -21,7 +21,7 @@ const LimitOrder = () => {
   const [inputMintToken, setInputMintToken] = useState([]);
   const [outputMintToken, setOutputMintToken] = useState([]);
   const [activeTab, setActiveTab] = useState('openOrders'); 
-  const [openOrders, setOpenOrders] = useState({ openOrders: [], orderHistory: [] });
+  const [openOrders, setOpenOrders] = useState([]);
   const [allVerifiedTokens, setAllVerifiedTokens] = useState([]);
   const [iframeSrc, setIframeSrc] = useState('https://birdeye.so/tv-widget/So11111111111111111111111111111111111111112/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v?chain=solana&viewMode=base%2Fquote&chartInterval=1D&chartType=CANDLE&chartTimezone=America%2FLos_Angeles&chartLeftToolbar=show&theme=dark');
   const [isLoading, setIsLoading] = useState(false);
@@ -251,13 +251,13 @@ const LimitOrder = () => {
     try {
       const openOrdersResponse = await axios.get(`https://api.jup.ag/limit/v2/openOrders?wallet=${walletAddress}`);
       const orderHistoryResponse = await axios.get(`https://api.jup.ag/limit/v2/orderHistory?wallet=${walletAddress}`);
-  
+
       console.log('Open Orders Response:', openOrdersResponse.data);
       console.log('Order History Response:', orderHistoryResponse.data);
   
       return {
         openOrders: openOrdersResponse.data,
-        orderHistory: orderHistoryResponse.data
+        orderHistory: orderHistoryResponse.data,
       };
     } catch (error) {
       console.error('Error fetching open orders:', error);
@@ -333,17 +333,18 @@ const LimitOrder = () => {
     };
     
     const renderHistoryTable = (orders) => {
-      // Check if we have orderHistory data
-      if (!orders?.orderHistory?.length) {
+      // Check if the response is valid and contains the `orders` array
+      if (!orders || !orders.orderHistory || !Array.isArray(orders.orderHistory) || orders.orderHistory.length === 0) {
         return <tr><td colSpan="6">No order history found.</td></tr>;
       }
     
-      return orders.orderHistory.map((order) => {
+      return orders.orders.map((order) => {
         const inputMint = order.inputMint;
         const outputMint = order.outputMint;
-        const makingAmount = parseFloat(order.makingAmount) / Math.pow(10, getDecimalOfMint(inputMint, allVerifiedTokens));
-        const takingAmount = parseFloat(order.takingAmount) / Math.pow(10, getDecimalOfMint(outputMint, allVerifiedTokens));
+        const makingAmount = parseFloat(order.makingAmount);
+        const takingAmount = parseFloat(order.takingAmount);
         const createdAt = new Date(order.createdAt).toLocaleString();
+        const status = order.status;
     
         return (
           <tr key={order.orderKey || order.closeTx}>
@@ -354,7 +355,7 @@ const LimitOrder = () => {
             <td>{makingAmount.toFixed(6)} {getSymbolFromMint(inputMint, tokens)}</td>
             <td>{takingAmount.toFixed(6)} {getSymbolFromMint(outputMint, tokens)}</td>
             <td>{createdAt}</td>
-            <td>{order.status}</td>
+            <td>{status}</td>
           </tr>
         );
       });
@@ -504,25 +505,22 @@ const LimitOrder = () => {
           )}
           {activeTab === 'history' && (
             <div className="order-table">
-              {isLoading ? (
-                <div>Loading order history...</div>
-              ) : (
-                <table>
-                  <thead>
-                    <tr>
-                      <th style={{display:'none'}}>Order ID</th>
-                      <th>Pair</th>
-                      <th>Sell</th>
-                      <th>Buy</th>
-                      <th>Date</th>
-                      <th>State</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {renderHistoryTable(openOrders)}
-                  </tbody>
-                </table>
-              )}
+              <table>
+                <thead>
+                  <tr>
+                    <th style={{display:'none'}} >Order ID</th>
+                    <th>Pair</th>
+                    <th>Sell</th>
+                    <th>Buy</th>
+                    <th>Date</th>
+                    <th>State</th>
+                    <th style={{display:'none'}}></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {renderHistoryTable(openOrders)}
+                </tbody>
+              </table>
             </div>
           )}
         </div>): (<span>Pease connect wallet</span>) }
