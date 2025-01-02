@@ -122,7 +122,6 @@ const LimitOrder = () => {
 
   // Handle placing the order
   const handlePlaceOrder = async () => {
-    const { wallet } = useWallet(); // Get the wallet object
 
     if (!wallet) {
       setOrderStatus('Please Connect Wallet!');
