@@ -132,8 +132,8 @@ async function placeLimitOrder(fromToken, toToken, price, amount, walletAddress,
 
     // Create the request body for the Jupiter Limit Order v2 API
     const createOrderBody = {
-      inputMint: toMint, // Mint address of the "to" token
-      outputMint: fromMint, // Mint address of the "from" token
+      inputMint: fromMint, // Mint address of the "to" token
+      outputMint: toMint, // Mint address of the "from" token
       maker: walletAddress, // Wallet address of the maker
       payer: walletAddress, // Wallet address of the payer
       params: {
