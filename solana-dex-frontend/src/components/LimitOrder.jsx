@@ -24,7 +24,8 @@ const LimitOrder = () => {
   const [openOrders, setOpenOrders] = useState([]);
   const [allVerifiedTokens, setAllVerifiedTokens] = useState([]);
   const [iframeSrc, setIframeSrc] = useState('https://birdeye.so/tv-widget/So11111111111111111111111111111111111111112/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v?chain=solana&viewMode=base%2Fquote&chartInterval=1D&chartType=CANDLE&chartTimezone=America%2FLos_Angeles&chartLeftToolbar=show&theme=dark');
-  
+  const [isLoading, setIsLoading] = useState(false);
+
   const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL || 'http://localhost:5000';
   const END_POINT = import.meta.env.VITE_APP_RPC_END_POINT || 'https://api.mainnet-beta.solana.com';
 
@@ -53,15 +54,24 @@ const LimitOrder = () => {
     fetchTokens();
   }, [API_BASE_URL, fromToken, toToken]);
   useEffect(() => {
-    const fetchOrders = async () => {
-      if (wallet.connected && wallet.publicKey) {
+  const fetchOrders = async () => {
+    if (wallet.connected && wallet.publicKey) {
+      setIsLoading(true);
+      try {
         const orders = await fetchOpenOrders(wallet.publicKey.toString());
         setOpenOrders(orders);
+      } catch (error) {
+        console.error('Error fetching orders:', error);
+      } finally {
+        setIsLoading(false);
       }
-    };
-  
-    fetchOrders();
-  }, [wallet.connected, wallet.publicKey]);
+    } else {
+      setOpenOrders({ openOrders: [], orderHistory: [] });
+    }
+  };
+
+  fetchOrders();
+}, [wallet.connected, wallet.publicKey]);
   // Fetch prices whenever fromToken, toToken, or price changes
   useEffect(() => {
     const fetchPrices = async () => {
@@ -290,38 +300,12 @@ const LimitOrder = () => {
     ? ((amount * price) / prices[toToken]).toFixed(2)
     : '0.00';
 
-    const renderHistoryTable = (orders) => {
-      if (!orders || orders.length === 0) {
-        return <tr><td colSpan="6">No order history found.</td></tr>;
-      }
-    
-      return orders.map((order) => {
-        const inputMint = order.account.inputMint;
-        const outputMint = order.account.outputMint;
-        const makingAmount = parseFloat(order.account.makingAmount) / Math.pow(10, getDecimalOfMint(inputMint, allVerifiedTokens));
-        const takingAmount = parseFloat(order.account.takingAmount) / Math.pow(10, getDecimalOfMint(outputMint, allVerifiedTokens));
-    
-        return (
-          <tr key={order.publicKey}>
-            <td style={{ display: 'none' }}>{order.publicKey}</td>
-            <td>
-              {getSymbolFromMint(inputMint, tokens)} ➡️ {getSymbolFromMint(outputMint, tokens)}
-            </td>
-            <td>{makingAmount.toFixed(6)} {getSymbolFromMint(inputMint, tokens)}</td>
-            <td>{takingAmount.toFixed(6)} {getSymbolFromMint(outputMint, tokens)}</td>
-            <td>{new Date(order.account.createdAt).toLocaleString()}</td>
-            <td>{order.account.status || 'Completed'}</td>
-          </tr>
-        );
-      });
-    };
-
     const renderOpenOrdersTable = (orders) => {
-      if (!orders || orders.length === 0) {
+      if (!orders || !Array.isArray(orders.openOrders) || orders.openOrders.length === 0) {
         return <tr><td colSpan="6">No open orders found.</td></tr>;
       }
     
-      return orders.map((order) => {
+      return orders.openOrders.map((order) => {
         const inputMint = order.account.inputMint;
         const outputMint = order.account.outputMint;
         const makingAmount = parseFloat(order.account.makingAmount) / Math.pow(10, getDecimalOfMint(inputMint, allVerifiedTokens));
@@ -340,6 +324,32 @@ const LimitOrder = () => {
             <td>
               <button onClick={() => handleCancelOrder(order.publicKey)}>Cancel</button>
             </td>
+          </tr>
+        );
+      });
+    };
+    
+    const renderHistoryTable = (orders) => {
+      if (!orders || !Array.isArray(orders.orderHistory) || orders.orderHistory.length === 0) {
+        return <tr><td colSpan="6">No order history found.</td></tr>;
+      }
+    
+      return orders.orderHistory.map((order) => {
+        const inputMint = order.account.inputMint;
+        const outputMint = order.account.outputMint;
+        const makingAmount = parseFloat(order.account.makingAmount) / Math.pow(10, getDecimalOfMint(inputMint, allVerifiedTokens));
+        const takingAmount = parseFloat(order.account.takingAmount) / Math.pow(10, getDecimalOfMint(outputMint, allVerifiedTokens));
+    
+        return (
+          <tr key={order.publicKey}>
+            <td style={{ display: 'none' }}>{order.publicKey}</td>
+            <td>
+              {getSymbolFromMint(inputMint, tokens)} ➡️ {getSymbolFromMint(outputMint, tokens)}
+            </td>
+            <td>{makingAmount.toFixed(6)} {getSymbolFromMint(inputMint, tokens)}</td>
+            <td>{takingAmount.toFixed(6)} {getSymbolFromMint(outputMint, tokens)}</td>
+            <td>{new Date(order.account.createdAt).toLocaleString()}</td>
+            <td>{order.account.status || 'Completed'}</td>
           </tr>
         );
       });
