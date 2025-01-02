@@ -22,6 +22,7 @@ const LimitOrder = () => {
   const [outputMintToken, setOutputMintToken] = useState([]);
   const [activeTab, setActiveTab] = useState('openOrders'); 
   const [openOrders, setOpenOrders] = useState([]);
+  const [orderHistory, setOrderHistory] = useState([]);
   const [allVerifiedTokens, setAllVerifiedTokens] = useState([]);
   const [iframeSrc, setIframeSrc] = useState('https://birdeye.so/tv-widget/So11111111111111111111111111111111111111112/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v?chain=solana&viewMode=base%2Fquote&chartInterval=1D&chartType=CANDLE&chartTimezone=America%2FLos_Angeles&chartLeftToolbar=show&theme=dark');
   const [isLoading, setIsLoading] = useState(false);
@@ -54,21 +55,25 @@ const LimitOrder = () => {
     fetchTokens();
   }, [API_BASE_URL, fromToken, toToken]);
   useEffect(() => {
-  const fetchOrders = async () => {
-    if (wallet.connected && wallet.publicKey) {
-      setIsLoading(true);
-      try {
-        const orders = await fetchOpenOrders(wallet.publicKey.toString());
-        setOpenOrders(orders);
-      } catch (error) {
-        console.error('Error fetching orders:', error);
-      } finally {
-        setIsLoading(false);
+    const fetchOrders = async () => {
+      if (wallet.connected && wallet.publicKey) {
+        setIsLoading(true);
+        try {
+          const ordersResponse = await fetchOpenOrders(wallet.publicKey.toString());
+          setOpenOrders(ordersResponse.openOrders);
+          setOrderHistory(ordersResponse.orderHistory);
+          console.log('Open Orders State:', openOrders);
+          console.log('Order History State:', orderHistory);
+        } catch (error) {
+          console.error('Error fetching orders:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        setOpenOrders([]);
+        setOrderHistory([]);
       }
-    } else {
-      setOpenOrders({ openOrders: [], orderHistory: [] });
-    }
-  };
+    };
 
   fetchOrders();
 }, [wallet.connected, wallet.publicKey]);
@@ -304,11 +309,11 @@ const LimitOrder = () => {
     : '0.00';
 
     const renderOpenOrdersTable = (orders) => {
-      if (!orders || !Array.isArray(orders.openOrders) || orders.openOrders.length === 0) {
+      if (!Array.isArray(orders) || orders.length === 0) {
         return <tr><td colSpan="6">No open orders found.</td></tr>;
       }
     
-      return orders.openOrders.map((order) => {
+      return orders.map((order) => {
         const inputMint = order.account.inputMint;
         const outputMint = order.account.outputMint;
         const makingAmount = parseFloat(order.account.makingAmount) / Math.pow(10, getDecimalOfMint(inputMint, allVerifiedTokens));
@@ -332,13 +337,12 @@ const LimitOrder = () => {
       });
     };
     
-    const renderHistoryTable = (orders) => {
-      // Check if the response is valid and contains the `orders` array
-      if (!orders || !orders.orderHistory || !Array.isArray(orders.orderHistory) || orders.orderHistory.length === 0) {
+    const renderHistoryTable = (history) => {
+      if (!Array.isArray(history) || history.length === 0) {
         return <tr><td colSpan="6">No order history found.</td></tr>;
       }
     
-      return orders.orders.map((order) => {
+      return history.map((order) => {
         const inputMint = order.inputMint;
         const outputMint = order.outputMint;
         const makingAmount = parseFloat(order.makingAmount);
@@ -518,7 +522,7 @@ const LimitOrder = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {renderHistoryTable(openOrders)}
+                  {renderHistoryTable(orderHistory)}
                 </tbody>
               </table>
             </div>
