@@ -309,24 +309,23 @@ const LimitOrder = () => {
       }
     
       return orders.openOrders.map((order) => {
-        const inputMint = order.inputMint;
-        const outputMint = order.outputMint;
-        const makingAmount = parseFloat(order.makingAmount);
-        const takingAmount = parseFloat(order.takingAmount);
+        const inputMint = order.account.inputMint;
+        const outputMint = order.account.outputMint;
+        const makingAmount = parseFloat(order.account.makingAmount) / Math.pow(10, getDecimalOfMint(inputMint, allVerifiedTokens));
+        const takingAmount = parseFloat(order.account.takingAmount) / Math.pow(10, getDecimalOfMint(outputMint, allVerifiedTokens));
         const price = takingAmount / makingAmount;
-        const expiredAt = order.expiredAt || 'Never';
     
         return (
-          <tr key={order.orderKey}>
-            <td style={{ display: 'none' }}>{order.orderKey}</td>
+          <tr key={order.publicKey}>
+            <td style={{ display: 'none' }}>{order.publicKey}</td>
             <td>
               {getSymbolFromMint(inputMint, tokens)} ➡️ {getSymbolFromMint(outputMint, tokens)}
             </td>
             <td>{price.toFixed(6)}</td>
-            <td>{expiredAt}</td>
+            <td>{order.account.expiredAt || 'Never'}</td>
             <td>{makingAmount.toFixed(6)} {getSymbolFromMint(inputMint, tokens)}</td>
             <td>
-              <button onClick={() => handleCancelOrder(order.orderKey)}>Cancel</button>
+              <button onClick={() => handleCancelOrder(order.publicKey)}>Cancel</button>
             </td>
           </tr>
         );
