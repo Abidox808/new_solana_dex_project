@@ -309,23 +309,24 @@ const LimitOrder = () => {
       }
     
       return orders.openOrders.map((order) => {
-        const inputMint = order.account.inputMint;
-        const outputMint = order.account.outputMint;
-        const makingAmount = parseFloat(order.account.makingAmount) / Math.pow(10, getDecimalOfMint(inputMint, allVerifiedTokens));
-        const takingAmount = parseFloat(order.account.takingAmount) / Math.pow(10, getDecimalOfMint(outputMint, allVerifiedTokens));
+        const inputMint = order.inputMint;
+        const outputMint = order.outputMint;
+        const makingAmount = parseFloat(order.makingAmount);
+        const takingAmount = parseFloat(order.takingAmount);
         const price = takingAmount / makingAmount;
+        const expiredAt = order.expiredAt || 'Never';
     
         return (
-          <tr key={order.publicKey}>
-            <td style={{ display: 'none' }}>{order.publicKey}</td>
+          <tr key={order.orderKey}>
+            <td style={{ display: 'none' }}>{order.orderKey}</td>
             <td>
               {getSymbolFromMint(inputMint, tokens)} ➡️ {getSymbolFromMint(outputMint, tokens)}
             </td>
             <td>{price.toFixed(6)}</td>
-            <td>{order.account.expiredAt || 'Never'}</td>
+            <td>{expiredAt}</td>
             <td>{makingAmount.toFixed(6)} {getSymbolFromMint(inputMint, tokens)}</td>
             <td>
-              <button onClick={() => handleCancelOrder(order.publicKey)}>Cancel</button>
+              <button onClick={() => handleCancelOrder(order.orderKey)}>Cancel</button>
             </td>
           </tr>
         );
@@ -338,21 +339,23 @@ const LimitOrder = () => {
       }
     
       return orders.orderHistory.map((order) => {
-        const inputMint = order.account.inputMint;
-        const outputMint = order.account.outputMint;
-        const makingAmount = parseFloat(order.account.makingAmount) / Math.pow(10, getDecimalOfMint(inputMint, allVerifiedTokens));
-        const takingAmount = parseFloat(order.account.takingAmount) / Math.pow(10, getDecimalOfMint(outputMint, allVerifiedTokens));
+        const inputMint = order.inputMint;
+        const outputMint = order.outputMint;
+        const makingAmount = parseFloat(order.makingAmount);
+        const takingAmount = parseFloat(order.takingAmount);
+        const createdAt = new Date(order.createdAt).toLocaleString();
+        const status = order.status;
     
         return (
-          <tr key={order.publicKey}>
-            <td style={{ display: 'none' }}>{order.publicKey}</td>
+          <tr key={order.orderKey}>
+            <td style={{ display: 'none' }}>{order.orderKey}</td>
             <td>
               {getSymbolFromMint(inputMint, tokens)} ➡️ {getSymbolFromMint(outputMint, tokens)}
             </td>
             <td>{makingAmount.toFixed(6)} {getSymbolFromMint(inputMint, tokens)}</td>
             <td>{takingAmount.toFixed(6)} {getSymbolFromMint(outputMint, tokens)}</td>
-            <td>{new Date(order.account.createdAt).toLocaleString()}</td>
-            <td>{order.account.status || 'Completed'}</td>
+            <td>{createdAt}</td>
+            <td>{status}</td>
           </tr>
         );
       });
