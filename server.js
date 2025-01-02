@@ -124,6 +124,10 @@ async function placeLimitOrder(fromToken, toToken, price, amount, walletAddress,
 
     console.log('SOL Decimals:', fromDecimal);
     console.log('USDC Decimals:', toDecimal);
+
+    console.log('totalFromAmount:', totalFromAmount);
+    console.log('amount:', totalFromAmount);
+
     // Calculate amounts in lamports (smallest units of the tokens)
     const makingAmount = Math.round(totalFromAmount * Math.pow(10, fromDecimal)); // Amount of the "from" token
     const takingAmount = Math.round(amount * Math.pow(10, toDecimal)); // Amount of the "to" token
