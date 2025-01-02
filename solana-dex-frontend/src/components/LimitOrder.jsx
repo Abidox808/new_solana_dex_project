@@ -143,7 +143,7 @@ const LimitOrder = () => {
         toToken,
         sendingBase,
       });
-
+      console.log('API Response:', res);
       // Log the API response for debugging
       console.log('API Response:', res.data);
 
