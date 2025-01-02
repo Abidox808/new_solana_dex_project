@@ -113,23 +113,23 @@ app.post('/api/swap', async (req, res) => {
 
 async function placeLimitOrder(fromToken, toToken, price, amount, walletAddress, totalUSDC, sendingBase) {
   try {
-    const inputMintTokenData = await getMintAddress(toToken);
+    const inputMintTokenData = await fetchMintAddressFromJupiter(toToken);
     const inputMint = inputMintTokenData.address;
-    const inDecimal = inputMintTokenData.decimal
+    const inDecimal = inputMintTokenData.decimal;
     
-    const outputMintTokenData = await getMintAddress(fromToken);
+    const outputMintTokenData = await fetchMintAddressFromJupiter(fromToken);
     const outputMint = outputMintTokenData.address;
     const outDecimal = outputMintTokenData.decimal;
     const inAmount = totalUSDC * Math.pow(10, outDecimal);
     const outAmount =  amount * Math.pow(10, inDecimal);
-    const {data:tx} = await axios.post(`${process.env.JUPITER_LIMIT_ORDER_API_RUL}createOrder`,{
-      owner:walletAddress,
+    const {data:tx} = await axios.post(`${process.env.JUPITER_LIMIT_ORDER_API_URL}createOrder`,{
+      owner: walletAddress,
       inAmount: inAmount,
       outAmount: outAmount,
-      inputMint:inputMint,
-      outputMint, outputMint,
+      inputMint: inputMint,
+      outputMint: outputMint,
       expiredAt: null,
-      base : sendingBase
+      base: sendingBase
     },{
       headers: {
         'Content-Type': 'application/json'
