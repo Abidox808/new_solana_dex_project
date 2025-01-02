@@ -59,7 +59,7 @@ const LimitOrder = () => {
         setOpenOrders(orders);
       }
     };
-
+  
     fetchOrders();
   }, [wallet.connected, wallet.publicKey]);
   // Fetch prices whenever fromToken, toToken, or price changes
@@ -186,6 +186,9 @@ const LimitOrder = () => {
       });
 
       setOrderStatus(`Transaction succeeded! Transaction ID: ${txid}`);
+      // Fetch and update open orders after placing the order
+      const orders = await fetchOpenOrders(wallet.publicKey.toString());
+      setOpenOrders(orders);
     } catch (error) {
       console.error('Error during order placement:', error);
       setOrderStatus('Order placement failed. Please try again.');
@@ -236,11 +239,16 @@ const LimitOrder = () => {
 
   const fetchOpenOrders = async (walletAddress) => {
     try {
-      const response = await axios.get(`https://api.jup.ag/limit/v2/openOrders?wallet=${walletAddress}`);
-      return response.data; // Return the array of open orders
+      const openOrdersResponse = await axios.get(`https://api.jup.ag/limit/v2/openOrders?wallet=${walletAddress}`);
+      const orderHistoryResponse = await axios.get(`https://api.jup.ag/limit/v2/orderHistory?wallet=${walletAddress}`);
+  
+      return {
+        openOrders: openOrdersResponse.data,
+        orderHistory: orderHistoryResponse.data,
+      };
     } catch (error) {
       console.error('Error fetching open orders:', error);
-      return [];
+      return { openOrders: [], orderHistory: [] };
     }
   };
   //const iframeSrc = `https://birdeye.so/tv-widget/${inputMintToken}/${outputMintToken}?chain=solana&viewMode=base%2Fquote&chartInterval=1D&chartType=CANDLE&chartTimezone=America%2FLos_Angeles&chartLeftToolbar=show&theme=dark`;
