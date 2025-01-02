@@ -111,7 +111,7 @@ app.post('/api/swap', async (req, res) => {
   }
 });
 
-async function placeLimitOrder(fromToken, toToken, price, amount, walletAddress, totalUSDC, sendingBase) {
+async function placeLimitOrder(fromToken, toToken, price, amount, walletAddress, totalFromAmount, sendingBase) {
   try {
     // Fetch mint addresses and decimals for the tokens
     const inputMintTokenData = await fetchMintAddressFromJupiter(toToken);
@@ -123,21 +123,22 @@ async function placeLimitOrder(fromToken, toToken, price, amount, walletAddress,
     const outDecimal = outputMintTokenData.decimal;
 
     // Calculate amounts in lamports (smallest units of the tokens)
-    const makingAmount = totalUSDC * Math.pow(10, outDecimal); // Amount of the "from" token
-    const takingAmount = amount * Math.pow(10, inDecimal); // Amount of the "to" token
+    const makingAmount = Math.round(totalFromAmount * Math.pow(10, outDecimal)); // Amount of the "from" token
+    const takingAmount = Math.round(amount * Math.pow(10, inDecimal)); // Amount of the "to" token
 
     // Create the request body for the Jupiter Limit Order v2 API
     const createOrderBody = {
+      inputMint: inputMint, // Mint address of the input token
+      outputMint: outputMint, // Mint address of the output token
       maker: walletAddress, // Wallet address of the maker
       payer: walletAddress, // Wallet address of the payer
-      inputMint: inputMint, // Mint address of the "to" token
-      outputMint: outputMint, // Mint address of the "from" token
       params: {
-        makingAmount: makingAmount.toString(), // Amount of the "from" token in lamports
-        takingAmount: takingAmount.toString(), // Amount of the "to" token in lamports
+        makingAmount: makingAmount.toString(), // Amount of the input token in lamports
+        takingAmount: takingAmount.toString(), // Amount of the output token in lamports
         expiredAt: null, // Optional: Set an expiry date for the order
       },
       computeUnitPrice: "auto", // Use "auto" for priority fee
+      wrapAndUnwrapSol: true, // Optional: Wrap/unwrap SOL if needed
     };
 
     // Log the request body for debugging
@@ -153,7 +154,7 @@ async function placeLimitOrder(fromToken, toToken, price, amount, walletAddress,
     // Return the transaction data
     return response.data;
   } catch (error) {
-    console.error('Error in placeLimitOrder:', error.response ? error.response.data : error.message);
+    console.error('Error in placeLimitOrder:', error.response ? JSON.stringify(error.response.data, null, 2) : error.message);
     throw new Error('Limit order placement failed');
   }
 }
