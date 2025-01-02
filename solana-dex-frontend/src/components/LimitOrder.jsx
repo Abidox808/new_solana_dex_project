@@ -251,13 +251,13 @@ const LimitOrder = () => {
     try {
       const openOrdersResponse = await axios.get(`https://api.jup.ag/limit/v2/openOrders?wallet=${walletAddress}`);
       const orderHistoryResponse = await axios.get(`https://api.jup.ag/limit/v2/orderHistory?wallet=${walletAddress}`);
-
+  
       console.log('Open Orders Response:', openOrdersResponse.data);
       console.log('Order History Response:', orderHistoryResponse.data);
   
       return {
         openOrders: openOrdersResponse.data,
-        orderHistory: orderHistoryResponse.data,
+        orderHistory: orderHistoryResponse.data
       };
     } catch (error) {
       console.error('Error fetching open orders:', error);
