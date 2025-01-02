@@ -135,7 +135,7 @@ async function placeLimitOrder(fromToken, toToken, price, amount, walletAddress,
       params: {
         makingAmount: makingAmount.toString(), // Amount of the input token in lamports
         takingAmount: takingAmount.toString(), // Amount of the output token in lamports
-        expiredAt: null, // Optional: Set an expiry date for the order
+        // Omit expiredAt or set it to undefined
       },
       computeUnitPrice: "auto", // Use "auto" for priority fee
       wrapAndUnwrapSol: true, // Optional: Wrap/unwrap SOL if needed
