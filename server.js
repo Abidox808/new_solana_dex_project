@@ -126,7 +126,7 @@ async function placeLimitOrder(fromToken, toToken, price, amount, walletAddress,
     console.log('USDC Decimals:', toDecimal);
 
     console.log('totalFromAmount:', totalFromAmount);
-    console.log('amount:', totalFromAmount);
+    console.log('amount:', amount);
 
     // Calculate amounts in lamports (smallest units of the tokens)
     const makingAmount = Math.round(amount * Math.pow(10, fromDecimal)); // Amount of the "from" token
@@ -172,8 +172,8 @@ async function placeLimitOrder(fromToken, toToken, price, amount, walletAddress,
 app.post('/api/limit-order-history', async (req, res) =>{
   try{
     const {walletAddress} = req.body;
-    const response1 = await axios.get(`https://jup.ag/api/limit/v1/openorders?wallet=${walletAddress}`);
-    const response2 = await axios.get(`https://jup.ag/api/limit/v1/orderHistory?wallet=${walletAddress}`);
+    const response1 = await axios.get(`https://api.jup.ag/limit/v2/openOrders?wallet=${walletAddress}`);
+    const response2 = await axios.get(`https://api.jup.ag/limit/v2/orderHistory?wallet=${walletAddress}`);
     const openOrders = response1.data;
     const orderHistory = response2.data
     const fetchResult = {openOrders, orderHistory};
