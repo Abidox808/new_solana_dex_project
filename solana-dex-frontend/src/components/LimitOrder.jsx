@@ -307,11 +307,11 @@ const LimitOrder = () => {
     : '0.00';
 
     const renderOpenOrdersTable = (orders) => {
-      if (!Array.isArray(orders) || orders.length === 0) {
+      if (!orders || !Array.isArray(orders.openOrders) || orders.openOrders.length === 0) {
         return <tr><td colSpan="6">No open orders found.</td></tr>;
       }
     
-      return orders.map((order) => {
+      return orders.openOrders.map((order) => {
         const inputMint = order.account.inputMint;
         const outputMint = order.account.outputMint;
         const makingAmount = parseFloat(order.account.makingAmount) / Math.pow(10, getDecimalOfMint(inputMint, allVerifiedTokens));
