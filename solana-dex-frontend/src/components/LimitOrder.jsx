@@ -192,45 +192,50 @@ const LimitOrder = () => {
     }
   };
 
-  const handleCancelOrder = async (orderId)=>{
-    if (!orderId){
-      return
-    }
-    const response = axios.post(`${API_BASE_URL}/api/limit-order`,{
-      orderId: orderId
-    });
-    const connection=  new Connection(END_POINT);
-    const tx = response.data.tx;
-    const transactionBuf = Buffer.from(tx, 'base64');
-      var transaction = Transaction.from(transactionBuf);
-      const signedTransaction = await wallet.signTransaction(transaction)
-      signedTransaction.partialSign(base);
-
-      const latestBlockhash = await connection.getLatestBlockhash();
-      console.log('LATEST BLOCKHASH:', latestBlockhash);
-      
-      const txid = await connection.sendRawTransaction(signedTransaction.serialize(),{
-        skipPreflight:true,
-        maxRetries:2,
+  const handleCancelOrder = async (orderId) => {
+    if (!orderId) return;
+  
+    try {
+      const response = await axios.post('https://api.jup.ag/limit/v2/cancelOrders', {
+        maker: wallet.publicKey.toString(),
+        orders: [orderId], // Cancel a specific order
+        computeUnitPrice: "auto",
       });
-      await connection.confirmTransaction({
-        blockhash:latestBlockhash,
-        lastValidBlockHeight:latestBlockhash.lastValidBlockHeight,
-        signature:txid
-      })
+  
+      const txs = response.data.txs;
+      const connection = new Connection(END_POINT);
+  
+      // Sign and send each transaction
+      for (const tx of txs) {
+        const transactionBuf = Buffer.from(tx, 'base64');
+        const transaction = Transaction.from(transactionBuf);
+        const signedTransaction = await wallet.signTransaction(transaction);
+        const txid = await connection.sendRawTransaction(signedTransaction.serialize(), {
+          skipPreflight: true,
+          maxRetries: 2,
+        });
+  
+        await connection.confirmTransaction(txid);
+        console.log('Transaction confirmed:', txid);
+      }
+  
+      // Refresh open orders after cancellation
+      const orders = await fetchOpenOrders(wallet.publicKey.toString());
+      setOpenOrders(orders);
+    } catch (error) {
+      console.error('Error canceling order:', error);
+    }
   };
 
-  const fetchOpenOrders = async (walletAddress)=>{
+  const fetchOpenOrders = async (walletAddress) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/limit-order-history`, {
-        walletAddress: walletAddress
-      });
-      return response.data.fetchResult;
+      const response = await axios.get(`https://api.jup.ag/limit/v2/openOrders?wallet=${walletAddress}`);
+      return response.data; // Return the array of open orders
     } catch (error) {
       console.error('Error fetching open orders:', error);
       return [];
     }
-  }
+  };
   //const iframeSrc = `https://birdeye.so/tv-widget/${inputMintToken}/${outputMintToken}?chain=solana&viewMode=base%2Fquote&chartInterval=1D&chartType=CANDLE&chartTimezone=America%2FLos_Angeles&chartLeftToolbar=show&theme=dark`;
   const handleTabClick = (tab) => {
     setActiveTab(tab);
@@ -270,43 +275,60 @@ const LimitOrder = () => {
     ? ((amount * price) / prices[toToken]).toFixed(2)
     : '0.00';
 
-  const renderHistoryTable= (orders)=>{
-    const historyData = orders.orderHistory;
-    return historyData.map((history)=>(
-      <tr key = {history.id} >
-        <td style={{display:'none'}}>{history.orderKey}</td>
-        <td>{getSymbolFromMint(history.inputMint, tokens)} ➡️ {getSymbolFromMint( history.outputMint, tokens)}</td>
-        <td>{parseFloat(history.oriInAmount) / Math.pow(10, getDecimalOfMint(history.inputMint, allVerifiedTokens))}{" "}
-          {getSymbolFromMint(history.inputMint, tokens)}
-        </td>
-        <td>{parseFloat(history.oriOutAmount) / Math.pow(10, getDecimalOfMint(history.outputMint, allVerifiedTokens))}{" "}
-          {getSymbolFromMint(history.outputMint, tokens)}
-        </td>
-        <td>{history.createdAt}</td>
-        <td>{history.state}</td>
-      </tr>
-    ));
-  }
+    const renderHistoryTable = (orders) => {
+      if (!orders || orders.length === 0) {
+        return <tr><td colSpan="6">No order history found.</td></tr>;
+      }
+    
+      return orders.map((order) => {
+        const inputMint = order.account.inputMint;
+        const outputMint = order.account.outputMint;
+        const makingAmount = parseFloat(order.account.makingAmount) / Math.pow(10, getDecimalOfMint(inputMint, allVerifiedTokens));
+        const takingAmount = parseFloat(order.account.takingAmount) / Math.pow(10, getDecimalOfMint(outputMint, allVerifiedTokens));
+    
+        return (
+          <tr key={order.publicKey}>
+            <td style={{ display: 'none' }}>{order.publicKey}</td>
+            <td>
+              {getSymbolFromMint(inputMint, tokens)} ➡️ {getSymbolFromMint(outputMint, tokens)}
+            </td>
+            <td>{makingAmount.toFixed(6)} {getSymbolFromMint(inputMint, tokens)}</td>
+            <td>{takingAmount.toFixed(6)} {getSymbolFromMint(outputMint, tokens)}</td>
+            <td>{new Date(order.account.createdAt).toLocaleString()}</td>
+            <td>{order.account.state || 'Completed'}</td>
+          </tr>
+        );
+      });
+    };
 
-  const renderOpenOrdersTable= (orders)=>{
-    const openOrderData = orders.openOrders;
-    if (!openOrderData){
-      return;
-    }
-    return openOrderData.map((history)=>(
-      <tr key = {history.id} >
-        <td style={{display:'none'}}>{history.orderKey}</td>
-        <td>
-          {(parseFloat(history.oriInAmount) / Math.pow(10, getDecimalOfMint(history.inputMint, allVerifiedTokens)))}
-          {" "}  {getSymbolFromMint(history.inputMint, tokens)} ➡️ 
-          {(parseFloat(history.oriOutAmount) / Math.pow(10, getDecimalOfMint(history.outputMint, allVerifiedTokens)))/ (parseFloat(history.oriInAmount) / Math.pow(10, getDecimalOfMint(history.inputMint, allVerifiedTokens)))}
-          {" "} {getSymbolFromMint( history.outputMint, tokens)}
-        </td>
-        <td>{history.expiredAt}</td>
-        <td><button onclick ={handleCancelOrder(history.id)}>Cancel</button></td>
-      </tr>
-    ));
-  }
+    const renderOpenOrdersTable = (orders) => {
+      if (!orders || orders.length === 0) {
+        return <tr><td colSpan="6">No open orders found.</td></tr>;
+      }
+    
+      return orders.map((order) => {
+        const inputMint = order.account.inputMint;
+        const outputMint = order.account.outputMint;
+        const makingAmount = parseFloat(order.account.makingAmount) / Math.pow(10, getDecimalOfMint(inputMint, allVerifiedTokens));
+        const takingAmount = parseFloat(order.account.takingAmount) / Math.pow(10, getDecimalOfMint(outputMint, allVerifiedTokens));
+        const price = takingAmount / makingAmount;
+    
+        return (
+          <tr key={order.publicKey}>
+            <td style={{ display: 'none' }}>{order.publicKey}</td>
+            <td>
+              {getSymbolFromMint(inputMint, tokens)} ➡️ {getSymbolFromMint(outputMint, tokens)}
+            </td>
+            <td>{price.toFixed(6)}</td>
+            <td>{order.account.expiredAt || 'Never'}</td>
+            <td>{makingAmount.toFixed(6)} {getSymbolFromMint(inputMint, tokens)}</td>
+            <td>
+              <button onClick={() => handleCancelOrder(order.publicKey)}>Cancel</button>
+            </td>
+          </tr>
+        );
+      });
+    };
 
   return (
     <div>

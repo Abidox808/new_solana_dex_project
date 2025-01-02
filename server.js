@@ -111,7 +111,7 @@ app.post('/api/swap', async (req, res) => {
   }
 });
 
-async function placeLimitOrder(fromToken, toToken, price, amount, walletAddress, totalFromAmount, sendingBase) {
+async function placeLimitOrder(fromToken, toToken, price, FromTokenAmount, walletAddress, ToTokenAmount, sendingBase) {
   try {
     // Fetch mint addresses and decimals for the tokens
     const fromTokenData = await fetchMintAddressFromJupiter(fromToken);
@@ -125,12 +125,12 @@ async function placeLimitOrder(fromToken, toToken, price, amount, walletAddress,
     console.log('SOL Decimals:', fromDecimal);
     console.log('USDC Decimals:', toDecimal);
 
-    console.log('totalFromAmount:', totalFromAmount);
-    console.log('amount:', amount);
+    console.log('totalFromAmount:', ToTokenAmount);
+    console.log('FromTokenAmount:', FromTokenAmount);
 
     // Calculate amounts in lamports (smallest units of the tokens)
-    const makingAmount = Math.round(amount * Math.pow(10, fromDecimal)); // Amount of the "from" token
-    const takingAmount = Math.round(totalFromAmount * Math.pow(10, toDecimal)); // Amount of the "to" token
+    const makingAmount = Math.round(FromTokenAmount * Math.pow(10, fromDecimal)); // Amount of the "from" token
+    const takingAmount = Math.round(ToTokenAmount * Math.pow(10, toDecimal)); // Amount of the "to" token
 
     // Log the calculated amounts for debugging
     console.log('Making Amount (lamports):', makingAmount);
@@ -169,21 +169,24 @@ async function placeLimitOrder(fromToken, toToken, price, amount, walletAddress,
   }
 }
 
-app.post('/api/limit-order-history', async (req, res) =>{
-  try{
-    const {walletAddress} = req.body;
-    const response1 = await axios.get(`https://api.jup.ag/limit/v2/openOrders?wallet=${walletAddress}`);
-    const response2 = await axios.get(`https://api.jup.ag/limit/v2/orderHistory?wallet=${walletAddress}`);
-    const openOrders = response1.data;
-    const orderHistory = response2.data
-    const fetchResult = {openOrders, orderHistory};
-    res.json({message: 'Open order fetched successfully',fetchResult});
+app.post('/api/limit-order-history', async (req, res) => {
+  try {
+    const { walletAddress } = req.body;
+
+    const openOrdersResponse = await axios.get(`https://api.jup.ag/limit/v2/openOrders?wallet=${walletAddress}`);
+    const orderHistoryResponse = await axios.get(`https://api.jup.ag/limit/v2/orderHistory?wallet=${walletAddress}`);
+
+    const fetchResult = {
+      openOrders: openOrdersResponse.data,
+      orderHistory: orderHistoryResponse.data,
+    };
+
+    res.json({ message: 'Open order fetched successfully', fetchResult });
+  } catch (error) {
+    console.error('Error fetching order history:', error);
+    res.status(500).json({ error: 'Failed to fetch order history', details: error.message });
   }
-  catch (error){
-    console.error('Error fetching order history.', error);
-    res.status(500).json({error:'Failed to place limit orde history', details: error});
-  }
-} );
+});
 
 app.post('/api/limit-order', async (req, res) => {
   try {
