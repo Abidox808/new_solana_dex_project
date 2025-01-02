@@ -114,28 +114,32 @@ app.post('/api/swap', async (req, res) => {
 async function placeLimitOrder(fromToken, toToken, price, amount, walletAddress, totalFromAmount, sendingBase) {
   try {
     // Fetch mint addresses and decimals for the tokens
-    const inputMintTokenData = await fetchMintAddressFromJupiter(toToken);
-    const inputMint = inputMintTokenData.address;
-    const inDecimal = inputMintTokenData.decimal;
+    const fromTokenData = await fetchMintAddressFromJupiter(fromToken);
+    const fromMint = fromTokenData.address;
+    const fromDecimal = fromTokenData.decimal;
 
-    const outputMintTokenData = await fetchMintAddressFromJupiter(fromToken);
-    const outputMint = outputMintTokenData.address;
-    const outDecimal = outputMintTokenData.decimal;
+    const toTokenData = await fetchMintAddressFromJupiter(toToken);
+    const toMint = toTokenData.address;
+    const toDecimal = toTokenData.decimal;
 
     // Calculate amounts in lamports (smallest units of the tokens)
-    const makingAmount = Math.round(totalFromAmount * Math.pow(10, outDecimal)); // Amount of the "from" token
-    const takingAmount = Math.round(amount * Math.pow(10, inDecimal)); // Amount of the "to" token
+    const makingAmount = Math.round(totalFromAmount * Math.pow(10, fromDecimal)); // Amount of the "from" token
+    const takingAmount = Math.round(amount * Math.pow(10, toDecimal)); // Amount of the "to" token
+
+    // Log the calculated amounts for debugging
+    console.log('Making Amount (lamports):', makingAmount);
+    console.log('Taking Amount (lamports):', takingAmount);
 
     // Create the request body for the Jupiter Limit Order v2 API
     const createOrderBody = {
-      inputMint: inputMint, // Mint address of the input token
-      outputMint: outputMint, // Mint address of the output token
+      inputMint: toMint, // Mint address of the "to" token
+      outputMint: fromMint, // Mint address of the "from" token
       maker: walletAddress, // Wallet address of the maker
       payer: walletAddress, // Wallet address of the payer
       params: {
-        makingAmount: makingAmount.toString(), // Amount of the input token in lamports
-        takingAmount: takingAmount.toString(), // Amount of the output token in lamports
-        // Omit expiredAt or set it to undefined
+        makingAmount: makingAmount.toString(), // Amount of the "from" token in lamports
+        takingAmount: takingAmount.toString(), // Amount of the "to" token in lamports
+        expiredAt: undefined, // Optional: Set an expiry date for the order
       },
       computeUnitPrice: "auto", // Use "auto" for priority fee
       wrapAndUnwrapSol: true, // Optional: Wrap/unwrap SOL if needed
