@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Dropdown from './Dropdown';
 import '../styles/limit-order.css';
-import { Connection, Keypair, Transaction } from '@solana/web3.js';
+import { Connection, Keypair, Transaction, VersionedTransaction  } from '@solana/web3.js';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { getSymbolFromMint, getDecimalOfMint } from '../utils/apiService';
 import tokenAmount from '../images/tokenAmount.png';
@@ -121,16 +121,18 @@ const LimitOrder = () => {
 
   // Handle placing the order
   const handlePlaceOrder = async () => {
-    if (!wallet){
+    if (!wallet) {
       setOrderStatus('Please Connect Wallet!');
       return;
     }
     try {
-      setOrderStatus('initiating transaction...');
+      setOrderStatus('Initiating transaction...');
       const connection = new Connection(END_POINT);
       const walletAddress = wallet.publicKey;
       const sendingBase = base.publicKey.toString();
-      const res = await axios.post(`${API_BASE_URL}/api/limit-order`,{
+
+      // Send the request to the backend to create the limit order
+      const res = await axios.post(`${API_BASE_URL}/api/limit-order`, {
         fromToken,
         walletAddress,
         amount,
@@ -139,27 +141,34 @@ const LimitOrder = () => {
         toToken,
         sendingBase,
       });
-      
+
       setOrderStatus('Sending transaction...');
+
+      // Deserialize the transaction as a VersionedTransaction
       const tx = res.data.orderResult.tx;
       const transactionBuf = Buffer.from(tx, 'base64');
-      var transaction = Transaction.from(transactionBuf);
-      const signedTransaction = await wallet.signTransaction(transaction)
-      signedTransaction.partialSign(base);
+      const transaction = VersionedTransaction.deserialize(transactionBuf);
 
+      // Sign the transaction with the wallet
+      transaction.sign([wallet]);
+
+      // Send the signed transaction to the Solana network
       const latestBlockhash = await connection.getLatestBlockhash();
       console.log('LATEST BLOCKHASH:', latestBlockhash);
-      
-      const txid = await connection.sendRawTransaction(signedTransaction.serialize(),{
-        skipPreflight:true,
-        maxRetries:2,
+
+      const txid = await connection.sendRawTransaction(transaction.serialize(), {
+        skipPreflight: true,
+        maxRetries: 2,
       });
+
+      // Confirm the transaction
       await connection.confirmTransaction({
-        blockhash:latestBlockhash,
-        lastValidBlockHeight:latestBlockhash.lastValidBlockHeight,
-        signature:txid
-      })
-      setOrderStatus(`Transaction succeed! Transaction ID: ${txid}`);  
+        blockhash: latestBlockhash.blockhash,
+        lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+        signature: txid,
+      });
+
+      setOrderStatus(`Transaction succeeded! Transaction ID: ${txid}`);
     } catch (error) {
       console.error('Error during order placement:', error);
       setOrderStatus('Order placement failed. Please try again.');
