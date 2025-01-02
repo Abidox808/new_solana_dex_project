@@ -196,25 +196,32 @@ const LimitOrder = () => {
     if (!orderId) return;
   
     try {
+      // Send the cancel order request to the Jupiter API
       const response = await axios.post('https://api.jup.ag/limit/v2/cancelOrders', {
         maker: wallet.publicKey.toString(),
         orders: [orderId], // Cancel a specific order
         computeUnitPrice: "auto",
       });
   
-      const txs = response.data.txs;
+      const txs = response.data.txs; // Array of base64-encoded transactions
       const connection = new Connection(END_POINT);
   
       // Sign and send each transaction
       for (const tx of txs) {
+        // Deserialize the transaction as a VersionedTransaction
         const transactionBuf = Buffer.from(tx, 'base64');
-        const transaction = Transaction.from(transactionBuf);
+        const transaction = VersionedTransaction.deserialize(transactionBuf);
+  
+        // Sign the transaction with the wallet
         const signedTransaction = await wallet.signTransaction(transaction);
+  
+        // Send the signed transaction to the Solana network
         const txid = await connection.sendRawTransaction(signedTransaction.serialize(), {
           skipPreflight: true,
           maxRetries: 2,
         });
   
+        // Confirm the transaction
         await connection.confirmTransaction(txid);
         console.log('Transaction confirmed:', txid);
       }
@@ -295,7 +302,7 @@ const LimitOrder = () => {
             <td>{makingAmount.toFixed(6)} {getSymbolFromMint(inputMint, tokens)}</td>
             <td>{takingAmount.toFixed(6)} {getSymbolFromMint(outputMint, tokens)}</td>
             <td>{new Date(order.account.createdAt).toLocaleString()}</td>
-            <td>{order.account.state || 'Completed'}</td>
+            <td>{order.account.status || 'Completed'}</td>
           </tr>
         );
       });
@@ -462,7 +469,7 @@ const LimitOrder = () => {
                     <th>Order Info</th>
                     <th>Price</th>
                     <th>Expiry</th>
-                    <th>Filled Size</th>
+                    <th>Size</th>
                     <th>Action</th>
                   </tr>
                 </thead>
