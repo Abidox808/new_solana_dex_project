@@ -22,7 +22,7 @@ const DCA = () => {
   const wallet = useWallet();
   const [inputMintToken, setInputMintToken] = useState('');
   const [outputMintToken, setOutputMintToken] = useState('');
-  const [iframeSrc, setIframeSrc] = useState('https://birdeye.so/tv-widget/So11111111111111111111111111111111111111112/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v?chain=solana&viewMode=base%2Fquote&chartInterval=1D&chartType=AREA&chartTimezone=America%2FLos_Angeles&chartLeftToolbar=show&theme=dark');
+  const [iframeSrc, setIframeSrc] = useState('https://birdeye.so/tv-widget/So11111111111111111111111111111111111111112/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v?chain=solana&viewMode=base%2Fquote&chartInterval=1D&chartType=CANDLE&chartTimezone=America%2FLos_Angeles&chartLeftToolbar=show&theme=dark');
 
   const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL || 'http://localhost:3000';
   
@@ -41,7 +41,7 @@ const DCA = () => {
           setOutputMintToken(toTokenData.address);
 
           // Update iframe source
-          setIframeSrc(`https://birdeye.so/tv-widget/${fromTokenData.address}/${toTokenData.address}?chain=solana&viewMode=base%2Fquote&chartInterval=1D&chartType=AREA&chartTimezone=America%2FLos_Angeles&chartLeftToolbar=show&theme=dark`);
+          setIframeSrc(`https://birdeye.so/tv-widget/${fromTokenData.address}/${toTokenData.address}?chain=solana&viewMode=base%2Fquote&chartInterval=1D&chartType=CANDLE&chartTimezone=America%2FLos_Angeles&chartLeftToolbar=show&theme=dark`);
 
           // Derive SOL to USDC rate from token data if available
           if (fromTokenData.symbol === 'SOL' && fromTokenData.price && toTokenData.symbol === 'USDC' && toTokenData.price) {
@@ -62,7 +62,7 @@ const DCA = () => {
 
   useEffect(() => {
     if (inputMintToken && outputMintToken) {
-      setIframeSrc(`https://birdeye.so/tv-widget/${inputMintToken}/${outputMintToken}?chain=solana&viewMode=base%2Fquote&chartInterval=1D&chartType=AREA&chartTimezone=America%2FLos_Angeles&chartLeftToolbar=show&theme=dark`);
+      setIframeSrc(`https://birdeye.so/tv-widget/${inputMintToken}/${outputMintToken}?chain=solana&viewMode=base%2Fquote&chartInterval=1D&chartType=CANDLE&chartTimezone=America%2FLos_Angeles&chartLeftToolbar=show&theme=dark`);
     }
   }, [inputMintToken, outputMintToken]);
 

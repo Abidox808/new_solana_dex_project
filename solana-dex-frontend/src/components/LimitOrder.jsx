@@ -205,7 +205,7 @@ const LimitOrder = () => {
       return [];
     }
   }
-  //const iframeSrc = `https://birdeye.so/tv-widget/${inputMintToken}/${outputMintToken}?chain=solana&viewMode=base%2Fquote&chartInterval=1D&chartType=AREA&chartTimezone=America%2FLos_Angeles&chartLeftToolbar=show&theme=dark`;
+  //const iframeSrc = `https://birdeye.so/tv-widget/${inputMintToken}/${outputMintToken}?chain=solana&viewMode=base%2Fquote&chartInterval=1D&chartType=CANDLE&chartTimezone=America%2FLos_Angeles&chartLeftToolbar=show&theme=dark`;
   const handleTabClick = (tab) => {
     setActiveTab(tab);
   };
