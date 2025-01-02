@@ -60,12 +60,12 @@ app.get('/api/tokens', async (req, res) => {
 
 const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, slippage, walletAddress) => {
   try {
-    // Fetch mint addresses from Birdeye API
+    
     const inputMint = fromToken;
     const decimal = decimals;
     const outputMint = toToken;
 
-    // Fetch swap quote from Jupiter API
+    
     const quoteResponse = await axios.get(process.env.JUPITER_SWAP_QUOTE_API_URL, {
       params: {
         inputMint: inputMint,
@@ -78,7 +78,7 @@ const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, s
     const quoteRes = quoteResponse.data;
     console.log('Jupiter API Response:', quoteRes);
 
-    // Execute swap
+    
     const swapTransaction = await axios.post(process.env.JUPITER_SWAP_API_URL, {
       quoteResponse: quoteRes,
       userPublicKey: walletAddress,

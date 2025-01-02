@@ -48,7 +48,6 @@ const TokenSwap = () => {
   
         setTokens(tokenData);
   
-        // Set default token info (SOL and USDC) on initial load
         const solToken = tokenData.find((t) => t.symbol === 'SOL');
         const usdcToken = tokenData.find((t) => t.symbol === 'USDC');
   
@@ -119,11 +118,11 @@ const TokenSwap = () => {
       if (type === 'from') {
         setFromToken(token.symbol);
         setFromTokenAddress(token.address);
-        setFromTokenDecimals(token.decimals); // Set fromToken decimals
+        setFromTokenDecimals(token.decimals); 
       } else {
         setToToken(token.symbol);
         setToTokenAddress(token.address);
-        setToTokenDecimals(token.decimals); // Set toToken decimals
+        setToTokenDecimals(token.decimals); 
       }
     }
     setShowFromDropdown(false);
@@ -135,7 +134,7 @@ const TokenSwap = () => {
     setToToken(fromToken);
     setFromTokenAddress(toTokenAddress);
     setToTokenAddress(fromTokenAddress);
-    setFromTokenDecimals(toTokenDecimals); // Swap decimals
+    setFromTokenDecimals(toTokenDecimals); 
     setToTokenDecimals(fromTokenDecimals);
     setFromAmount(toAmount);
     setToAmount(fromAmount);
@@ -147,7 +146,7 @@ const TokenSwap = () => {
     const walletAddress = wallet.publicKey;
   
     try {
-      // Ensure token info is available
+      
       if (!fromTokenAddress || !toTokenAddress || !fromTokenDecimals) {
         throw new Error('Token information is missing. Please reselect the tokens.');
       }

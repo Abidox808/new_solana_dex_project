@@ -5,7 +5,7 @@ const Dropdown = ({ tokens, selectedToken, onSelectToken, showDropdown, setShowD
   const [searchTerm, setSearchTerm] = useState('');
   const dropdownRef = useRef(null);
 
-  // Close dropdown when clicking outside
+  
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -19,14 +19,14 @@ const Dropdown = ({ tokens, selectedToken, onSelectToken, showDropdown, setShowD
     };
   }, [setShowDropdown]);
 
-  // Filter tokens based on search term
+  
   const filteredTokens = tokens.filter((token) =>
     token.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
     token.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     token.address.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Limit to top 100 tokens if no search term is entered
+  
   const displayedTokens = searchTerm ? filteredTokens : filteredTokens.slice(0, 100);
 
   return (
@@ -55,7 +55,7 @@ const Dropdown = ({ tokens, selectedToken, onSelectToken, showDropdown, setShowD
               >
                 {/* Lazy load the image */}
                 <img
-                  src={showDropdown ? token.logoURI : ''} // Only load the image if the dropdown is open
+                  src={showDropdown ? token.logoURI : ''} 
                   alt={token.symbol}
                   className="token-logo"
                   onError={(e) => {
