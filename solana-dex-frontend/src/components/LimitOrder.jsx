@@ -22,7 +22,7 @@ const LimitOrder = () => {
   const [outputMintToken, setOutputMintToken] = useState([]);
   const [activeTab, setActiveTab] = useState('openOrders'); 
   const [openOrders, setOpenOrders] = useState([]);
-  const [orderHistory, setOrderHistory] = useState([]);
+  const [orderHistory, setOrderHistory] = useState({ orders: [] });
   const [allVerifiedTokens, setAllVerifiedTokens] = useState([]);
   const [iframeSrc, setIframeSrc] = useState('https://birdeye.so/tv-widget/So11111111111111111111111111111111111111112/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v?chain=solana&viewMode=base%2Fquote&chartInterval=1D&chartType=CANDLE&chartTimezone=America%2FLos_Angeles&chartLeftToolbar=show&theme=dark');
   const [isLoading, setIsLoading] = useState(false);
@@ -59,11 +59,9 @@ const LimitOrder = () => {
       if (wallet.connected && wallet.publicKey) {
         setIsLoading(true);
         try {
-          const ordersResponse = await fetchOpenOrders(wallet.publicKey.toString());
-          setOpenOrders(ordersResponse.openOrders);
-          setOrderHistory(ordersResponse.orderHistory);
-          console.log('Open Orders State:', openOrders);
-          console.log('Order History State:', orderHistory);
+          const ordersData = await fetchOpenOrders(wallet.publicKey.toString());
+          setOpenOrders(ordersData.openOrders);
+          setOrderHistory(ordersData.orderHistory);
         } catch (error) {
           console.error('Error fetching orders:', error);
         } finally {
@@ -71,12 +69,12 @@ const LimitOrder = () => {
         }
       } else {
         setOpenOrders([]);
-        setOrderHistory([]);
+        setOrderHistory({ orders: [] });
       }
     };
-
-  fetchOrders();
-}, [wallet.connected, wallet.publicKey]);
+  
+    fetchOrders();
+  }, [wallet.connected, wallet.publicKey]);
   // Fetch prices whenever fromToken, toToken, or price changes
   useEffect(() => {
     const fetchPrices = async () => {
@@ -256,17 +254,17 @@ const LimitOrder = () => {
     try {
       const openOrdersResponse = await axios.get(`https://api.jup.ag/limit/v2/openOrders?wallet=${walletAddress}`);
       const orderHistoryResponse = await axios.get(`https://api.jup.ag/limit/v2/orderHistory?wallet=${walletAddress}`);
-
+  
       console.log('Open Orders Response:', openOrdersResponse.data);
       console.log('Order History Response:', orderHistoryResponse.data);
   
       return {
-        openOrders: openOrdersResponse.data,
-        orderHistory: orderHistoryResponse.data,
+        openOrders: openOrdersResponse.data.openOrders || [],
+        orderHistory: orderHistoryResponse.data || { orders: [] },
       };
     } catch (error) {
       console.error('Error fetching open orders:', error);
-      return { openOrders: [], orderHistory: [] };
+      return { openOrders: [], orderHistory: { orders: [] } };
     }
   };
   //const iframeSrc = `https://birdeye.so/tv-widget/${inputMintToken}/${outputMintToken}?chain=solana&viewMode=base%2Fquote&chartInterval=1D&chartType=CANDLE&chartTimezone=America%2FLos_Angeles&chartLeftToolbar=show&theme=dark`;
@@ -338,11 +336,11 @@ const LimitOrder = () => {
     };
     
     const renderHistoryTable = (history) => {
-      if (!Array.isArray(history) || history.length === 0) {
+      if (!Array.isArray(history.orders) || history.orders.length === 0) {
         return <tr><td colSpan="6">No order history found.</td></tr>;
       }
     
-      return history.map((order) => {
+      return history.orders.map((order) => {
         const inputMint = order.inputMint;
         const outputMint = order.outputMint;
         const makingAmount = parseFloat(order.makingAmount);
