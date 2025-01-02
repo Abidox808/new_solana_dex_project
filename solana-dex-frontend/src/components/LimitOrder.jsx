@@ -43,7 +43,7 @@ const LimitOrder = () => {
         if (fromTokenMint && toTokenMint) {
           setInputMintToken(fromTokenMint);
           setOutputMintToken(toTokenMint);
-          setIframeSrc(`https://birdeye.so/tv-widget/${fromTokenMint}/${toTokenMint}?chain=solana&viewMode=base%2Fquote&chartInterval=1D&chartType=AREA&chartTimezone=America%2FLos_Angeles&chartLeftToolbar=show&theme=dark`);
+          setIframeSrc(`https://birdeye.so/tv-widget/${fromTokenMint}/${toTokenMint}?chain=solana&viewMode=base%2Fquote&chartInterval=1D&chartType=CANDLE&chartTimezone=America%2FLos_Angeles&chartLeftToolbar=show&theme=dark`);
         }
       } catch (error) {
         console.error('Error fetching tokens:', error);
