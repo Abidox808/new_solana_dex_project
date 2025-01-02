@@ -122,6 +122,7 @@ async function placeLimitOrder(fromToken, toToken, price, amount, walletAddress,
     const outDecimal = outputMintTokenData.decimal;
     const inAmount = totalUSDC * Math.pow(10, outDecimal);
     const outAmount =  amount * Math.pow(10, inDecimal);
+    console.log('JUPITER_LIMIT_ORDER_API_URL:', process.env.JUPITER_LIMIT_ORDER_API_URL);
     const {data:tx} = await axios.post(`${process.env.JUPITER_LIMIT_ORDER_API_URL}createOrder`,{
       owner: walletAddress,
       inAmount: inAmount,
