@@ -143,7 +143,14 @@ const LimitOrder = () => {
         toToken,
         sendingBase,
       });
-      console.log('API Response:', res);
+      
+      // Log the values before sending the request
+      console.log("Values being sent to the backend:");
+      console.log("fromToken:", fromToken);
+      console.log("walletAddress:", walletAddress.toString());
+      console.log("amount: (e.g., 0.026 SOL)", amount); // Should be the amount of fromToken (e.g., 0.026 SOL)
+      console.log("totalUSDC: (e.g., 6.50 U)", totalUSDC); // Should be the total amount of toToken (e.g., 6.50 U)
+
       // Log the API response for debugging
       console.log('API Response:', res.data);
 
