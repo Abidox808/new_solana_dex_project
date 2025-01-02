@@ -333,11 +333,12 @@ const LimitOrder = () => {
     };
     
     const renderHistoryTable = (orders) => {
-      if (!orders || !Array.isArray(orders.orderHistory) || orders.orderHistory.length === 0) {
+      // Check if the response is valid and contains the `orders` array
+      if (!orders || !orders.orders || !Array.isArray(orders.orders) || orders.orders.length === 0) {
         return <tr><td colSpan="6">No order history found.</td></tr>;
       }
     
-      return orders.orderHistory.map((order) => {
+      return orders.orders.map((order) => {
         const inputMint = order.inputMint;
         const outputMint = order.outputMint;
         const makingAmount = parseFloat(order.makingAmount);
@@ -346,8 +347,8 @@ const LimitOrder = () => {
         const status = order.status;
     
         return (
-          <tr key={order.orderKey}>
-            <td style={{ display: 'none' }}>{order.orderKey}</td>
+          <tr key={order.orderKey || order.closeTx}>
+            <td style={{ display: 'none' }}>{order.orderKey || order.closeTx}</td>
             <td>
               {getSymbolFromMint(inputMint, tokens)} ➡️ {getSymbolFromMint(outputMint, tokens)}
             </td>
