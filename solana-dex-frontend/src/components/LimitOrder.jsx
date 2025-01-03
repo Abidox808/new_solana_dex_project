@@ -382,7 +382,7 @@ const LimitOrder = () => {
     };
 
   // Generate the TradingView symbol based on the selected tokens
-  const tradingViewSymbol = `${fromToken}/${toToken}`;
+  const tradingViewSymbol = `${fromToken}:${toToken}`;
 
   return (
     <div>
