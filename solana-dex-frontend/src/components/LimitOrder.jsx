@@ -388,8 +388,7 @@ const LimitOrder = () => {
     <div>
       <div className="limit-order-page">
         <div className="limit-order-price-chart-container">
-          {/* Replace the iframe with TradingViewWidget */}
-          <TradingViewWidget symbol={tradingViewSymbol} />
+        <TradingViewWidget fromToken={fromToken} toToken={toToken} />
         </div>
         <div className="limit-order-container">
           {orderStatus && <p>{orderStatus}</p>}
