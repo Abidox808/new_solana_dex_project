@@ -29,7 +29,7 @@ async function fetchWithRetry(url, options = {}, retries = 3) {
 
 async function fetchFromJupiter() {
   try {
-    const response = await fetchWithRetry('https://tokens.jup.ag/tokens?tags=verified,unknown');
+    const response = await fetchWithRetry('https://tokens.jup.ag/tokens?tags=unknown');
     const tokens = response;
 
     if (!Array.isArray(tokens)) {
