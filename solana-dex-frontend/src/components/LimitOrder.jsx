@@ -25,7 +25,6 @@ const LimitOrder = () => {
   const [openOrders, setOpenOrders] = useState([]);
   const [orderHistory, setOrderHistory] = useState({ orders: [] });
   const [allVerifiedTokens, setAllVerifiedTokens] = useState([]);
-  const [iframeSrc, setIframeSrc] = useState('https://birdeye.so/tv-widget/So11111111111111111111111111111111111111112/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v?chain=solana&viewMode=base%2Fquote&chartInterval=1D&chartType=CANDLE&chartTimezone=America%2FLos_Angeles&chartLeftToolbar=show&theme=dark');
   const [isLoading, setIsLoading] = useState(false);
 
 
@@ -47,7 +46,6 @@ const LimitOrder = () => {
         if (fromTokenMint && toTokenMint) {
           setInputMintToken(fromTokenMint);
           setOutputMintToken(toTokenMint);
-          setIframeSrc(`https://birdeye.so/tv-widget/${fromTokenMint}/${toTokenMint}?chain=solana&viewMode=base%2Fquote&chartInterval=1D&chartType=CANDLE&chartTimezone=America%2FLos_Angeles&chartLeftToolbar=show&theme=dark`);
         }
       } catch (error) {
         console.error('Error fetching tokens:', error);
@@ -128,28 +126,7 @@ const LimitOrder = () => {
       fetchPrices();
     }
   }, [fromToken, toToken, price, tokens]);
-
-   // Function to update the iframe source
-   const updateIframe = () => {
-    const newSrc = `https://birdeye.so/tv-widget/${inputMintToken}/${outputMintToken}?chain=solana&viewMode=base%2Fquote&chartInterval=1D&chartType=CANDLE&chartTimezone=America%2FLos_Angeles&chartLeftToolbar=show&theme=dark`;
-
-    // Set the hidden iframe's source to preload the new content
-    hiddenIframeRef.current.src = newSrc;
-
-    // Wait for the hidden iframe to load
-    hiddenIframeRef.current.onload = () => {
-      // Swap the visible and hidden iframes
-      const tempSrc = visibleIframeRef.current.src;
-      visibleIframeRef.current.src = hiddenIframeRef.current.src;
-      hiddenIframeRef.current.src = tempSrc;
-
-      // Update the state to reflect the new source
-      setIframeSrc(newSrc);
-    };
-  };
-
  
-
 
   // Handle placing the order
   const handlePlaceOrder = async () => {
@@ -285,7 +262,7 @@ const LimitOrder = () => {
       return { openOrders: [], orderHistory: { orders: [] } };
     }
   };
-  //const iframeSrc = `https://birdeye.so/tv-widget/${inputMintToken}/${outputMintToken}?chain=solana&viewMode=base%2Fquote&chartInterval=1D&chartType=CANDLE&chartTimezone=America%2FLos_Angeles&chartLeftToolbar=show&theme=dark`;
+  
   const handleTabClick = (tab) => {
     setActiveTab(tab);
   };
