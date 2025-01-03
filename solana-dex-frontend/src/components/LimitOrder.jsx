@@ -6,6 +6,7 @@ import { Connection, Keypair, Transaction, VersionedTransaction  } from '@solana
 import { useWallet } from '@solana/wallet-adapter-react';
 import { getSymbolFromMint, getDecimalOfMint } from '../utils/apiService';
 import tokenAmount from '../images/tokenAmount.png';
+import TradingChart from './TradingChart';
 
 const LimitOrder = () => {
   const wallet = useWallet();
@@ -387,24 +388,11 @@ const LimitOrder = () => {
       <div className="limit-order-page">
         <div className="limit-order-price-chart-container">
           {/* Visible iframe */}
-          <iframe
-            ref={visibleIframeRef}
-            title="TradingIFrame"
-            width="100%"
-            height="600"
-            src={iframeSrc}
-            allowFullScreen
-          ></iframe>
-
-          {/* Hidden iframe for preloading */}
-          <iframe
-            ref={hiddenIframeRef}
-            title="HiddenTradingIFrame"
-            style={{ display: 'none' }} // Hide the preloading iframe
-            width="100%"
-            height="600"
-            allowFullScreen
-          ></iframe>
+          <TradingChart
+            tokenPair={`${fromToken}/${toToken}`}
+            inputMintToken={inputMintToken}
+            outputMintToken={outputMintToken}
+          />
         </div>
         <div className="limit-order-container">
           {orderStatus && <p>{orderStatus}</p>}
