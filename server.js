@@ -30,7 +30,7 @@ const database = client.db('solana_dex');
 
 const fetchMintAddressFromJupiter = async (symbol) => {
   try {
-    const response = await axios.get('https://tokens.jup.ag/tokens?tags=verified');
+    const response = await axios.get('https://tokens.jup.ag/tokens?tags=unknown');
     const token = response.data.find(t => t.symbol === symbol);
 
     if (!token) {
