@@ -65,7 +65,7 @@ export default defineConfig({
       requireReturnsDefault: 'auto',
     },
     rollupOptions: {
-      external: ['@project-serum/anchor', '@drift-labs/sdk'],
+      external: ['@project-serum/anchor', '@drift-labs/sdk', 'lightweight-charts'],
       output: {
         manualChunks: undefined,
       },
