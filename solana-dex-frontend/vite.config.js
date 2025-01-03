@@ -39,6 +39,7 @@ export default defineConfig({
       'buffer',
       'bn.js',
       'jayson',
+      'lightweight-charts',
     ],
     exclude: [
       '@project-serum/anchor',
@@ -65,7 +66,7 @@ export default defineConfig({
       requireReturnsDefault: 'auto',
     },
     rollupOptions: {
-      external: ['@project-serum/anchor', '@drift-labs/sdk', 'lightweight-charts'],
+      external: ['@project-serum/anchor', '@drift-labs/sdk'],
       output: {
         manualChunks: undefined,
       },
