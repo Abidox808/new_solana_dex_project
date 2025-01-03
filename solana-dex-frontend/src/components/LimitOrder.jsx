@@ -27,6 +27,9 @@ const LimitOrder = () => {
   const [iframeSrc, setIframeSrc] = useState('https://birdeye.so/tv-widget/So11111111111111111111111111111111111111112/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v?chain=solana&viewMode=base%2Fquote&chartInterval=1D&chartType=CANDLE&chartTimezone=America%2FLos_Angeles&chartLeftToolbar=show&theme=dark');
   const [isLoading, setIsLoading] = useState(false);
 
+  const visibleIframeRef = useRef(null); // Ref for the visible iframe
+  const hiddenIframeRef = useRef(null); // Ref for the hidden iframe
+
   const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL || 'http://localhost:5000';
   const END_POINT = import.meta.env.VITE_APP_RPC_END_POINT || 'https://api.mainnet-beta.solana.com';
 
@@ -127,9 +130,32 @@ const LimitOrder = () => {
     }
   }, [fromToken, toToken, price, tokens]);
 
+   // Function to update the iframe source
+   const updateIframe = () => {
+    const newSrc = `https://birdeye.so/tv-widget/${inputMintToken}/${outputMintToken}?chain=solana&viewMode=base%2Fquote&chartInterval=1D&chartType=CANDLE&chartTimezone=America%2FLos_Angeles&chartLeftToolbar=show&theme=dark`;
+
+    // Set the hidden iframe's source to preload the new content
+    hiddenIframeRef.current.src = newSrc;
+
+    // Wait for the hidden iframe to load
+    hiddenIframeRef.current.onload = () => {
+      // Swap the visible and hidden iframes
+      const tempSrc = visibleIframeRef.current.src;
+      visibleIframeRef.current.src = hiddenIframeRef.current.src;
+      hiddenIframeRef.current.src = tempSrc;
+
+      // Update the state to reflect the new source
+      setIframeSrc(newSrc);
+    };
+  };
+
   useEffect(() => {
-    // Update iframeSrc when fromToken or toToken changes
-    setIframeSrc(`https://birdeye.so/tv-widget/${inputMintToken}/${outputMintToken}?chain=solana&viewMode=base%2Fquote&chartInterval=1D&chartType=CANDLE&chartTimezone=America%2FLos_Angeles&chartLeftToolbar=show&theme=dark`);
+    const interval = setInterval(() => {
+      updateIframe();
+    }, 5000); // Update every 5 seconds
+
+    // Cleanup the interval on component unmount
+    return () => clearInterval(interval);
   }, [inputMintToken, outputMintToken]);
 
 
@@ -367,14 +393,25 @@ const LimitOrder = () => {
     <div>
       <div className="limit-order-page">
         <div className="limit-order-price-chart-container">
-          <iframe 
-            title='TradingIFrame'
-            width="100%" 
-            height="600" 
+          {/* Visible iframe */}
+          <iframe
+            ref={visibleIframeRef}
+            title="TradingIFrame"
+            width="100%"
+            height="600"
             src={iframeSrc}
-            allowFullScreen>
-          </iframe>
-            {/* <TradingViewChart symbol={getTradingSymbol()} interval="1" /> */}
+            allowFullScreen
+          ></iframe>
+
+          {/* Hidden iframe for preloading */}
+          <iframe
+            ref={hiddenIframeRef}
+            title="HiddenTradingIFrame"
+            style={{ display: 'none' }} // Hide the preloading iframe
+            width="100%"
+            height="600"
+            allowFullScreen
+          ></iframe>
         </div>
         <div className="limit-order-container">
           {orderStatus && <p>{orderStatus}</p>}
