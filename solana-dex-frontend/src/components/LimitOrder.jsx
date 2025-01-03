@@ -6,6 +6,7 @@ import { Connection, Keypair, Transaction, VersionedTransaction  } from '@solana
 import { useWallet } from '@solana/wallet-adapter-react';
 import { getSymbolFromMint, getDecimalOfMint } from '../utils/apiService';
 import tokenAmount from '../images/tokenAmount.png';
+import TradingViewWidget from './TradingViewWidget';
 
 const LimitOrder = () => {
   const wallet = useWallet();
@@ -27,8 +28,6 @@ const LimitOrder = () => {
   const [iframeSrc, setIframeSrc] = useState('https://birdeye.so/tv-widget/So11111111111111111111111111111111111111112/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v?chain=solana&viewMode=base%2Fquote&chartInterval=1D&chartType=CANDLE&chartTimezone=America%2FLos_Angeles&chartLeftToolbar=show&theme=dark');
   const [isLoading, setIsLoading] = useState(false);
 
-  const visibleIframeRef = useRef(null); // Ref for the visible iframe
-  const hiddenIframeRef = useRef(null); // Ref for the hidden iframe
 
   const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL || 'http://localhost:5000';
   const END_POINT = import.meta.env.VITE_APP_RPC_END_POINT || 'https://api.mainnet-beta.solana.com';
@@ -382,29 +381,15 @@ const LimitOrder = () => {
       });
     };
 
+  // Generate the TradingView symbol based on the selected tokens
+  const tradingViewSymbol = `${fromToken}/${toToken}`;
+
   return (
     <div>
       <div className="limit-order-page">
         <div className="limit-order-price-chart-container">
-          {/* Visible iframe */}
-          <iframe
-            ref={visibleIframeRef}
-            title="TradingIFrame"
-            width="100%"
-            height="600"
-            src={iframeSrc}
-            allowFullScreen
-          ></iframe>
-
-          {/* Hidden iframe for preloading */}
-          <iframe
-            ref={hiddenIframeRef}
-            title="HiddenTradingIFrame"
-            style={{ display: 'none' }} // Hide the preloading iframe
-            width="100%"
-            height="600"
-            allowFullScreen
-          ></iframe>
+          {/* Replace the iframe with TradingViewWidget */}
+          <TradingViewWidget symbol={tradingViewSymbol} />
         </div>
         <div className="limit-order-container">
           {orderStatus && <p>{orderStatus}</p>}
