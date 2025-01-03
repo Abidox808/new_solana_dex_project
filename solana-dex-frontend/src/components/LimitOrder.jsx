@@ -149,14 +149,7 @@ const LimitOrder = () => {
     };
   };
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      updateIframe();
-    }, 15000); // Update every 5 seconds
-
-    // Cleanup the interval on component unmount
-    return () => clearInterval(interval);
-  }, [inputMintToken, outputMintToken]);
+ 
 
 
   // Handle placing the order
