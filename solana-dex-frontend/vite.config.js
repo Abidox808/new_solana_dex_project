@@ -39,7 +39,6 @@ export default defineConfig({
       'buffer',
       'bn.js',
       'jayson',
-      'lightweight-charts',
     ],
     exclude: [
       '@project-serum/anchor',
