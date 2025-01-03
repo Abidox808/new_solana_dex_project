@@ -11,7 +11,7 @@ function TradingViewWidget({ fromToken, toToken }) {
     script.innerHTML = `
       {
         "autosize": true,
-        "symbol": "${fromToken}:${toToken}",
+        "symbol": "${fromToken}${toToken}",
         "interval": "D",
         "timezone": "Etc/UTC",
         "theme": "dark",
