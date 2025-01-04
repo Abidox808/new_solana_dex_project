@@ -30,6 +30,20 @@ const DCA = () => {
 
   const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL || 'http://localhost:3000';
   
+  const fetchInputTokenPrice = async (mintAddress) => {
+    try {
+      const response = await axios.get(`https://api.jup.ag/price/v2?ids=${mintAddress}`);
+      const priceData = response.data.data[mintAddress];
+      if (priceData) {
+        setInputTokenPrice(priceData.price);
+      } else {
+        console.error('Price data not found for mint address:', mintAddress);
+      }
+    } catch (error) {
+      console.error('Error fetching input token price:', error);
+    }
+  };
+
   useEffect(() => {
     const fetchTokens = async () => {
       try {
@@ -43,16 +57,12 @@ const DCA = () => {
         if (fromTokenData && toTokenData) {
           setInputMintToken(fromTokenData.address);
           setOutputMintToken(toTokenData.address);
+          fetchInputTokenPrice(fromTokenData.address);
 
           // Update iframe source
           setIframeSrc(`https://birdeye.so/tv-widget/${fromTokenData.address}/${toTokenData.address}?chain=solana&viewMode=base%2Fquote&chartInterval=1D&chartType=CANDLE&chartTimezone=America%2FLos_Angeles&chartLeftToolbar=show&theme=dark`);
 
-          // Derive SOL to USDC rate from token data if available
-          if (fromTokenData.symbol === 'SOL' && fromTokenData.price && toTokenData.symbol === 'USDC' && toTokenData.price) {
-            // If USDC price is 1 (usually stable), SOL to USDC = SOL's price
-            // If not stable, adjust accordingly. Here we assume USDC price ~ 1:
-            setSolToUsdc(fromTokenData.price);
-          }
+          
         }
 
       } catch (error) {
@@ -79,16 +89,17 @@ const DCA = () => {
   }, [numOrders]);
   
   useEffect(() => {
-    if (solToUsdc !== null && amount !== '' && numOrders !== '') {
-      const orderValue = parseFloat(amount) * solToUsdc * numOrders;
-      console.log('orderValue:', orderValue, 'amount:', amount, 'solToUsdc:', solToUsdc, 'numOrders:', numOrders);
+    if (inputTokenPrice && amount && numOrders >= 0.01) {
+      const amountNumber = parseFloat(amount);
+      const priceNumber = parseFloat(inputTokenPrice.price);
+      const orderValue = amountNumber * priceNumber;
       if (orderValue < 100) {
-        setAmountWarning('Order value per cycle must be at least $100.');
+        setAmountWarning('Order value must be at least $100.');
       } else {
         setAmountWarning('');
       }
     }
-  }, [amount, numOrders, solToUsdc]);
+  }, [inputTokenPrice, amount, numOrders]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -103,6 +114,21 @@ const DCA = () => {
       return;
     }
 
+    // Check if amount and numOrders are valid numbers
+    const amountNumber = parseFloat(amount);
+    const numOrdersNumber = parseFloat(numOrders);
+    if (isNaN(amountNumber) || isNaN(numOrdersNumber)) {
+      setAmountWarning('Invalid amount or number of orders.');
+      return;
+    }
+
+    // Check order value
+    const priceNumber = parseFloat(inputTokenPrice.price);
+    const orderValue = amountNumber * priceNumber;
+    if (orderValue < 100) {
+      setAmountWarning('order Value must be at least $100.');
+      return;
+    }
 
     try {
       const res = await axios.post(`${API_BASE_URL}/api/dca-order`, {
