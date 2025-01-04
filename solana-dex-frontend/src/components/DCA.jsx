@@ -92,8 +92,9 @@ const DCA = () => {
   useEffect(() => {
     if (inputTokenPrice && amount && numOrders >= 0.01) {
       const amountNumber = parseFloat(amount);
-      const priceNumber = parseFloat(inputTokenPrice.price);
+      const priceNumber = parseFloat(inputTokenPrice);
       const orderValue = amountNumber * priceNumber;
+      console.log('orderValue:', orderValue);
       if (orderValue < 100) {
         setAmountWarning('Order value must be at least $100.');
       } else {
@@ -124,8 +125,11 @@ const DCA = () => {
     }
 
     // Check order value
-    const priceNumber = parseFloat(inputTokenPrice.price);
+    const priceNumber = parseFloat(inputTokenPrice);
     const orderValue = amountNumber * priceNumber;
+    console.log('inputTokenPrice:', inputTokenPrice);
+    console.log('amount:', amount);
+    console.log('numOrders:', numOrders);
     if (orderValue < 100) {
       setAmountWarning('order Value must be at least $100.');
       return;
