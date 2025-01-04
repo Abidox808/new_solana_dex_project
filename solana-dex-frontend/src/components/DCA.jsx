@@ -25,6 +25,9 @@ const DCA = () => {
   const [outputMintToken, setOutputMintToken] = useState('');
   const [iframeSrc, setIframeSrc] = useState('https://birdeye.so/tv-widget/So11111111111111111111111111111111111111112/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v?chain=solana&viewMode=base%2Fquote&chartInterval=1D&chartType=CANDLE&chartTimezone=America%2FLos_Angeles&chartLeftToolbar=show&theme=dark');
 
+  const [orderWarning, setOrderWarning] = useState('');
+  const [amountWarning, setAmountWarning] = useState('');
+
   const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL || 'http://localhost:3000';
   
   useEffect(() => {
@@ -67,8 +70,43 @@ const DCA = () => {
     }
   }, [inputMintToken, outputMintToken]);
 
+  useEffect(() => {
+    if (numOrders < 2) {
+      setOrderWarning('Number of orders cannot be less than 2.');
+    } else {
+      setOrderWarning('');
+    }
+  }, [numOrders]);
+  
+  useEffect(() => {
+    const orderValue = amount * solToUsdc * numOrders;
+    if (orderValue < 100) {
+      setAmountWarning('Order value per cycle must be at least $100.');
+    } else {
+      setAmountWarning('');
+    }
+  }, [amount, numOrders, solToUsdc]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Reset warnings
+    setOrderWarning('');
+    setAmountWarning('');
+
+    // Check number of orders
+    if (numOrders < 2) {
+      setOrderWarning('Number of orders cannot be less than 2.');
+      return;
+    }
+
+    // Check order value
+    const orderValue = amount * solToUsdc * numOrders;
+    if (orderValue < 100) {
+      setAmountWarning('Order value per cycle must be at least $100.');
+      return;
+    }
+
     try {
       const res = await axios.post(`${API_BASE_URL}/api/dca-order`, {
         fromToken,
@@ -163,6 +201,7 @@ const DCA = () => {
                 setShowDropdown={setShowFromDropdown}
                 style={{ width: '200px' }}
               />
+              {amountWarning && <p className="warning">{amountWarning}</p>}
               <input
                 type="number"
                 id="amount"
@@ -216,6 +255,7 @@ const DCA = () => {
           <div className="form-group">
             <label htmlFor="num-orders">Over</label>
             <div className="inline-fields">
+            {orderWarning && <p className="warning">{orderWarning}</p>}
               <input
                 type="number"
                 id="num-orders"

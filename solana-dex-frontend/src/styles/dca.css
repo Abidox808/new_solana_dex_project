@@ -116,3 +116,9 @@ body.light input[type="number"] {
   /* color: black;  */
   border: 1px solid #cccccc; /* Lighter border for better visibility */
 }
+
+.warning {
+  color: red;
+  font-weight: bold;
+  margin-top: 5px;
+}
