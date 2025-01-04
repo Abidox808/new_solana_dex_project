@@ -164,15 +164,18 @@ const DCA = () => {
       console.log("Total what you wanna sell on lamport", amountBigInt)
       console.log("how much you will sell On each Day", inAmountPerCycle)
       console.log("Bigint(frequensy)", BigInt(frequency))
-  
+      
+      const inputMint = new PublicKey(res.data.orderResult.inputMint);
+      const outputMint = new PublicKey(res.data.orderResult.outputMint);
+
       const params = {
         payer: wallet.publicKey,
         user: wallet.publicKey,
         inAmount: inAmount,
         inAmountPerCycle: inAmountPerCycle,
         cycleSecondsApart: BigInt(frequency),
-        inputMint: res.data.orderResult.inputMint,
-        outputMint: res.data.orderResult.outputMint,
+        inputMint: inputMint,
+        outputMint: outputMint,
         minOutAmountPerCycle: null,
         maxOutAmountPerCycle: null,
         startAt: null,
