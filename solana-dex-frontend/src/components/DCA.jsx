@@ -153,7 +153,7 @@ const DCA = () => {
       const amountNumber = parseFloat(amount);
       const amountBigInt = BigInt(Math.round(amountNumber * (10 ** inputDecimal)));
       const inAmount = amountBigInt;
-      const inAmountPerCycle = amountBigInt / numOrdersNumber;
+      const inAmountPerCycle = amountBigInt / BigInt(numOrdersNumber);
       console.log("Total what you wanna sell on sol", amountNumber)
       console.log("Total what you wanna sell on lamport", amountBigInt)
       console.log("how much you will sell On each Day", inAmountPerCycle)
