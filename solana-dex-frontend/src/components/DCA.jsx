@@ -151,10 +151,13 @@ const DCA = () => {
       // Ensure amount is parsed correctly and scaled with decimals
       const inputDecimal = res.data.orderResult.inputDecimal;
       const amountNumber = parseFloat(amount);
-      const decimalFactor = 10n ** BigInt(inputDecimal);
       const amountBigInt = BigInt(Math.round(amountNumber * (10 ** inputDecimal)));
-      const inAmount = BigInt(numOrders) * amountBigInt;
-      const inAmountPerCycle = amountBigInt;
+      const inAmount = amountBigInt;
+      const inAmountPerCycle = amountBigInt / numOrdersNumber;
+      console.log("Total what you wanna sell on sol", amountNumber)
+      console.log("Total what you wanna sell on lamport", amountBigInt)
+      console.log("how much you will sell On each Day", inAmountPerCycle)
+      console.log("Bigint(frequensy)", BigInt(frequency))
   
       const params = {
         payer: wallet.publicKey,
