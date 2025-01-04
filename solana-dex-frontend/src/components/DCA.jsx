@@ -23,6 +23,7 @@ const DCA = () => {
   const wallet = useWallet();
   const [inputMintToken, setInputMintToken] = useState('');
   const [outputMintToken, setOutputMintToken] = useState('');
+  const [inputTokenPrice, setInputTokenPrice] = useState('');
   const [iframeSrc, setIframeSrc] = useState('https://birdeye.so/tv-widget/So11111111111111111111111111111111111111112/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v?chain=solana&viewMode=base%2Fquote&chartInterval=1D&chartType=CANDLE&chartTimezone=America%2FLos_Angeles&chartLeftToolbar=show&theme=dark');
 
   const [orderWarning, setOrderWarning] = useState('');
