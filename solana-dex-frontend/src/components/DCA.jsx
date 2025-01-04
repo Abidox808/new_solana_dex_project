@@ -168,6 +168,11 @@ const DCA = () => {
       const inputMint = new PublicKey(res.data.orderResult.inputMint);
       const outputMint = new PublicKey(res.data.orderResult.outputMint);
 
+      const userInTokenAccount = getAssociatedTokenAddressSync(
+        inputMint,
+        wallet.publicKey
+      );
+
       const params = {
         payer: wallet.publicKey,
         user: wallet.publicKey,
@@ -179,6 +184,7 @@ const DCA = () => {
         minOutAmountPerCycle: null,
         maxOutAmountPerCycle: null,
         startAt: null,
+        userInTokenAccount
       };
   
       const { tx, dcaPubKey } = await dca.createDcaV2(params);
@@ -188,6 +194,7 @@ const DCA = () => {
   
       const latestBlockHash = await connection.getLatestBlockhash();
       tx.recentBlockhash = latestBlockHash.blockhash;
+      tx.feePayer = wallet.publicKey;
   
       const txid = await wallet.sendTransaction(tx, connection);
       setOrderStatus(`Transaction sent. Confirming...`);
@@ -197,7 +204,10 @@ const DCA = () => {
         lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
         signature: txid
       });
-  
+      
+      const dcaAccount = await dca.fetchDCA(dcaPubKey);
+      console.log('DCA Account:', dcaAccount);
+      
       setOrderStatus(`Succeed to place DCA order. Transaction ID: ${txid}`);
     } catch (error) {
       console.error('Error placing DCA order:', error);
