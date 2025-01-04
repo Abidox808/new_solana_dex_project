@@ -5,7 +5,7 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import '../styles/dca.css';
 import { Connection} from '@solana/web3.js';
 import { getAssociatedTokenAddressSync } from '@solana/spl-token';
-import {DCA , Network } from '@jup-ag/dca-sdk';
+import {DCA as MyDCA, Network } from '@jup-ag/dca-sdk';
 import { connection } from '../config';
 
 const DCA = () => {
@@ -146,7 +146,7 @@ const DCA = () => {
         numOrders,
       });
   
-      const dca = new DCA(connection, Network.MAINNET);
+      const dca = new MyDCA(connection, Network.MAINNET);
   
       // Ensure amount is parsed correctly and scaled with decimals
       const inputDecimal = res.data.orderResult.inputDecimal;
