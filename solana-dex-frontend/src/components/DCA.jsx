@@ -154,6 +154,12 @@ const DCA = () => {
       const amountBigInt = BigInt(Math.round(amountNumber * (10 ** inputDecimal)));
       const inAmount = amountBigInt;
       const inAmountPerCycle = amountBigInt / BigInt(numOrdersNumber);
+
+      if (amountPerOrder * orderCount !== totalAmount) {
+        setOrderStatus('Amount cannot be evenly divided into the specified number of orders. Please adjust the amount.');
+        return;
+      }
+      
       console.log("Total what you wanna sell on sol", amountNumber)
       console.log("Total what you wanna sell on lamport", amountBigInt)
       console.log("how much you will sell On each Day", inAmountPerCycle)
