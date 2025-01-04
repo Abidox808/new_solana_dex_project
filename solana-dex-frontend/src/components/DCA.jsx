@@ -83,6 +83,7 @@ const DCA = () => {
       const dca = new MyDCA(connection, Network.MAINNET);
   
       const params = {
+        application_idx: Date.now() / 1000 | 0,
         payer: wallet.publicKey,
         user: wallet.publicKey,
         inAmount: numOrders * amount * Math.pow(10, res.data.orderResult.inputDecimal),
@@ -96,7 +97,10 @@ const DCA = () => {
       };
   
       const { tx } = await dca.createDcaV2(params);
-  
+      
+      console.log('Params:', params);
+      console.log('Transaction:', tx);
+
       const latestBlockHash = await connection.getLatestBlockhash();
       tx.recentBlockhash = latestBlockHash.blockhash;
   
