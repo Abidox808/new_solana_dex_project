@@ -203,19 +203,14 @@ app.post('/api/limit-order', async (req, res) => {
 
 async function placeDCAOrder(fromToken, toToken) {
   try {
-    // Simulate the DCA order placement for demonstration purposes
-    const inputMintTokenData =await getMintAddress(fromToken);
-    const inputMint = inputMintTokenData.address;
-    const inputDecimal = inputMintTokenData.decimal;
-    const outputMintTokenData =await getMintAddress(toToken);
-    const outputMint = outputMintTokenData.address;
-    const outputDecimal = outputMintTokenData.decimal;
+    const fromTokenData = await fetchMintAddressFromJupiter(fromToken);
+    const toTokenData = await fetchMintAddressFromJupiter(toToken);
 
     return {
-      inputMint:inputMint,
-      outputMint:outputMint,
-      inputDecimal:inputDecimal,
-      outputDecimal:outputDecimal
+      inputMint: fromTokenData.address,
+      inputDecimal: fromTokenData.decimal,
+      outputMint: toTokenData.address,
+      outputDecimal: toTokenData.decimal,
     };
   } catch (error) {
     console.error('Error in placeDCAOrder:', error);
@@ -225,14 +220,17 @@ async function placeDCAOrder(fromToken, toToken) {
 
 app.post('/api/dca-order', async (req, res) => {
   try {
-    const { fromToken, toToken, amount, frequency, interval, numOrders } = req.body;
+    const { fromToken, toToken } = req.body;
 
-    const orderResult = await placeDCAOrder(fromToken, toToken);
-    console.log('Order Result:',orderResult);
-    res.json({ message: 'DCA order placed successfully', orderResult });
+    const orderData = await placeDCAOrder(fromToken, toToken);
+
+    res.json({
+      message: 'DCA order data fetched successfully',
+      orderResult: orderData,
+    });
   } catch (error) {
-    ////console.error('Error placing DCA order:', error);
-    res.status(500).json({ error: 'Failed to place DCA order', details: error.message });
+    console.error('Error fetching DCA order data:', error);
+    res.status(500).json({ error: 'Failed to fetch DCA order data', details: error.message });
   }
 });
 

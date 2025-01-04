@@ -4,6 +4,7 @@ import Dropdown from './Dropdown';
 import { useWallet } from '@solana/wallet-adapter-react';
 import '../styles/dca.css';
 import { Connection} from '@solana/web3.js';
+import { getAssociatedTokenAddressSync } from '@solana/spl-token';
 import {DCA as MyDCA, Network } from '@jup-ag/dca-sdk';
 import { connection } from '../config';
 
@@ -71,12 +72,16 @@ const DCA = () => {
     try {
       const res = await axios.post(`${API_BASE_URL}/api/dca-order`, {
         fromToken,
-        toToken
+        toToken,
+        publicKey: wallet.publicKey.toString(),
+        amount,
+        frequency,
+        interval,
+        numOrders,
       });
-      setOrderStatus('DCA ordering...!');
-
+  
       const dca = new MyDCA(connection, Network.MAINNET);
-      console.log('WalletPubKey', wallet.publicKey);
+  
       const params = {
         payer: wallet.publicKey,
         user: wallet.publicKey,
@@ -89,20 +94,22 @@ const DCA = () => {
         maxOutAmountPerCycle: null,
         startAt: null,
       };
-      console.log(params);
+  
       const { tx } = await dca.createDcaV2(params);
-      console.log(tx);
+  
       const latestBlockHash = await connection.getLatestBlockhash();
       tx.recentBlockhash = latestBlockHash.blockhash;
+  
       const txid = await wallet.sendTransaction(tx, connection);
       setOrderStatus(`Transaction sent. Confirming...`);
+  
       await connection.confirmTransaction({
         blockhash: latestBlockHash.blockhash,
         lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
         signature: txid
       });
+  
       setOrderStatus(`Succeed to place DCA order. Transaction ID: ${txid}`);
-
     } catch (error) {
       console.error('Error placing DCA order:', error);
       setOrderStatus('Failed to place DCA order. Please try again.');
