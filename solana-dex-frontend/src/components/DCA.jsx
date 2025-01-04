@@ -82,13 +82,20 @@ const DCA = () => {
   
       const dca = new MyDCA(connection, Network.MAINNET);
   
+      // Ensure amount is parsed correctly and scaled with decimals
+      const inputDecimal = res.data.orderResult.inputDecimal;
+      const amountNumber = parseFloat(amount);
+      const decimalFactor = 10n ** BigInt(inputDecimal);
+      const amountBigInt = BigInt(Math.round(amountNumber * (10 ** inputDecimal)));
+      const inAmount = BigInt(numOrders) * amountBigInt;
+      const inAmountPerCycle = amountBigInt;
+  
       const params = {
-        application_idx: Date.now() / 1000 | 0,
         payer: wallet.publicKey,
         user: wallet.publicKey,
-        inAmount: numOrders * amount * Math.pow(10, res.data.orderResult.inputDecimal),
-        inAmountPerCycle: amount * Math.pow(10, res.data.orderResult.inputDecimal),
-        cycleSecondsApart: parseInt(frequency),
+        inAmount: inAmount,
+        inAmountPerCycle: inAmountPerCycle,
+        cycleSecondsApart: BigInt(frequency),
         inputMint: res.data.orderResult.inputMint,
         outputMint: res.data.orderResult.outputMint,
         minOutAmountPerCycle: null,
@@ -96,11 +103,11 @@ const DCA = () => {
         startAt: null,
       };
   
-      const { tx } = await dca.createDcaV2(params);
-      
+      const { tx, dcaPubKey } = await dca.createDcaV2(params);
+  
       console.log('Params:', params);
       console.log('Transaction:', tx);
-
+  
       const latestBlockHash = await connection.getLatestBlockhash();
       tx.recentBlockhash = latestBlockHash.blockhash;
   
