@@ -190,6 +190,8 @@ const DCA = () => {
       <div className="dca-page-chart">
         {orderStatus && <p>{orderStatus}</p>}
         <form onSubmit={handleSubmit}>
+        {orderWarning && <p className="warning">{orderWarning}</p>}
+        {amountWarning && <p className="warning">{amountWarning}</p>}
           <div className="form-group">
             <label htmlFor="from-token">I Want To Allocate</label>
             <div className="inline-fields">
@@ -201,7 +203,6 @@ const DCA = () => {
                 setShowDropdown={setShowFromDropdown}
                 style={{ width: '200px' }}
               />
-              {amountWarning && <p className="warning">{amountWarning}</p>}
               <input
                 type="number"
                 id="amount"
@@ -255,7 +256,6 @@ const DCA = () => {
           <div className="form-group">
             <label htmlFor="num-orders">Over</label>
             <div className="inline-fields">
-            {orderWarning && <p className="warning">{orderWarning}</p>}
               <input
                 type="number"
                 id="num-orders"
