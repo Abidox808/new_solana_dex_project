@@ -12,7 +12,7 @@ const DCA = () => {
   const [tokens, setTokens] = useState([]);
   const [fromToken, setFromToken] = useState('SOL');
   const [toToken, setToToken] = useState('USDC');
-  const [amount, setAmount] = useState('');
+  const [amount, setAmount] = useState(0);
   const [frequency, setFrequency] = useState('60');
   const [interval, setInterval] = useState(1);
   const [numOrders, setNumOrders] = useState(1);
@@ -79,11 +79,14 @@ const DCA = () => {
   }, [numOrders]);
   
   useEffect(() => {
-    const orderValue = amount * solToUsdc * numOrders;
-    if (orderValue < 100) {
-      setAmountWarning('Order value per cycle must be at least $100.');
-    } else {
-      setAmountWarning('');
+    if (solToUsdc !== null && amount !== '' && numOrders !== '') {
+      const orderValue = parseFloat(amount) * solToUsdc * numOrders;
+      console.log('orderValue:', orderValue, 'amount:', amount, 'solToUsdc:', solToUsdc, 'numOrders:', numOrders);
+      if (orderValue < 100) {
+        setAmountWarning('Order value per cycle must be at least $100.');
+      } else {
+        setAmountWarning('');
+      }
     }
   }, [amount, numOrders, solToUsdc]);
 
@@ -100,12 +103,6 @@ const DCA = () => {
       return;
     }
 
-    // Check order value
-    const orderValue = amount * solToUsdc * numOrders;
-    if (orderValue < 100) {
-      setAmountWarning('Order value per cycle must be at least $100.');
-      return;
-    }
 
     try {
       const res = await axios.post(`${API_BASE_URL}/api/dca-order`, {
