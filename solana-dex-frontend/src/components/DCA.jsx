@@ -158,8 +158,10 @@ const DCA = () => {
       // Calculate amounts using BN instead of BigInt
       const inputDecimal = res.data.orderResult.inputDecimal;
       const totalAmount = parseFloat(amount);
+      // Calculate with proper decimals handling
       const amountPerCycleRaw = Math.floor((totalAmount / numOrders) * Math.pow(10, inputDecimal));
-      const totalAmountRaw = Math.floor(totalAmount * Math.pow(10, inputDecimal));
+      const totalAmountRaw = Math.ceil(totalAmount * Math.pow(10, inputDecimal));
+
       const amountPerCycle = new BN(amountPerCycleRaw.toString());
       const totalAmountInSmallestUnit = new BN(totalAmountRaw.toString());
 
