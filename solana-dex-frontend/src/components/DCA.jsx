@@ -232,7 +232,6 @@ const DCA = () => {
     console.log('Total amount:', totalAmountInSmallestUnit.toString());
 
     const params = {
-      accounts,
       applicationIdx: timestamp.toNumber(),
       inAmount: totalAmountInSmallestUnit,
       inAmountPerCycle: amountPerCycle,
