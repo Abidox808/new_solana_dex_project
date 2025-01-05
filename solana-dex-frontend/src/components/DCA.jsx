@@ -174,18 +174,20 @@ const DCA = () => {
         wallet.publicKey
       );
 
+      const USDC = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
+      const SOL = new PublicKey('So11111111111111111111111111111111111111112');
+
       const params = {
         payer: wallet.publicKey,
         user: wallet.publicKey,
-        inAmount: totalAmountInSmallestUnit,
-        inAmountPerCycle: amountPerCycle,
-        cycleSecondsApart: BigInt(parseInt(frequency) * parseInt(interval)),
-        inputMint: new PublicKey(res.data.orderResult.inputMint),
-        outputMint: new PublicKey(res.data.orderResult.outputMint),
+        inAmount: BigInt(10006000000),
+        inAmountPerCycle: BigInt(5003000000),
+        cycleSecondsApart: BigInt(86400),
+        inputMint: new PublicKey(USDC),
+        outputMint: new PublicKey(SOL),
         minOutAmountPerCycle: null,
         maxOutAmountPerCycle: null,
         startAt: null,
-        userInTokenAccount,
       };
 
       const { tx, dcaPubKey } = await dca.createDcaV2(params);
