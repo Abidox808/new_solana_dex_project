@@ -196,8 +196,8 @@ const DCA = () => {
     const params = {
       payer: wallet.publicKey,
       user: wallet.publicKey,
-      inAmount: BigInt(101000000),
-      inAmountPerCycle: BigInt(50500000),
+      inAmount: BigInt(100500000),
+      inAmountPerCycle: BigInt(50250000),
       cycleSecondsApart: BigInt(86400),
       inputMint: new PublicKey(res.data.orderResult.inputMint),
       outputMint: new PublicKey(res.data.orderResult.outputMint),
