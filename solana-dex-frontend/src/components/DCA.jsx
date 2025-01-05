@@ -3,7 +3,7 @@ import axios from 'axios';
 import Dropdown from './Dropdown';
 import { useWallet } from '@solana/wallet-adapter-react';
 import '../styles/dca.css';
-import { Connection, PublicKey, sendAndConfirmTransaction  } from '@solana/web3.js';
+import { Connection, PublicKey} from '@solana/web3.js';
 import { getAssociatedTokenAddressSync } from '@solana/spl-token';
 import {DCA as MyDCA, Network } from '@jup-ag/dca-sdk';
 import { connection } from '../config';
@@ -170,7 +170,7 @@ const DCA = () => {
       });
 
       const userInTokenAccount = getAssociatedTokenAddressSync(
-        new PublicKey(res.data.orderResult.inputMint),
+        new PublicKey('J7fMkJVwqHqPWHu6Fbcr9WkZMVY9EKDexHTgtQPgeYXB'),
         wallet.publicKey
       );
 
@@ -187,6 +187,8 @@ const DCA = () => {
         startAt: null,
         userInTokenAccount,
       };
+
+      console.log('params sent', params);
 
       const { tx, dcaPubKey } = await dca.createDcaV2(params);
       const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
