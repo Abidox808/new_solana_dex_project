@@ -159,7 +159,7 @@ const DCA = () => {
       const inputDecimal = res.data.orderResult.inputDecimal;
       const totalAmount = parseFloat(amount);
       const totalAmountInSmallestUnit = new BN(
-        Math.floor(totalAmount * Math.pow(10, inputDecimal)).toString()
+        Math.floor(totalAmount * Math.pow(10, inputDecimal))
       );
       const amountPerCycle = totalAmountInSmallestUnit.div(new BN(numOrders));
 
