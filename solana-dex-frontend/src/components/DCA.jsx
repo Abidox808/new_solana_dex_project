@@ -156,67 +156,67 @@ const DCA = () => {
       const dca = new MyDCA(connection, Network.MAINNET);
     
       // Calculate amounts
-      const inputDecimal = res.data.orderResult.inputDecimal;
-      const totalAmount = parseFloat(amount);
-      const totalAmountInSmallestUnit = BigInt(Math.floor(totalAmount * (10 ** inputDecimal)));
-      const amountPerCycle = totalAmountInSmallestUnit / BigInt(numOrders);
+    const inputDecimal = res.data.orderResult.inputDecimal;
+    const totalAmount = parseFloat(amount);
+    const totalAmountInSmallestUnit = BigInt(Math.floor(totalAmount * (10 ** inputDecimal)));
+    const amountPerCycle = totalAmountInSmallestUnit / BigInt(numOrders);
 
-      // Log for debugging
-      console.log('Creating DCA with:', {
-        amount: totalAmount,
-        amountInSmallestUnit: totalAmountInSmallestUnit.toString(),
-        amountPerCycle: amountPerCycle.toString(),
-        inputMint: res.data.orderResult.inputMint,
-        outputMint: res.data.orderResult.outputMint
-      });
+    // Derive DCA PDA
+    const applicationIdx = Math.floor(Date.now() / 1000);
+    const inputMint = new PublicKey(res.data.orderResult.inputMint);
+    const outputMint = new PublicKey(res.data.orderResult.outputMint);
+    const [dcaPubKey] = await PublicKey.findProgramAddressSync(
+      [
+        Buffer.from("dca"),
+        wallet.publicKey.toBuffer(),
+        inputMint.toBuffer(),
+        outputMint.toBuffer(),
+        new BN(applicationIdx).toArrayLike(Buffer, 'le', 8),
+      ],
+      new PublicKey('DCA265Vj8a9CEuX1eb1LWRnDT7uK6q1xMipnNyatn23M')
+    );
 
-      const userInTokenAccount = getAssociatedTokenAddressSync(
-        new PublicKey('res.data.orderResult.inputMint'),
-        wallet.publicKey
-      );
+    const userInTokenAccount = getAssociatedTokenAddressSync(
+      inputMint,
+      wallet.publicKey
+    );
 
-      // Generate DCA PDA
-      const timestamp = new BN(parseInt((Date.now() / 1000).toString()));
-      const [dcaPDA] = await PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("dca"),
-          wallet.publicKey.toBuffer(),
-          new PublicKey(res.data.orderResult.inputMint).toBuffer(),
-          new PublicKey(res.data.orderResult.outputMint).toBuffer(),
-          timestamp.toArrayLike(Buffer, "le", 8),
-        ],
-        new PublicKey("DCA265Vj8a9CEuX1eb1LWRnDT7uK6q1xMipnNyatn23M")
-      );
+    // Ensure correct data types
+    const inAmount = totalAmountInSmallestUnit.toNumber();
+    const inAmountPerCycle = amountPerCycle.toNumber();
+    const cycleFrequency = parseInt(frequency) * parseInt(interval);
 
-      const params = {
-        payer: wallet.publicKey,
-        user: wallet.publicKey,
-        inAmount: totalAmountInSmallestUnit,
-        inAmountPerCycle: amountPerCycle,
-        cycleSecondsApart: BigInt(parseInt(frequency) * parseInt(interval)),
-        inputMint: new PublicKey(res.data.orderResult.inputMint),
-        outputMint: new PublicKey(res.data.orderResult.outputMint),
-        minOutAmountPerCycle: null,
-        maxOutAmountPerCycle: null,
-        startAt: null,
-        applicationIdx: timestamp.toNumber(), // Add this line
-      };
+    // Construct params
+    const params = {
+      payer: wallet.publicKey,
+      user: wallet.publicKey,
+      dca: dcaPubKey,
+      inAmount: inAmount,
+      inAmountPerCycle: inAmountPerCycle,
+      cycleFrequency: cycleFrequency,
+      minOutAmount: null,
+      maxOutAmount: null,
+      startAt: null,
+      inputMint: inputMint,
+      outputMint: outputMint,
+      userAta: userInTokenAccount,
+      inAta: getAssociatedTokenAddressSync(inputMint, dcaPubKey, true),
+      outAta: getAssociatedTokenAddressSync(outputMint, dcaPubKey, true),
+      systemProgram: SystemProgram.programId,
+      tokenProgram: TOKEN_PROGRAM_ID,
+      associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+      eventAuthority: new PublicKey('Cspp27eGUDMXxPEdhmEXFVRn6Lt1L7xJyALF3nmnWoBj'),
+      program: new PublicKey('DCA265Vj8a9CEuX1eb1LWRnDT7uK6q1xMipnNyatn23M'),
+    };
 
-      console.log('params sent', params);
+    // Create DCA
+    const { tx } = await dca.createDcaV2(params);
+    const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+    tx.recentBlockhash = blockhash;
+    tx.feePayer = wallet.publicKey;
 
-      const { tx, dcaPubKey } = await dca.createDcaV2(params);
-      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
-      tx.recentBlockhash = blockhash;
-      tx.feePayer = wallet.publicKey;
-      
-      console.log('params sent', params);
-
-      console.log('Transaction:', tx);
-      console.log('Wallet:', wallet);
-      const txid = await wallet.sendTransaction(tx, connection);
-      console.log('Transaction sent. TXID:', txid);
-
-      setOrderStatus(`Transaction sent. Confirming...`);
+    const txid = await wallet.sendTransaction(tx, connection);
+    setOrderStatus(`Transaction sent. Confirming...`);
 
       await connection.confirmTransaction({
         signature: txid,
