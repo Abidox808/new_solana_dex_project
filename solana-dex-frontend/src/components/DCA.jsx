@@ -169,15 +169,10 @@ const DCA = () => {
         outputMint: res.data.orderResult.outputMint
       });
 
-      const userInTokenAccount = getAssociatedTokenAddressSync(
-        new PublicKey('J7fMkJVwqHqPWHu6Fbcr9WkZMVY9EKDexHTgtQPgeYXB'),
-        wallet.publicKey
-      );
-
       const params = {
         payer: wallet.publicKey,
         user: wallet.publicKey,
-        userInTokenAccount,
+        userInTokenAccount: new PublicKey('J7fMkJVwqHqPWHu6Fbcr9WkZMVY9EKDexHTgtQPgeYXB'),
         inAmount: totalAmountInSmallestUnit,
         inAmountPerCycle: amountPerCycle,
         cycleSecondsApart: BigInt(parseInt(frequency) * parseInt(interval)),
