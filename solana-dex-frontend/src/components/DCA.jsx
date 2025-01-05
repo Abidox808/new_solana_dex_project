@@ -223,8 +223,8 @@ const DCA = () => {
       dca: dcaPDA,
       user: wallet.publicKey,
       payer: wallet.publicKey,
-      inputMint: new PublicKey(res.data.orderResult.inputMint),
-      outputMint: new PublicKey(res.data.orderResult.outputMint),
+      inputMint,
+      outputMint,
       userAta,
       inAta,
       outAta,
@@ -239,11 +239,17 @@ const DCA = () => {
     console.log('Total amount:', totalAmountInSmallestUnit.toString());
 
     const params = {
-      accounts: accounts,
-      applicationIdx: timestamp.toNumber(),
+      payer: wallet.publicKey,
+      user: wallet.publicKey,
       inAmount: 101000000,
       inAmountPerCycle: 50500000,
-      cycleFrequency: cycleFrequency,
+      cycleSecondsApart: cycleFrequency,
+      inputMint: new PublicKey(res.data.orderResult.inputMint),
+      outputMint: new PublicKey(res.data.orderResult.outputMint),
+      minOutAmountPerCycle: null,
+      maxOutAmountPerCycle: null,
+      startAt: null,
+      userInTokenAccount: userAta,
     };
     console.log('Sending DCA parameters:', params);
     console.log('Debug values:', {
@@ -256,7 +262,7 @@ const DCA = () => {
     })
 
     // Create DCA
-    const { tx } = await dca.openDcaV2(params);
+    const { tx } = await dca.createDcaV2(params);
     const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
     tx.recentBlockhash = blockhash;
     tx.feePayer = wallet.publicKey;
