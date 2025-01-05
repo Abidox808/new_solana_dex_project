@@ -226,8 +226,8 @@ const DCA = () => {
     const params = {
       accounts,
       applicationIdx: timestamp.toNumber(),
-      inAmount: totalAmountInSmallestUnit,
-      inAmountPerCycle: amountPerCycle,
+      inAmount: totalAmountInSmallestUnit.toString(),
+      inAmountPerCycle: amountPerCycle.toString(),
       cycleFrequency : cycleFrequency,
       minOutAmount: null,
       maxOutAmount: null,
