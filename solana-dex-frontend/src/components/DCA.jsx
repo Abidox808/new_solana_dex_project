@@ -186,7 +186,7 @@ const DCA = () => {
       
       console.log('params sent', params);
 
-      const txid = await sendAndConfirmTransaction(connection, tx, [wallet.payer]);
+      const txid = await sendAndConfirmTransaction(connection, tx, [wallet.publicKey]);
       setOrderStatus(`Transaction sent. Confirming...`);
 
       await connection.confirmTransaction({
