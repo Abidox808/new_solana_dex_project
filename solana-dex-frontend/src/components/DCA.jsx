@@ -161,78 +161,74 @@ const DCA = () => {
     const totalAmountInSmallestUnit = BigInt(Math.floor(totalAmount * (10 ** inputDecimal)));
     const amountPerCycle = totalAmountInSmallestUnit / BigInt(numOrders);
 
-    // Derive DCA PDA
-    const applicationIdx = Math.floor(Date.now() / 1000);
+    // Create PublicKeys for input and output mints
     const inputMint = new PublicKey(res.data.orderResult.inputMint);
     const outputMint = new PublicKey(res.data.orderResult.outputMint);
-    const [dcaPubKey] = await PublicKey.findProgramAddressSync(
+    
+    // Generate timestamp for PDA and applicationIdx
+    const timestamp = new BN(Math.floor(Date.now() / 1000));
+
+    // Generate DCA PDA
+    const [dcaPDA] = PublicKey.findProgramAddressSync(
       [
         Buffer.from("dca"),
         wallet.publicKey.toBuffer(),
         inputMint.toBuffer(),
         outputMint.toBuffer(),
-        new BN(applicationIdx).toArrayLike(Buffer, 'le', 8),
+        timestamp.toArrayLike(Buffer, "le", 8),
       ],
-      new PublicKey('DCA265Vj8a9CEuX1eb1LWRnDT7uK6q1xMipnNyatn23M')
+      new PublicKey("DCA265Vj8a9CEuX1eb1LWRnDT7uK6q1xMipnNyatn23M")
     );
 
-    const userInTokenAccount = getAssociatedTokenAddressSync(
+    // Get user's input token ATA
+    const userAta = getAssociatedTokenAddressSync(
       inputMint,
       wallet.publicKey
     );
 
-    // Convert to numbers (if required by the SDK)
-    const inAmount = Number(totalAmountInSmallestUnit);
-    const inAmountPerCycle = Number(amountPerCycle);
-    const cycleFrequency = parseInt(frequency) * parseInt(interval);
+    // Get DCA's associated token accounts
+    const inAta = getAssociatedTokenAddressSync(
+      inputMint,
+      dcaPDA,
+      true // allowOwnerOffCurve = true for PDAs
+    );
 
-    // Ensure inAmount > inAmountPerCycle
-    if (totalAmountInSmallestUnit <= amountPerCycle) {
-      console.error('inAmount must be greater than inAmountPerCycle');
-      setOrderStatus('Error: Total amount must be greater than the amount per cycle.');
-      return;
-    }
+    const outAta = getAssociatedTokenAddressSync(
+      outputMint,
+      dcaPDA,
+      true // allowOwnerOffCurve = true for PDAs
+    );
 
-    // Log for debugging
-    console.log('Creating DCA with:', {
-      totalAmount,
-      totalAmountInSmallestUnit: totalAmountInSmallestUnit.toString(),
-      amountPerCycle: amountPerCycle.toString(),
-      inAmount,
-      inAmountPerCycle,
-      numOrders,
-    });
-
-    // Construct params
-    const params = {
-      payer: wallet.publicKey,
+    // Required accounts structure from documentation
+    const accounts = {
+      dca: dcaPDA,
       user: wallet.publicKey,
-      dca: dcaPubKey,
-      inAmount: inAmount,
-      inAmountPerCycle: inAmountPerCycle,
-      cycleFrequency: cycleFrequency,
-      minOutAmount: null,
-      maxOutAmount: null,
-      startAt: null,
-      inputMint: inputMint,
-      outputMint: outputMint,
-      userAta: userInTokenAccount,
-      inAta: getAssociatedTokenAddressSync(inputMint, dcaPubKey, true),
-      outAta: getAssociatedTokenAddressSync(outputMint, dcaPubKey, true),
-      systemProgram: SystemProgram.programId,
-      tokenProgram: TOKEN_PROGRAM_ID,
-      associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-      eventAuthority: new PublicKey('Cspp27eGUDMXxPEdhmEXFVRn6Lt1L7xJyALF3nmnWoBj'),
-      program: new PublicKey('DCA265Vj8a9CEuX1eb1LWRnDT7uK6q1xMipnNyatn23M'),
+      payer: wallet.publicKey,
+      inputMint,
+      outputMint,
+      userAta,
+      inAta,
+      outAta,
+      systemProgram: new PublicKey("11111111111111111111111111111111"),
+      tokenProgram: new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
+      associatedTokenProgram: new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"),
+      eventAuthority: new PublicKey("Cspp27eGUDMXxPEdhmEXFVRn6Lt1L7xJyALF3nmnWoBj"),
+      program: new PublicKey("DCA265Vj8a9CEuX1eb1LWRnDT7uK6q1xMipnNyatn23M")
     };
 
-    console.log('paramas sent :', params)
-    // Check for undefined values
-    for (const key in params) {
-      if (params[key] === undefined) {
-        console.error(`Parameter '${key}' is undefined.`);
-      }
-    }
+    const params = {
+      accounts,
+      applicationIdx: timestamp.toNumber(),
+      inAmount: totalAmountInSmallestUnit,
+      inAmountPerCycle: amountPerCycle,
+      cycleSecondsApart: BigInt(parseInt(frequency) * parseInt(interval)),
+      minOutAmount: null,
+      maxOutAmount: null,
+      startAt: null
+    };
+
+    console.log('Sending DCA parameters:', params);
+
     // Create DCA
     const { tx } = await dca.createDcaV2(params);
     const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
