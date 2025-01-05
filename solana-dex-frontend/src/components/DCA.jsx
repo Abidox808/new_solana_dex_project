@@ -155,6 +155,9 @@ const DCA = () => {
   
       const dca = new MyDCA(connection, Network.MAINNET);
     
+      // Calculate amounts using BN instead of BigInt
+      const inputDecimal = res.data.orderResult.inputDecimal;
+      const totalAmount = parseFloat(amount);
       // Calculate base amounts
       const baseAmountPerCycle = (totalAmount / numOrders);
       const amountPerCycleRaw = Math.floor(baseAmountPerCycle * Math.pow(10, inputDecimal));
