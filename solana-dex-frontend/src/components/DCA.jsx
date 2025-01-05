@@ -209,6 +209,7 @@ const DCA = () => {
       program: new PublicKey('DCA265Vj8a9CEuX1eb1LWRnDT7uK6q1xMipnNyatn23M'),
     };
 
+    console.log('paramas sent :', params)
     // Create DCA
     const { tx } = await dca.createDcaV2(params);
     const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
