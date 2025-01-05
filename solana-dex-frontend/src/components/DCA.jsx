@@ -150,9 +150,9 @@ const DCA = () => {
     
       // Calculate amounts
       const inputDecimal = res.data.orderResult.inputDecimal;
-      const totalAmount = parseFloat(amount);
-      const totalAmountInSmallestUnit = BigInt(Math.floor(totalAmount * (10 ** inputDecimal)));
-      const amountPerCycle = totalAmountInSmallestUnit / BigInt(numOrders);
+      const totalAmount = amount;
+      const totalAmountInSmallestUnit = totalAmount * Math.pow(10, inputDecimal);
+      const amountPerCycle = totalAmountInSmallestUnit / numOrders;
 
       // Log for debugging
       console.log('Creating DCA with:', {
@@ -164,13 +164,13 @@ const DCA = () => {
       });
 
       const params = {
-        payer: wallet.publicKey,
-        user: wallet.publicKey,
+        payer: wallet.publicKey.toString(),
+        user: wallet.publicKey.toString(),
         inAmount: totalAmountInSmallestUnit,
         inAmountPerCycle: amountPerCycle,
-        cycleSecondsApart: BigInt(parseInt(frequency) * parseInt(interval)),
-        inputMint: new PublicKey(res.data.orderResult.inputMint),
-        outputMint: new PublicKey(res.data.orderResult.outputMint),
+        cycleSecondsApart: parseInt(frequency) * parseInt(interval),
+        inputMint: res.data.orderResult.inputMint,
+        outputMint: res.data.orderResult.outputMint,
         minOutAmountPerCycle: null,
         maxOutAmountPerCycle: null,
         startAt: null
