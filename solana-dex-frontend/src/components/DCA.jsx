@@ -4,7 +4,7 @@ import Dropdown from './Dropdown';
 import { useWallet } from '@solana/wallet-adapter-react';
 import '../styles/dca.css';
 import { Connection, PublicKey, SystemProgram } from '@solana/web3.js';
-import { getAssociatedTokenAddressSync } from '@solana/spl-token';
+import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID, getAssociatedTokenAddressSync } from '@solana/spl-token';
 import {DCA as MyDCA, Network } from '@jup-ag/dca-sdk';
 import { connection } from '../config';
 import BN from 'bn.js';
