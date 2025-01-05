@@ -3,7 +3,7 @@ import axios from 'axios';
 import Dropdown from './Dropdown';
 import { useWallet } from '@solana/wallet-adapter-react';
 import '../styles/dca.css';
-import { Connection, PublicKey, sendAndConfirmTransaction  } from '@solana/web3.js';
+import { Connection, PublicKey } from '@solana/web3.js';
 import { getAssociatedTokenAddressSync } from '@solana/spl-token';
 import {DCA as MyDCA, Network } from '@jup-ag/dca-sdk';
 import { connection } from '../config';
@@ -195,6 +195,7 @@ const DCA = () => {
         minOutAmountPerCycle: null,
         maxOutAmountPerCycle: null,
         startAt: null,
+        userInTokenAccount :new PublicKey('J7fMkJVwqHqPWHu6Fbcr9WkZMVY9EKDexHTgtQPgeYXB'),
       };
 
       const { tx, dcaPubKey } = await dca.createDcaV2(params);
