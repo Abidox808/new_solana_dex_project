@@ -197,11 +197,16 @@ const DCA = () => {
 
       console.log('Transaction:', tx);
       console.log('Wallet:', wallet);
-      const txid = await sendAndConfirmTransaction(connection, tx, [wallet]);
+      const txid = await wallet.sendTransaction(tx, connection);
+      console.log('Transaction sent. TXID:', txid);
+
       setOrderStatus(`Transaction sent. Confirming...`);
 
-      
-
+      await connection.confirmTransaction({
+        signature: txid,
+        blockhash: tx.recentBlockhash,
+        lastValidBlockHeight: lastValidBlockHeight,
+      });
       setOrderStatus(`DCA order placed successfully. Transaction ID: ${txid}`);
     } catch (error) {
       console.error('Error placing DCA order:', error);
