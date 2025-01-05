@@ -147,49 +147,68 @@ const DCA = () => {
       });
   
       const dca = new MyDCA(connection, Network.MAINNET);
-    
-      // Calculate amounts
+  
+      // Ensure amount is parsed correctly and scaled with decimals
       const inputDecimal = res.data.orderResult.inputDecimal;
-      const totalAmount = parseFloat(amount);
-      const totalAmountInSmallestUnit = BigInt(Math.floor(totalAmount * (10 ** inputDecimal)));
-      const amountPerCycle = totalAmountInSmallestUnit / BigInt(numOrders);
+      const amountNumber = parseFloat(amount);
+      const amountBigInt = BigInt(Math.round(amountNumber * (10 ** inputDecimal)));
+      const inAmount = amountBigInt;
+      const inAmountPerCycle = amountBigInt / BigInt(numOrdersNumber);
 
-      // Log for debugging
-      console.log('Creating DCA with:', {
-        amount: totalAmount,
-        amountInSmallestUnit: totalAmountInSmallestUnit.toString(),
-        amountPerCycle: amountPerCycle.toString(),
-        inputMint: res.data.orderResult.inputMint,
-        outputMint: res.data.orderResult.outputMint
-      });
+      if (inAmountPerCycle * BigInt(numOrdersNumber) !== amountBigInt) {
+        setOrderStatus('Amount cannot be evenly divided into the specified number of orders. Please adjust the amount.');
+        return;
+      }
+
+      console.log("Total what you wanna sell on sol", amountNumber)
+      console.log("Total what you wanna sell on lamport", amountBigInt)
+      console.log("how much you will sell On each Day", inAmountPerCycle)
+      console.log("Bigint(frequensy)", BigInt(frequency))
+      
+      const inputMint = new PublicKey(res.data.orderResult.inputMint);
+      const outputMint = new PublicKey(res.data.orderResult.outputMint);
+
+      const userInTokenAccount = getAssociatedTokenAddressSync(
+        inputMint,
+        wallet.publicKey
+      );
 
       const params = {
         payer: wallet.publicKey,
         user: wallet.publicKey,
-        inAmount: totalAmountInSmallestUnit,
-        inAmountPerCycle: amountPerCycle,
-        cycleSecondsApart: BigInt(parseInt(frequency) * parseInt(interval)),
-        inputMint: new PublicKey(res.data.orderResult.inputMint),
-        outputMint: new PublicKey(res.data.orderResult.outputMint),
+        inAmount: inAmount,
+        inAmountPerCycle: inAmountPerCycle,
+        cycleSecondsApart: BigInt(frequency),
+        inputMint: inputMint,
+        outputMint: outputMint,
         minOutAmountPerCycle: null,
         maxOutAmountPerCycle: null,
-        startAt: null
+        startAt: null,
+        userInTokenAccount
       };
-
+  
       const { tx, dcaPubKey } = await dca.createDcaV2(params);
-      
-      console.log('DCA account created:', dcaPubKey.toString());
-
+  
+      console.log('Params:', params);
+      console.log('Transaction:', tx);
+  
+      const latestBlockHash = await connection.getLatestBlockhash();
+      tx.recentBlockhash = latestBlockHash.blockhash;
+      tx.feePayer = wallet.publicKey;
+  
       const txid = await wallet.sendTransaction(tx, connection);
       setOrderStatus(`Transaction sent. Confirming...`);
-
+  
       await connection.confirmTransaction({
-        signature: txid,
-        blockhash: tx.recentBlockhash,
-        lastValidBlockHeight: (await connection.getLatestBlockhash()).lastValidBlockHeight
+        blockhash: latestBlockHash.blockhash,
+        lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
+        signature: txid
       });
-
-      setOrderStatus(`DCA order placed successfully. Transaction ID: ${txid}`);
+      
+      const dcaAccount = await dca.fetchDCA(dcaPubKey);
+      console.log('DCA Account:', dcaAccount);
+      
+      setOrderStatus(`Succeed to place DCA order. Transaction ID: ${txid}`);
     } catch (error) {
       console.error('Error placing DCA order:', error);
       setOrderStatus('Failed to place DCA order. Please try again.');
