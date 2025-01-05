@@ -177,15 +177,15 @@ const DCA = () => {
       const params = {
         payer: wallet.publicKey,
         user: wallet.publicKey,
+        userInTokenAccount,
         inAmount: totalAmountInSmallestUnit,
         inAmountPerCycle: amountPerCycle,
         cycleSecondsApart: BigInt(parseInt(frequency) * parseInt(interval)),
         inputMint: new PublicKey(res.data.orderResult.inputMint),
         outputMint: new PublicKey(res.data.orderResult.outputMint),
-        minOutAmountPerCycle: null,
-        maxOutAmountPerCycle: null,
+        minOutAmount: null,
+        maxOutAmount: null,
         startAt: null,
-        userInTokenAccount,
       };
 
       console.log('params sent', params);
