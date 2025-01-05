@@ -3,10 +3,11 @@ import axios from 'axios';
 import Dropdown from './Dropdown';
 import { useWallet } from '@solana/wallet-adapter-react';
 import '../styles/dca.css';
-import { Connection, PublicKey, BN } from '@solana/web3.js';
+import { Connection, PublicKey } from '@solana/web3.js';
 import { getAssociatedTokenAddressSync } from '@solana/spl-token';
 import {DCA as MyDCA, Network } from '@jup-ag/dca-sdk';
 import { connection } from '../config';
+import BN from 'bn.js';
 
 const DCA = () => {
   const [tokens, setTokens] = useState([]);
