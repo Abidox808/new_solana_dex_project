@@ -189,6 +189,9 @@ const DCA = () => {
       };
 
       const { tx, dcaPubKey } = await dca.createDcaV2(params);
+      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+      tx.recentBlockhash = blockhash;
+      tx.feePayer = wallet.publicKey;
       
       console.log('params sent', params);
 
@@ -197,11 +200,7 @@ const DCA = () => {
       const txid = await sendAndConfirmTransaction(connection, tx, [wallet]);
       setOrderStatus(`Transaction sent. Confirming...`);
 
-      await connection.confirmTransaction({
-        signature: txid,
-        blockhash: tx.recentBlockhash,
-        lastValidBlockHeight: (await connection.getLatestBlockhash()).lastValidBlockHeight
-      });
+      
 
       setOrderStatus(`DCA order placed successfully. Transaction ID: ${txid}`);
     } catch (error) {
