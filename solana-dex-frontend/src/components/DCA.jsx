@@ -256,7 +256,7 @@ const DCA = () => {
     })
 
     // Create DCA
-    const { tx } = await dca.createDcaV2(params);
+    const { tx } = await dca.openDcaV2(params);
     const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
     tx.recentBlockhash = blockhash;
     tx.feePayer = wallet.publicKey;
