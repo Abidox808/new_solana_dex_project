@@ -181,10 +181,27 @@ const DCA = () => {
       wallet.publicKey
     );
 
-    // Ensure correct data types
-    const inAmount = new BN(totalAmountInSmallestUnit.toString());
-    const inAmountPerCycle = new BN(amountPerCycle.toString());
+    // Convert to numbers (if required by the SDK)
+    const inAmount = Number(totalAmountInSmallestUnit);
+    const inAmountPerCycle = Number(amountPerCycle);
     const cycleFrequency = parseInt(frequency) * parseInt(interval);
+
+    // Ensure inAmount > inAmountPerCycle
+    if (totalAmountInSmallestUnit <= amountPerCycle) {
+      console.error('inAmount must be greater than inAmountPerCycle');
+      setOrderStatus('Error: Total amount must be greater than the amount per cycle.');
+      return;
+    }
+
+    // Log for debugging
+    console.log('Creating DCA with:', {
+      totalAmount,
+      totalAmountInSmallestUnit: totalAmountInSmallestUnit.toString(),
+      amountPerCycle: amountPerCycle.toString(),
+      inAmount,
+      inAmountPerCycle,
+      numOrders,
+    });
 
     // Construct params
     const params = {
