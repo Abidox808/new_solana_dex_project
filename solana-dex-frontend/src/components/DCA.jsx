@@ -232,18 +232,18 @@ const DCA = () => {
     console.log('Total amount:', totalAmountInSmallestUnit.toString());
 
     const params = {
-      accounts,
-      params: {  // Wrap the parameters in a 'params' key
-        applicationIdx: timestamp.toNumber(),
-        inAmount: totalAmountInSmallestUnit,
-        inAmountPerCycle: amountPerCycle,
-        cycleFrequency: cycleFrequency,
-        minOutAmount: null,
-        maxOutAmount: null,
-        startAt: null
-      }
+      payer: wallet.publicKey,
+      user: wallet.publicKey,
+      inAmount: totalAmountBN,
+      inAmountPerCycle: amountPerCycle,
+      cycleSecondsApart: cycleFrequency,
+      inputMint: new PublicKey(res.data.orderResult.inputMint),
+      outputMint: new PublicKey(res.data.orderResult.outputMint),
+      userInTokenAccount: userAta,
+      minOutAmountPerCycle: null,
+      maxOutAmountPerCycle: null,
+      startAt: null
     };
-
     console.log('Sending DCA parameters:', params);
 
     // Create DCA
