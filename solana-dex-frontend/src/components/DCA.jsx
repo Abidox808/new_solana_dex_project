@@ -227,6 +227,12 @@ const DCA = () => {
     };
 
     console.log('paramas sent :', params)
+    // Check for undefined values
+    for (const key in params) {
+      if (params[key] === undefined) {
+        console.error(`Parameter '${key}' is undefined.`);
+      }
+    }
     // Create DCA
     const { tx } = await dca.createDcaV2(params);
     const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
