@@ -163,6 +163,14 @@ const DCA = () => {
       const amountPerCycle = new BN(amountPerCycleRaw.toString());
       const totalAmountInSmallestUnit = new BN(totalAmountRaw.toString());
 
+      console.log({
+        inputDecimal,
+        amountPerCycleRaw,
+        totalAmountRaw,
+        amountPerCycleBN: amountPerCycle.toString(),
+        totalAmountBN: totalAmountInSmallestUnit.toString()
+      });
+
     // Create PublicKeys for input and output mints
     const inputMint = new PublicKey(res.data.orderResult.inputMint);
     const outputMint = new PublicKey(res.data.orderResult.outputMint);
@@ -226,8 +234,8 @@ const DCA = () => {
     const params = {
       accounts,
       applicationIdx: timestamp.toNumber(),
-      inAmount: totalAmountInSmallestUnit.toString(),
-      inAmountPerCycle: amountPerCycle.toString(),
+      inAmount: totalAmountInSmallestUnit,
+      inAmountPerCycle: amountPerCycle,
       cycleFrequency : cycleFrequency,
       minOutAmount: null,
       maxOutAmount: null,
