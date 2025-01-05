@@ -181,21 +181,6 @@ const DCA = () => {
     // Create PublicKeys for input and output mints
     const inputMint = new PublicKey(res.data.orderResult.inputMint);
     const outputMint = new PublicKey(res.data.orderResult.outputMint);
-    
-    // Generate timestamp for PDA and applicationIdx
-    const timestamp = new BN(Math.floor(Date.now() / 1000));
-
-    // Generate DCA PDA
-    const [dcaPDA] = PublicKey.findProgramAddressSync(
-      [
-        Buffer.from("dca"),
-        wallet.publicKey.toBuffer(),
-        inputMint.toBuffer(),
-        outputMint.toBuffer(),
-        timestamp.toArrayLike(Buffer, "le", 8),
-      ],
-      new PublicKey("DCA265Vj8a9CEuX1eb1LWRnDT7uK6q1xMipnNyatn23M")
-    );
 
     // Get user's input token ATA
     const userAta = getAssociatedTokenAddressSync(
@@ -203,37 +188,7 @@ const DCA = () => {
       wallet.publicKey
     );
 
-    // Get DCA's associated token accounts
-    const inAta = getAssociatedTokenAddressSync(
-      inputMint,
-      dcaPDA,
-      true // allowOwnerOffCurve = true for PDAs
-    );
-
-    const outAta = getAssociatedTokenAddressSync(
-      outputMint,
-      dcaPDA,
-      true // allowOwnerOffCurve = true for PDAs
-    );
-
     const cycleFrequency = new BN(parseInt(frequency) * parseInt(interval));
-
-    // Required accounts structure from documentation
-    const accounts = {
-      dca: dcaPDA,
-      user: wallet.publicKey,
-      payer: wallet.publicKey,
-      inputMint,
-      outputMint,
-      userAta,
-      inAta,
-      outAta,
-      systemProgram: new PublicKey("11111111111111111111111111111111"),
-      tokenProgram: new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
-      associatedTokenProgram: new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"),
-      eventAuthority: new PublicKey("Cspp27eGUDMXxPEdhmEXFVRn6Lt1L7xJyALF3nmnWoBj"),
-      program: new PublicKey("DCA265Vj8a9CEuX1eb1LWRnDT7uK6q1xMipnNyatn23M")
-    };
 
     console.log('Amount per cycle:', amountPerCycle.toString());
     console.log('Total amount:', totalAmountInSmallestUnit.toString());
@@ -241,9 +196,9 @@ const DCA = () => {
     const params = {
       payer: wallet.publicKey,
       user: wallet.publicKey,
-      inAmount: 101000000,
-      inAmountPerCycle: 50500000,
-      cycleSecondsApart: cycleFrequency,
+      inAmount: BigInt(101000000),
+      inAmountPerCycle: BigInt(50500000),
+      cycleSecondsApart: BigInt(parseInt(frequency) * parseInt(interval)),
       inputMint: new PublicKey(res.data.orderResult.inputMint),
       outputMint: new PublicKey(res.data.orderResult.outputMint),
       minOutAmountPerCycle: null,
