@@ -158,10 +158,10 @@ const DCA = () => {
       // Calculate amounts using BN instead of BigInt
       const inputDecimal = res.data.orderResult.inputDecimal;
       const totalAmount = parseFloat(amount);
-      const amountPerCycle = new BN(
-        Math.floor((totalAmount / numOrders) * Math.pow(10, inputDecimal))
-      );
-      const totalAmountInSmallestUnit = amountPerCycle.mul(new BN(numOrders));
+      const amountPerCycleRaw = Math.floor((totalAmount / numOrders) * Math.pow(10, inputDecimal));
+      const totalAmountRaw = Math.floor(totalAmount * Math.pow(10, inputDecimal));
+      const amountPerCycle = new BN(amountPerCycleRaw.toString());
+      const totalAmountInSmallestUnit = new BN(totalAmountRaw.toString());
 
     // Create PublicKeys for input and output mints
     const inputMint = new PublicKey(res.data.orderResult.inputMint);
