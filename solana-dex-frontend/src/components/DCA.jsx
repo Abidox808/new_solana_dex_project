@@ -135,6 +135,12 @@ const DCA = () => {
       return;
     }
 
+    if (!wallet.connected || !wallet.publicKey) {
+      console.error('Wallet is not connected.');
+      setOrderStatus('Wallet is not connected. Please connect your wallet.');
+      return;
+    }
+
     try {
       const res = await axios.post(`${API_BASE_URL}/api/dca-order`, {
         fromToken,
@@ -186,6 +192,8 @@ const DCA = () => {
       
       console.log('params sent', params);
 
+      console.log('Transaction:', tx);
+      console.log('Wallet:', wallet);
       const txid = await sendAndConfirmTransaction(connection, tx, [wallet]);
       setOrderStatus(`Transaction sent. Confirming...`);
 
