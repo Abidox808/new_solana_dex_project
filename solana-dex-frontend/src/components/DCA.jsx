@@ -4,7 +4,7 @@ import Dropdown from './Dropdown';
 import { useWallet } from '@solana/wallet-adapter-react';
 import '../styles/dca.css';
 import { Connection, PublicKey, sendAndConfirmTransaction  } from '@solana/web3.js';
-import { getAssociatedTokenAddressSync, createAssociatedTokenAccountInstruction, createTransferInstruction, getAccount, getTokenAccountsByOwner  } from '@solana/spl-token';
+import { getAssociatedTokenAddressSync, createAssociatedTokenAccountInstruction, createTransferInstruction, getAccount, getTokenAccountsByOwner, getParsedTokenAccountsByOwner } from '@solana/spl-token';
 import {DCA as MyDCA, Network } from '@jup-ag/dca-sdk';
 import { connection } from '../config';
 
@@ -74,30 +74,30 @@ const DCA = () => {
   };
 
   // Function to get the USDC token account address
-  const getUsdcTokenAccount = async () => {
-    try {
-      // Fetch all token accounts owned by the wallet for the USDC mint
-      const tokenAccounts = await getTokenAccountsByOwner(
-        connection, // Solana connection
-        wallet.publicKey, // Wallet public key
-        { mint: USDC } // Filter by USDC mint
-      );
+const getUsdcTokenAccount = async () => {
+  try {
+    // Fetch all token accounts owned by the wallet
+    const tokenAccounts = await getParsedTokenAccountsByOwner(
+      connection, // Solana connection
+      wallet.publicKey, // Wallet public key
+      { mint: USDC } // Filter by USDC mint
+    );
 
-      // Check if any token accounts exist
-      if (tokenAccounts.value.length === 0) {
-        console.error('No USDC token account found for this wallet.');
-        return null;
-      }
-
-      // Return the first token account address
-      const usdcTokenAccount = tokenAccounts.value[0].pubkey;
-      console.log('USDC Token Account Address:', usdcTokenAccount.toString());
-      return usdcTokenAccount;
-    } catch (error) {
-      console.error('Error fetching USDC token account:', error);
+    // Check if any token accounts exist
+    if (tokenAccounts.value.length === 0) {
+      console.error('No USDC token account found for this wallet.');
       return null;
     }
-  };
+
+    // Return the first token account address
+    const usdcTokenAccount = tokenAccounts.value[0].pubkey;
+    console.log('USDC Token Account Address:', usdcTokenAccount.toString());
+    return usdcTokenAccount;
+  } catch (error) {
+    console.error('Error fetching USDC token account:', error);
+    return null;
+  }
+};
 
   const transferUsdcToAta = async () => {
     const usdcAta = getUsdcAta();
