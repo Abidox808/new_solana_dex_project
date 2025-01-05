@@ -246,7 +246,7 @@ const DCA = () => {
     };
     console.log('Sending DCA parameters:', params);
     console.log('Debug values:', {
-      inAmount: totalAmountBN.toString(),
+      inAmount: totalAmountInSmallestUnit.toString(),
       inAmountPerCycle: amountPerCycle.toString(),
       cycleSecondsApart: cycleFrequency.toString(),
       inputMint: inputMint.toString(),
