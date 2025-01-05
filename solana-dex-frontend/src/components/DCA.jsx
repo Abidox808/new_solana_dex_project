@@ -155,11 +155,13 @@ const DCA = () => {
   
       const dca = new MyDCA(connection, Network.MAINNET);
     
-      // Calculate amounts
-    const inputDecimal = res.data.orderResult.inputDecimal;
-    const totalAmount = parseFloat(amount);
-    const totalAmountInSmallestUnit = BigInt(Math.floor(totalAmount * (10 ** inputDecimal)));
-    const amountPerCycle = totalAmountInSmallestUnit / BigInt(numOrders);
+      // Calculate amounts using BN instead of BigInt
+      const inputDecimal = res.data.orderResult.inputDecimal;
+      const totalAmount = parseFloat(amount);
+      const totalAmountInSmallestUnit = new BN(
+        Math.floor(totalAmount * Math.pow(10, inputDecimal)).toString()
+      );
+      const amountPerCycle = totalAmountInSmallestUnit.div(new BN(numOrders));
 
     // Create PublicKeys for input and output mints
     const inputMint = new PublicKey(res.data.orderResult.inputMint);
@@ -199,6 +201,8 @@ const DCA = () => {
       true // allowOwnerOffCurve = true for PDAs
     );
 
+    const cycleFrequency = new BN(parseInt(frequency) * parseInt(interval));
+
     // Required accounts structure from documentation
     const accounts = {
       dca: dcaPDA,
@@ -221,7 +225,7 @@ const DCA = () => {
       applicationIdx: timestamp.toNumber(),
       inAmount: totalAmountInSmallestUnit,
       inAmountPerCycle: amountPerCycle,
-      cycleSecondsApart: BigInt(parseInt(frequency) * parseInt(interval)),
+      cycleFrequency : cycleFrequency,
       minOutAmount: null,
       maxOutAmount: null,
       startAt: null
