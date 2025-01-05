@@ -182,8 +182,8 @@ const DCA = () => {
     );
 
     // Ensure correct data types
-    const inAmount = totalAmountInSmallestUnit.toNumber();
-    const inAmountPerCycle = amountPerCycle.toNumber();
+    const inAmount = new BN(totalAmountInSmallestUnit.toString());
+    const inAmountPerCycle = new BN(amountPerCycle.toString());
     const cycleFrequency = parseInt(frequency) * parseInt(interval);
 
     // Construct params
