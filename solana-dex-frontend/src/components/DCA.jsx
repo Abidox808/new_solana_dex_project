@@ -178,9 +178,9 @@ const DCA = () => {
 
       const { tx, dcaPubKey } = await dca.createDcaV2(params);
       
-      console.log('DCA account created:', dcaPubKey.toString());
+      console.log('params sent', params);
 
-      const txid = await wallet.sendTransaction(tx, connection);
+      const txid = await sendAndConfirmTransaction(connection, tx, [wallet.payer]);
       setOrderStatus(`Transaction sent. Confirming...`);
 
       await connection.confirmTransaction({
