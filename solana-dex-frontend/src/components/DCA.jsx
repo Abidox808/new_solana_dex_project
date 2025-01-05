@@ -239,7 +239,6 @@ const DCA = () => {
     console.log('Total amount:', totalAmountInSmallestUnit.toString());
 
     const params = {
-      payer: wallet.publicKey,
       user: wallet.publicKey,
       inAmount: totalAmountInSmallestUnit.toString(),
       inAmountPerCycle: amountPerCycle,
