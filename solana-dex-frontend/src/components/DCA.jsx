@@ -232,13 +232,16 @@ const DCA = () => {
     console.log('Total amount:', totalAmountInSmallestUnit.toString());
 
     const params = {
-      applicationIdx: timestamp.toNumber(),
-      inAmount: totalAmountInSmallestUnit,
-      inAmountPerCycle: amountPerCycle,
-      cycleFrequency : cycleFrequency,
-      minOutAmount: null,
-      maxOutAmount: null,
-      startAt: null
+      accounts,
+      params: {  // Wrap the parameters in a 'params' key
+        applicationIdx: timestamp.toNumber(),
+        inAmount: totalAmountInSmallestUnit,
+        inAmountPerCycle: amountPerCycle,
+        cycleFrequency: cycleFrequency,
+        minOutAmount: null,
+        maxOutAmount: null,
+        startAt: null
+      }
     };
 
     console.log('Sending DCA parameters:', params);
