@@ -196,6 +196,8 @@ const DCA = () => {
         userInTokenAccount,
       };
 
+      console.log('params sent', params);
+
       const { tx, dcaPubKey } = await dca.createDcaV2(params);
       const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
       tx.recentBlockhash = blockhash;
