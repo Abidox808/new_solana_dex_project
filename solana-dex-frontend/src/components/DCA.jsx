@@ -3,7 +3,7 @@ import axios from 'axios';
 import Dropdown from './Dropdown';
 import { useWallet } from '@solana/wallet-adapter-react';
 import '../styles/dca.css';
-import { Connection, PublicKey} from '@solana/web3.js';
+import { Connection, PublicKey, BN } from '@solana/web3.js';
 import { getAssociatedTokenAddressSync } from '@solana/spl-token';
 import {DCA as MyDCA, Network } from '@jup-ag/dca-sdk';
 import { connection } from '../config';
@@ -174,6 +174,19 @@ const DCA = () => {
         wallet.publicKey
       );
 
+      // Generate DCA PDA
+      const timestamp = new BN(parseInt((Date.now() / 1000).toString()));
+      const [dcaPDA] = await PublicKey.findProgramAddressSync(
+        [
+          Buffer.from("dca"),
+          wallet.publicKey.toBuffer(),
+          new PublicKey(res.data.orderResult.inputMint).toBuffer(),
+          new PublicKey(res.data.orderResult.outputMint).toBuffer(),
+          timestamp.toArrayLike(Buffer, "le", 8),
+        ],
+        new PublicKey("DCA265Vj8a9CEuX1eb1LWRnDT7uK6q1xMipnNyatn23M")
+      );
+
       const params = {
         payer: wallet.publicKey,
         user: wallet.publicKey,
@@ -185,6 +198,7 @@ const DCA = () => {
         minOutAmountPerCycle: null,
         maxOutAmountPerCycle: null,
         startAt: null,
+        applicationIdx: timestamp.toNumber(), // Add this line
       };
 
       console.log('params sent', params);
