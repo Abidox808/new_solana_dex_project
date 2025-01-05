@@ -169,13 +169,20 @@ const DCA = () => {
         outputMint: res.data.orderResult.outputMint
       });
 
+      const USDC = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
+      const SOL = new PublicKey('So11111111111111111111111111111111111111112');
+
       const userInTokenAccount = getAssociatedTokenAddressSync(
-        new PublicKey(res.data.orderResult.inputMint),
+        USDC,
         wallet.publicKey
       );
 
-      const USDC = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
-      const SOL = new PublicKey('So11111111111111111111111111111111111111112');
+      try {
+        const ataAccount = await getAccount(connection, usdcAta);
+        console.log('USDC ATA Balance:', ataAccount.amount.toString());
+      } catch (error) {
+        console.error('USDC ATA does not exist or has no balance.');
+      }
 
       const params = {
         payer: wallet.publicKey,
