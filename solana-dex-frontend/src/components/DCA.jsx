@@ -158,10 +158,10 @@ const DCA = () => {
       // Calculate amounts using BN instead of BigInt
       const inputDecimal = res.data.orderResult.inputDecimal;
       const totalAmount = parseFloat(amount);
-      const totalAmountInSmallestUnit = new BN(
-        Math.floor(totalAmount * Math.pow(10, inputDecimal))
+      const amountPerCycle = new BN(
+        Math.floor((totalAmount / numOrders) * Math.pow(10, inputDecimal))
       );
-      const amountPerCycle = totalAmountInSmallestUnit.div(new BN(numOrders));
+      const totalAmountInSmallestUnit = amountPerCycle.mul(new BN(numOrders));
 
     // Create PublicKeys for input and output mints
     const inputMint = new PublicKey(res.data.orderResult.inputMint);
@@ -219,6 +219,9 @@ const DCA = () => {
       eventAuthority: new PublicKey("Cspp27eGUDMXxPEdhmEXFVRn6Lt1L7xJyALF3nmnWoBj"),
       program: new PublicKey("DCA265Vj8a9CEuX1eb1LWRnDT7uK6q1xMipnNyatn23M")
     };
+
+    console.log('Amount per cycle:', amountPerCycle.toString());
+    console.log('Total amount:', totalAmountInSmallestUnit.toString());
 
     const params = {
       accounts,
