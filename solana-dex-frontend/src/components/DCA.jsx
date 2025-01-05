@@ -240,7 +240,6 @@ const DCA = () => {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="0.2"
-                min={0.01}
                 required
                 style={{ marginLeft: '10px', width: '100px', padding: '10px', marginTop: '10px' }}
               />
