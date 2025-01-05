@@ -3,8 +3,8 @@ import axios from 'axios';
 import Dropdown from './Dropdown';
 import { useWallet } from '@solana/wallet-adapter-react';
 import '../styles/dca.css';
-import { Connection, PublicKey, sendAndConfirmTransaction, getParsedTokenAccountsByOwner } from '@solana/web3.js';
-import { getAssociatedTokenAddressSync, createAssociatedTokenAccountInstruction, createTransferInstruction, getAccount, getTokenAccountsByOwner } from '@solana/spl-token';
+import { Connection, PublicKey, sendAndConfirmTransaction  } from '@solana/web3.js';
+import { getAssociatedTokenAddressSync } from '@solana/spl-token';
 import {DCA as MyDCA, Network } from '@jup-ag/dca-sdk';
 import { connection } from '../config';
 
@@ -30,120 +30,6 @@ const DCA = () => {
   const [amountWarning, setAmountWarning] = useState('');
 
   const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL || 'http://localhost:3000';
-
-  // USDC mint address
-  const USDC = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
-
-  // Get the ATA for USDC
-  const getUsdcAta = () => {
-    return getAssociatedTokenAddressSync(USDC, wallet.publicKey);
-  };
-
-  // Function to create the ATA for USDC
-  const createUsdcAta = async () => {
-    const usdcAta = getUsdcAta();
-
-    try {
-      // Check if the ATA already exists
-      await getAccount(connection, usdcAta);
-      console.log('USDC ATA already exists.');
-    } catch (error) {
-      console.log('Creating USDC ATA...');
-
-      const createAtaIx = createAssociatedTokenAccountInstruction(
-        wallet.publicKey, // Payer
-        usdcAta, // ATA address
-        wallet.publicKey, // Owner
-        USDC // Mint address
-      );
-
-      const createAtaTx = new Transaction().add(createAtaIx);
-      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
-      createAtaTx.recentBlockhash = blockhash;
-      createAtaTx.feePayer = wallet.publicKey;
-
-      const createAtaTxid = await wallet.sendTransaction(createAtaTx, connection);
-      await connection.confirmTransaction({
-        signature: createAtaTxid,
-        blockhash,
-        lastValidBlockHeight,
-      });
-
-      console.log('USDC ATA created. TXID:', createAtaTxid);
-    }
-  };
-
-  // Function to get the USDC token account address
-const getUsdcTokenAccount = async () => {
-  try {
-    // Fetch all token accounts owned by the wallet
-    const tokenAccounts = await getParsedTokenAccountsByOwner(
-      connection, // Solana connection
-      wallet.publicKey, // Wallet public key
-      { mint: USDC } // Filter by USDC mint
-    );
-
-    // Check if any token accounts exist
-    if (tokenAccounts.value.length === 0) {
-      console.error('No USDC token account found for this wallet.');
-      return null;
-    }
-
-    // Return the first token account address
-    const usdcTokenAccount = tokenAccounts.value[0].pubkey;
-    console.log('USDC Token Account Address:', usdcTokenAccount.toString());
-    return usdcTokenAccount;
-  } catch (error) {
-    console.error('Error fetching USDC token account:', error);
-    return null;
-  }
-};
-
-  const transferUsdcToAta = async () => {
-    const usdcAta = getUsdcAta();
-
-    // Get the USDC token account address
-    const existingTokenAccount = await getUsdcTokenAccount();
-    if (!existingTokenAccount) {
-      console.error('Failed to fetch USDC token account.');
-      return;
-    }
-
-    // Transfer 1 USDC to the ATA
-    const transferIx = createTransferInstruction(
-      existingTokenAccount, // Source token account (from Phantom)
-      usdcAta, // Destination token account (ATA)
-      wallet.publicKey, // Owner
-      BigInt(1 * 10 ** 6) // 1 USDC in lamports
-    );
-
-    const transferTx = new Transaction().add(transferIx);
-    const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
-    transferTx.recentBlockhash = blockhash;
-    transferTx.feePayer = wallet.publicKey;
-
-    const transferTxid = await wallet.sendTransaction(transferTx, connection);
-    await connection.confirmTransaction({
-      signature: transferTxid,
-      blockhash,
-      lastValidBlockHeight,
-    });
-
-    console.log('1 USDC transferred to ATA. TXID:', transferTxid);
-  };
-
-  // Function to check the ATA balance and address
-  const checkUsdcAta = async () => {
-    const usdcAta = getUsdcAta();
-
-    try {
-      const ataAccount = await getAccount(connection, usdcAta);
-      console.log('USDC ATA Address:', usdcAta.toString());
-      console.log('USDC ATA Balance:', ataAccount.amount.toString());
-    } catch (error) {
-      console.error('USDC ATA does not exist or has no balance.');
-    }
-  };
   
   const fetchInputTokenPrice = async (mintAddress) => {
     try {
@@ -256,15 +142,6 @@ const getUsdcTokenAccount = async () => {
     }
 
     try {
-      // Step 1: Create the ATA for USDC
-      await createUsdcAta();
-
-      // Step 2: Transfer 1 USDC to the ATA
-      await transferUsdcToAta();
-
-      // Step 3: Check the ATA balance and address
-      await checkUsdcAta();
-
       const res = await axios.post(`${API_BASE_URL}/api/dca-order`, {
         fromToken,
         toToken,
