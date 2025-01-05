@@ -172,17 +172,15 @@ const DCA = () => {
       const USDC = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
       const SOL = new PublicKey('So11111111111111111111111111111111111111112');
 
-      const userInTokenAccount = getAssociatedTokenAddressSync(
-        USDC,
-        wallet.publicKey
-      );
-
       try {
         const ataAccount = await getAccount(connection, usdcAta);
         console.log('USDC ATA Balance:', ataAccount.amount.toString());
       } catch (error) {
         console.error('USDC ATA does not exist or has no balance.');
       }
+
+      // Token account address for USDC (replace with the actual address)
+      const userInTokenAccount = new PublicKey('J7fMkJVwqHqPWHu6Fbcr9WkZMVY9EKDexHTgtQPgeYXB');
 
       const params = {
         payer: wallet.publicKey,
@@ -195,7 +193,7 @@ const DCA = () => {
         minOutAmountPerCycle: null,
         maxOutAmountPerCycle: null,
         startAt: null,
-        userInTokenAccount :new PublicKey('J7fMkJVwqHqPWHu6Fbcr9WkZMVY9EKDexHTgtQPgeYXB'),
+        userInTokenAccount,
       };
 
       const { tx, dcaPubKey } = await dca.createDcaV2(params);
