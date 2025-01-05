@@ -234,7 +234,7 @@ const DCA = () => {
     const params = {
       payer: wallet.publicKey,
       user: wallet.publicKey,
-      inAmount: totalAmountBN,
+      inAmount: totalAmountInSmallestUnit.toString(),
       inAmountPerCycle: amountPerCycle,
       cycleSecondsApart: cycleFrequency,
       inputMint: new PublicKey(res.data.orderResult.inputMint),
@@ -245,6 +245,14 @@ const DCA = () => {
       startAt: null
     };
     console.log('Sending DCA parameters:', params);
+    console.log('Debug values:', {
+      inAmount: totalAmountBN.toString(),
+      inAmountPerCycle: amountPerCycle.toString(),
+      cycleSecondsApart: cycleFrequency.toString(),
+      inputMint: inputMint.toString(),
+      outputMint: outputMint.toString(),
+      userInTokenAccount: userAta.toString()
+    })
 
     // Create DCA
     const { tx } = await dca.createDcaV2(params);
