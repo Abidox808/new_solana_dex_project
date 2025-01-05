@@ -3,8 +3,8 @@ import axios from 'axios';
 import Dropdown from './Dropdown';
 import { useWallet } from '@solana/wallet-adapter-react';
 import '../styles/dca.css';
-import { Connection, PublicKey, sendAndConfirmTransaction  } from '@solana/web3.js';
-import { getAssociatedTokenAddressSync, createAssociatedTokenAccountInstruction, createTransferInstruction, getAccount, getTokenAccountsByOwner, getParsedTokenAccountsByOwner } from '@solana/spl-token';
+import { Connection, PublicKey, sendAndConfirmTransaction, getParsedTokenAccountsByOwner } from '@solana/web3.js';
+import { getAssociatedTokenAddressSync, createAssociatedTokenAccountInstruction, createTransferInstruction, getAccount, getTokenAccountsByOwner } from '@solana/spl-token';
 import {DCA as MyDCA, Network } from '@jup-ag/dca-sdk';
 import { connection } from '../config';
 
@@ -101,14 +101,14 @@ const getUsdcTokenAccount = async () => {
 
   const transferUsdcToAta = async () => {
     const usdcAta = getUsdcAta();
-  
+
     // Get the USDC token account address
     const existingTokenAccount = await getUsdcTokenAccount();
     if (!existingTokenAccount) {
       console.error('Failed to fetch USDC token account.');
       return;
     }
-  
+
     // Transfer 1 USDC to the ATA
     const transferIx = createTransferInstruction(
       existingTokenAccount, // Source token account (from Phantom)
@@ -116,19 +116,19 @@ const getUsdcTokenAccount = async () => {
       wallet.publicKey, // Owner
       BigInt(1 * 10 ** 6) // 1 USDC in lamports
     );
-  
+
     const transferTx = new Transaction().add(transferIx);
     const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
     transferTx.recentBlockhash = blockhash;
     transferTx.feePayer = wallet.publicKey;
-  
+
     const transferTxid = await wallet.sendTransaction(transferTx, connection);
     await connection.confirmTransaction({
       signature: transferTxid,
       blockhash,
       lastValidBlockHeight,
     });
-  
+
     console.log('1 USDC transferred to ATA. TXID:', transferTxid);
   };
 
