@@ -155,18 +155,20 @@ const DCA = () => {
   
       const dca = new MyDCA(connection, Network.MAINNET);
     
-      // Calculate amounts using BN instead of BigInt
-      const inputDecimal = res.data.orderResult.inputDecimal;
-      const totalAmount = parseFloat(amount);
-      // Calculate with proper decimals handling
-      const amountPerCycleRaw = Math.floor((totalAmount / numOrders) * Math.pow(10, inputDecimal));
-      const totalAmountRaw = Math.ceil(totalAmount * Math.pow(10, inputDecimal));
+      // Calculate base amounts
+      const baseAmountPerCycle = (totalAmount / numOrders);
+      const amountPerCycleRaw = Math.floor(baseAmountPerCycle * Math.pow(10, inputDecimal));
+
+      // Add a small buffer to the total amount (0.01 more than exact amount)
+      const slightlyHigherTotal = totalAmount + 0.01;
+      const totalAmountRaw = Math.floor(slightlyHigherTotal * Math.pow(10, inputDecimal));
 
       const amountPerCycle = new BN(amountPerCycleRaw.toString());
       const totalAmountInSmallestUnit = new BN(totalAmountRaw.toString());
 
       console.log({
         inputDecimal,
+        baseAmountPerCycle,
         amountPerCycleRaw,
         totalAmountRaw,
         amountPerCycleBN: amountPerCycle.toString(),
