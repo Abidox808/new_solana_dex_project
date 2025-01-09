@@ -7,6 +7,7 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { getSymbolFromMint, getDecimalOfMint } from '../utils/apiService';
 import tokenAmount from '../images/tokenAmount.png';
 import TradingViewWidget from './TradingViewWidget';
+import TokenSelectModal from './TokenSelectModal';
 
 const LimitOrder = () => {
   const wallet = useWallet();
@@ -26,6 +27,9 @@ const LimitOrder = () => {
   const [orderHistory, setOrderHistory] = useState({ orders: [] });
   const [allVerifiedTokens, setAllVerifiedTokens] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isTokenSelectModalOpen, setIsTokenSelectModalOpen] = useState(false);
+  const [selectingFor, setSelectingFor] = useState('from');
+  const [fromBalance, setFromBalance] = useState('0');
 
 
   const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL || 'http://localhost:5000';
@@ -54,6 +58,46 @@ const LimitOrder = () => {
     };
     fetchTokens();
   }, [API_BASE_URL, fromToken, toToken]);
+
+  const fetchTokenBalance = async (tokenAddress, walletAddress) => {
+    try {
+      const connection = new Connection(END_POINT);
+      const publicKey = new PublicKey(walletAddress);
+
+      if (tokenAddress === 'So11111111111111111111111111111111111111112') {
+        const balance = await connection.getBalance(publicKey);
+        return balance / 1e9; // Convert lamports to SOL
+      }
+
+      const tokenPublicKey = new PublicKey(tokenAddress);
+      const tokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, {
+        programId: TOKEN_PROGRAM_ID,
+      });
+
+      const tokenAccount = tokenAccounts.value.find(account => 
+        account.account.data.parsed.info.mint === tokenPublicKey.toBase58()
+      );
+
+      return tokenAccount ? tokenAccount.account.data.parsed.info.tokenAmount.uiAmount : 0;
+    } catch (error) {
+      console.error('Error fetching token balance:', error);
+      return 0;
+    }
+  };
+
+  useEffect(() => {
+    const updateBalance = async () => {
+      if (wallet.connected && wallet.publicKey) {
+        const token = tokens.find(t => t.symbol === fromToken);
+        if (token) {
+          const balance = await fetchTokenBalance(token.address, wallet.publicKey.toString());
+          setFromBalance(balance);
+        }
+      }
+    };
+    updateBalance();
+  }, [fromToken, wallet.connected, wallet.publicKey]);
+
   useEffect(() => {
     const fetchOrders = async () => {
       if (wallet.connected && wallet.publicKey) {
@@ -269,19 +313,17 @@ const LimitOrder = () => {
   
   const handleSelectToken = (token, type) => {
     if (type === 'from') {
-      setFromToken(token);
-      setShowFromDropdown(false);
-      setPrice(''); // Reset price when changing fromToken
-      const tokenMint = tokens.find(tokenMint=> tokenMint.symbol === token);
-      setInputMintToken(tokenMint.address);
+      setFromToken(token.symbol);
+      const tokenMint = token.address;
+      setInputMintToken(tokenMint);
     } else {
-      setToToken(token);
-      setShowToDropdown(false);
-      const tokenMint = tokens.find(tokenMint=> tokenMint.symbol === token);
-      setOutputMintToken(tokenMint.address);
+      setToToken(token.symbol);
+      const tokenMint = token.address;
+      setOutputMintToken(tokenMint);
     }
-
+    setIsTokenSelectModalOpen(false);
   };
+
   const handleConnectWallet = async () => {
     try {
       if (!wallet.connected) {
@@ -295,6 +337,19 @@ const LimitOrder = () => {
 
   const handleAmountChange = (e) => {
     setAmount(e.target.value);
+  };
+
+  const handleHalf = () => {
+    if (fromBalance) {
+      const halfBalance = (parseFloat(fromBalance) / 2).toString();
+      setAmount(halfBalance);
+    }
+  };
+
+  const handleMax = () => {
+    if (fromBalance) {
+      setAmount(fromBalance.toString());
+    }
   };
 
   const totalUSDC = (amount && price && prices[toToken])
@@ -365,7 +420,7 @@ const LimitOrder = () => {
     <div>
       <div className="limit-order-page">
         <div className="limit-order-price-chart-container">
-        <TradingViewWidget fromToken={fromToken} toToken={toToken} />
+          <TradingViewWidget fromToken={fromToken} toToken={toToken} />
         </div>
         <div className="limit-order-container">
           {orderStatus && <p>{orderStatus}</p>}
@@ -374,26 +429,44 @@ const LimitOrder = () => {
               <h3>You're Selling</h3>
               <div className="right-section">
                 <img src={tokenAmount} alt="Token" />
-                <span>{amount == 0 ? 0 : amount} {fromToken}</span>
+                <span>{fromBalance} {fromToken}</span>
+              </div>
+            </div>
+            <div className="balance-info">
+              <span></span>
+              <div className="balance-actions">
+                <button onClick={handleHalf} className="balance-btn">Half</button>
+                <button onClick={handleMax} className="balance-btn">Max</button>
               </div>
             </div>
             <div className="limit-order-input-group">
-              <Dropdown
-                tokens={tokens}
-                selectedToken={fromToken}
-                onSelectToken={(token) => handleSelectToken(token, 'from')}
-                showDropdown={showFromDropdown}
-                setShowDropdown={setShowFromDropdown}
-                style={{ width: '200px' }} // Adjusted width for the ticker bar
-              />
+              <button 
+                className="token-select-button"
+                onClick={() => {
+                  setSelectingFor('from');
+                  setIsTokenSelectModalOpen(true);
+                }}
+              >
+                {fromToken ? (
+                  <>
+                    <img 
+                      src={tokens.find(t => t.symbol === fromToken)?.logoURI} 
+                      className="token-icon"
+                    />
+                    <span>{fromToken}</span>
+                  </>
+                ) : (
+                  'Select Token'
+                )}
+                <span className="dropdown-arrow">▼</span>
+              </button>
               <input
                 type="number"
                 value={amount}
                 onChange={handleAmountChange}
-                placeholder="0.0"
-                style={{ marginLeft: '10px', width: '100px',padding: '10px' }}
+                placeholder="0.5 sol"
                 min={0}
-                step={0.1}
+                style={{ marginLeft: '10px', width: '100px',padding: '10px' }}
               />
             </div>
           </div>
@@ -407,14 +480,26 @@ const LimitOrder = () => {
               </div>
             </div>
             <div className="limit-order-input-group">
-              <Dropdown
-                tokens={tokens}
-                selectedToken={toToken}
-                onSelectToken={(token) => handleSelectToken(token, 'to')}
-                showDropdown={showToDropdown}
-                setShowDropdown={setShowToDropdown}
-              />
-              <label>${totalUSDC}</label>
+              <button 
+                className="token-select-button"
+                onClick={() => {
+                  setSelectingFor('to');
+                  setIsTokenSelectModalOpen(true);
+                }}
+              >
+                {toToken ? (
+                  <>
+                    <img 
+                      src={tokens.find(t => t.symbol === toToken)?.logoURI} 
+                      className="token-icon"
+                    />
+                    <span>{toToken}</span>
+                  </>
+                ) : (
+                  'Select Token'
+                )}
+                <span className="dropdown-arrow">▼</span>
+              </button>
             </div>
             <div className="limit-order-limit-price-group">
               <label>Sell {fromToken} at rate</label>
@@ -428,9 +513,21 @@ const LimitOrder = () => {
               />
             </div>
           </div>
-          <button disabled={!wallet.connected}  onClick={wallet.connected? handlePlaceOrder: handleConnectWallet } className="limit-order-button wallet-adapter-button">
+
+          <button 
+            disabled={!wallet.connected} 
+            onClick={wallet.connected ? handlePlaceOrder : handleConnectWallet} 
+            className="limit-order-button wallet-adapter-button"
+          >
             {wallet.connected ? 'Place limit order': 'Connect wallet'}
           </button>
+
+          <TokenSelectModal
+            isOpen={isTokenSelectModalOpen}
+            tokens={tokens}
+            onSelectToken={(token) => handleSelectToken(token, selectingFor)}
+            onClose={() => setIsTokenSelectModalOpen(false)}
+          />
 
           <div className="limit-order-section">
             <div className="limit-order-section-header">
@@ -446,7 +543,7 @@ const LimitOrder = () => {
             </div>
             <div className="limit-order-input-group">
               <label>Buy SOL at Rate</label>
-              <label>${parseInt(price)}</label>
+              <label>${parseInt(price) || 0}</label>
             </div>
             <div className="limit-order-input-group">
               <label>Expiry</label>
