@@ -34,14 +34,15 @@ const TokenSwap = () => {
   const [transactionStatus, setTransactionStatus] = useState('');
   const [slippage, setSlippage] = useState(0.5); // default slippage tolerance
   const [isSlippageModalOpen, setIsSlippageModalOpen] = useState(false);
-  const [fromBalance, setFromBalance] = useState('1000'); // Example balance
-  const [toBalance, setToBalance] = useState('500'); // Example balance
+  const [fromBalance, setFromBalance] = useState('0'); // Example balance
+  const [toBalance, setToBalance] = useState('0'); // Example balance
   const [isTokenSelectModalOpen, setIsTokenSelectModalOpen] = useState(false);
   const [selectingFor, setSelectingFor] = useState('from'); // 'from' or 'to'
   const wallet = useWallet();
 
   const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL || 'http://localhost:3000';
   const END_POINT = import.meta.env.VITE_APP_RPC_END_POINT || 'https://api.mainnet-beta.solana.com';
+  const WRAPPED_SOL_ADDRESS = 'So11111111111111111111111111111111111111112';
 
   useEffect(() => {
     const fetchTokens = async () => {
@@ -55,18 +56,18 @@ const TokenSwap = () => {
   
         setTokens(tokenData);
   
-        const solToken = tokenData.find((t) => t.symbol === 'SOL');
-        const usdcToken = tokenData.find((t) => t.symbol === 'USDC');
-  
-        if (solToken) {
-          setFromTokenAddress('SOL'); // Native SOL
-          setFromTokenDecimals(9); // Native SOL has 9 decimals
-        }
+      const solToken = tokenData.find((t) => t.symbol === 'SOL');
+      const usdcToken = tokenData.find((t) => t.symbol === 'USDC');
 
-        if (usdcToken) {
-          setToTokenAddress(usdcToken.address); // SPL token address
-          setToTokenDecimals(usdcToken.decimals); // SPL token decimals
-        }
+      if (solToken) {
+        setFromTokenAddress(WRAPPED_SOL_ADDRESS); // Use wrapped SOL address for native SOL
+        setFromTokenDecimals(9); // Native SOL has 9 decimals
+      }
+
+      if (usdcToken) {
+        setToTokenAddress(usdcToken.address); // SPL token address
+        setToTokenDecimals(usdcToken.decimals); // SPL token decimals
+      }
       } catch (error) {
         console.error('Error fetching tokens:', error);
         setError('Failed to fetch tokens');
@@ -82,7 +83,7 @@ const TokenSwap = () => {
       const publicKey = new PublicKey(walletAddress);
 
     // If the token is native SOL, fetch the native balance
-    if (tokenAddress === 'SOL') {
+    if (tokenAddress === WRAPPED_SOL_ADDRESS) {
       const balance = await connection.getBalance(publicKey);
       return balance / 1e9; // Convert lamports to SOL
     }
@@ -205,7 +206,7 @@ const TokenSwap = () => {
       }
   
       const payload = {
-        fromToken: fromTokenAddress,
+        fromToken: fromTokenAddress === WRAPPED_SOL_ADDRESS ? 'SOL' : fromTokenAddress,
         toToken: toTokenAddress,
         decimals: fromTokenDecimals,
         fromAmount,
