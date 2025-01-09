@@ -53,6 +53,7 @@ const MusicPage = lazy(() => import('./components/MusicPage')); // Import the ne
 const YieldFarmingPage = lazy(() => import('./components/YieldFarmingPage')); // Import the new YieldFarmingPage component
 const StakingPage = lazy(() => import('./components/StakingPage')); // Import the new StakingPage component
 const LiquidityPage = lazy(() => import('./components/LiquidityPage')); // Import the new LiquidityPage component
+const ComingSoon = lazy(() => import('./components/ComingSoon'));
 
 
 function App() {
@@ -68,42 +69,40 @@ function App() {
             <Header/>
             <ErrorBoundary>
               <Suspense fallback={<div>Loading...</div>}>
-                <Routes>
-                    <Route path="/" element={<Navigate to="/swap" />} /> {/* Redirect Home to Swap */}
-                    <Route path="/swap" element={<TokenSwap />} />
-                    <Route path="/trade" element={<Trade />} />
-                    <Route path="/limit-order" element={<LimitOrder />} />
-                    <Route path="/dca" element={<DCA />} />
-                    <Route path="/perps" element={<Perps />} />
-                    <Route path="/wallet" element={<Wallet />} />
-                    <Route path="/portfolio" element={<PortfolioPage />} />
-                    <Route path="/profile" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
-                    <Route path="/news" element={<News />} />
-                    <Route path="/transactions" element={<ProtectedRoute><TransactionHistory /></ProtectedRoute>} />
-                    <Route path="/analytics" element={<ProtectedRoute><AnalyticsDashboard /></ProtectedRoute>} />
-                    <Route path="/trading-dashboard" element={<TradingDashboard />} />
-                    <Route path="/signin" element={<SignIn />} />
-                    <Route path="/trailing-stop-order" element={<ProtectedRoute><TrailingStopOrder /></ProtectedRoute>} />
-                    <Route path="/conditional-order" element={<ProtectedRoute><ConditionalOrder /></ProtectedRoute>} />
-                    <Route path="/trading-bot" element={<ProtectedRoute><TradingBot /></ProtectedRoute>} />
-                    <Route path="/advanced-analytics" element={<ProtectedRoute><AdvancedAnalytics /></ProtectedRoute>} />
-                    <Route path="/order-notifications" element={<ProtectedRoute><OrderNotifications /></ProtectedRoute>} />
-                    <Route path="/price-alerts" element={<ProtectedRoute><PriceAlerts /></ProtectedRoute>} />
-                    <Route path="/interactive-tutorials" element={<ProtectedRoute><InteractiveTutorials /></ProtectedRoute>} />
-                    <Route path="/social-trading" element={<ProtectedRoute><SocialTrading /></ProtectedRoute>} />
-                    <Route path="/portfolio-management" element={<ProtectedRoute><PortfolioManagement /></ProtectedRoute>} />
-                    <Route path="/customizable-dashboard" element={<ProtectedRoute><CustomizableDashboard /></ProtectedRoute>} />
-                    <Route path="/example-chart" element={<ExampleChart />} />
-                    <Route path="/balance-checker" element={<BalanceChecker />} /> {/* Add BalanceChecker route */}
-                    <Route path="/token-sniper" element={<TokenSniper />} /> {/* Add TokenSniper route */}
-                    <Route path="/gaming" element={<GamingPage />} /> {/* Add GamingPage route */}
-                    <Route path="/lending" element={<LendingPage />} /> {/* Add LendingPage route */}
-                    <Route path="/music" element={<MusicPage />} /> {/* Add MusicPage route */}
-                    <Route path="/yield-farming" element={<YieldFarmingPage />} /> {/* Add YieldFarmingPage route */}
-                    <Route path="/staking" element={<StakingPage />} /> {/* Add StakingPage route */}
-                    <Route path="/liquidity" element={<LiquidityPage />} /> {/* Add LiquidityPage route */}
-                    {/* <Route path="/crypto-prices" element={<CryptoPrices />} /> */}
-                </Routes>
+              <Routes>
+                  <Route path="/" element={<Navigate to="/swap" />} />
+                  <Route path="/swap" element={<TokenSwap />} />
+                  <Route path="/limit-order" element={<LimitOrder />} />
+                  <Route path="/dca" element={<ComingSoon />} />
+                  <Route path="/perps" element={<ComingSoon />} />
+                  <Route path="/wallet" element={<ComingSoon />} />
+                  <Route path="/portfolio" element={<ComingSoon />} />
+                  <Route path="/profile" element={<ComingSoon />} />
+                  <Route path="/news" element={<ComingSoon />} />
+                  <Route path="/transactions" element={<ComingSoon />} />
+                  <Route path="/analytics" element={<ComingSoon />} />
+                  <Route path="/trading-dashboard" element={<ComingSoon />} />
+                  <Route path="/signin" element={<ComingSoon />} />
+                  <Route path="/trailing-stop-order" element={<ComingSoon />} />
+                  <Route path="/conditional-order" element={<ComingSoon />} />
+                  <Route path="/trading-bot" element={<ComingSoon />} />
+                  <Route path="/advanced-analytics" element={<ComingSoon />} />
+                  <Route path="/order-notifications" element={<ComingSoon />} />
+                  <Route path="/price-alerts" element={<ComingSoon />} />
+                  <Route path="/interactive-tutorials" element={<ComingSoon />} />
+                  <Route path="/social-trading" element={<ComingSoon />} />
+                  <Route path="/portfolio-management" element={<ComingSoon />} />
+                  <Route path="/customizable-dashboard" element={<ComingSoon />} />
+                  <Route path="/example-chart" element={<ComingSoon />} />
+                  <Route path="/balance-checker" element={<ComingSoon />} />
+                  <Route path="/token-sniper" element={<ComingSoon />} />
+                  <Route path="/gaming" element={<ComingSoon />} />
+                  <Route path="/lending" element={<ComingSoon />} />
+                  <Route path="/music" element={<ComingSoon />} />
+                  <Route path="/yield-farming" element={<ComingSoon />} />
+                  <Route path="/staking" element={<ComingSoon />} />
+                  <Route path="/liquidity" element={<ComingSoon />} />
+              </Routes>
               </Suspense>
             </ErrorBoundary>
             <Footer />

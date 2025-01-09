@@ -6,27 +6,35 @@
   align-items: center;
   min-height: 60vh;
   margin-top: 20px;
+  padding: 0 15px;
 }
 
 .token-swap-body {
   display: flex;
   justify-content: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  width: 100%;
+  max-width: 1200px;
 }
 
 .token-swap {
   padding: 2rem;
   border-radius: 0.5rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  width: 360px; /* Reduced width */
-  margin-right: 50px;
+  width: 360px;
+  margin-right: 0;
+  flex: 1;
+  min-width: 300px;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 360px; /* Match token swap width */
-  margin-bottom: 10px; /* Adjusted spacing */
+  width: 100%;
+  max-width: 360px;
+  margin-bottom: 10px;
 }
 
 .slippage-container {
@@ -80,7 +88,9 @@
   border-radius: 8px;
   max-height: 138px;
   justify-content: space-between;
-  padding: 24px;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 15px;
 }
 
 .handle-swap-btn{
@@ -91,6 +101,7 @@
   position: relative;
   flex: 1;
   color: white !important;
+  min-width: 120px;
 
 }
 
@@ -127,9 +138,10 @@
 }
 
 .amount-input {
-  width: 100px;
   padding: 0.5rem;
   border-radius: 0.25rem;
+  min-width: 80px;
+  flex: 1;
 }
 
 .flip-button-container {
@@ -300,6 +312,9 @@ body.light .refresh-icon {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   width: 300px;
   color: white;
+  flex: 1;
+  min-width: 300px;
+  max-width: 360px;
 }
 
 .settings-container .settings-item {
@@ -417,4 +432,84 @@ body.light .refresh-icon {
 
 .settings-container .save-btn:hover {
   background: linear-gradient(90deg, #00C8FF, #003Fb7); /* Turquoise to purple gradient */
+}
+/* Add to your existing CSS */
+.balance-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  color: #888;
+  font-size: 14px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.balance-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.balance-btn {
+  background: transparent;
+  border: 1px solid #333;
+  border-radius: 4px;
+  color: #00C8FF;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.3s ease;
+}
+
+.balance-btn:hover {
+  background: rgba(0, 200, 255, 0.1);
+  border-color: #00C8FF;
+}
+
+.balance-btn i {
+  font-size: 10px;
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+
+
+  .token-swap,
+  .settings-container {
+    width: 90%;
+    max-width: 90%;
+    margin-right: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .token-swap {
+    width: 90%;
+    max-width: 90%;
+    margin-right: 0;
+  }
+
+  .token-swap-input .input-group {
+    padding: 12px;
+  }
+
+  .dropdown-container,
+  .amount-input {
+    width: 100%;
+  }
+
+
+  .settings-container .slippage-options {
+    flex-wrap: wrap;
+  }
+
+  .settings-container .btn {
+    flex: 1;
+    min-width: 60px;
+    margin-right: 5px;
+    font-size: 12px;
+  }
 }

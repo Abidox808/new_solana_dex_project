@@ -1,0 +1,53 @@
+.coming-soon-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    padding: 1rem;
+  }
+  
+  .coming-soon-content {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    width: 90%;
+    max-width: 400px;
+  }
+  
+  .coming-soon-content i {
+    color: #3b82f6;
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+  
+  .coming-soon-content h2 {
+    color: white;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+  }
+  
+  .coming-soon-content p {
+    color: #9ca3af;
+    font-size: 0.875rem;
+  }
+  
+  @media (min-width: 768px) {
+    .coming-soon-content {
+      padding: 3rem;
+    }
+    
+    .coming-soon-content i {
+      font-size: 4rem;
+    }
+    
+    .coming-soon-content h2 {
+      font-size: 2rem;
+    }
+    
+    .coming-soon-content p {
+      font-size: 1rem;
+    }
+  }

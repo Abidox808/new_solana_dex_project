@@ -12,6 +12,7 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { VersionedTransaction, Connection } from '@solana/web3.js';
 import toggle from '../images/toggle.png';
 import { connection } from '../config';
+import TokenSelectModal from './TokenSelectModal';
 
 const TokenSwap = () => {
   const [tokens, setTokens] = useState([]);
@@ -32,6 +33,10 @@ const TokenSwap = () => {
   const [transactionStatus, setTransactionStatus] = useState('');
   const [slippage, setSlippage] = useState(0.5); // default slippage tolerance
   const [isSlippageModalOpen, setIsSlippageModalOpen] = useState(false);
+  const [fromBalance, setFromBalance] = useState('1000'); // Example balance
+  const [toBalance, setToBalance] = useState('500'); // Example balance
+  const [isTokenSelectModalOpen, setIsTokenSelectModalOpen] = useState(false);
+  const [selectingFor, setSelectingFor] = useState('from'); // 'from' or 'to'
   const wallet = useWallet();
 
   const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL || 'http://localhost:3000';
@@ -112,8 +117,7 @@ const TokenSwap = () => {
     }
   }, [fromAmount, prices, fromToken, toToken]);
 
-  const handleSelectToken = async (tokenSymbol, type) => {
-    const token = tokens.find((t) => t.symbol === tokenSymbol);
+  const handleSelectToken = async (token, type) => {
     if (token) {
       if (type === 'from') {
         setFromToken(token.symbol);
@@ -125,8 +129,12 @@ const TokenSwap = () => {
         setToTokenDecimals(token.decimals); 
       }
     }
-    setShowFromDropdown(false);
-    setShowToDropdown(false);
+    setIsTokenSelectModalOpen(false);
+  };
+
+  const openTokenSelectModal = (type) => {
+    setSelectingFor(type);
+    setIsTokenSelectModalOpen(true);
   };
 
   const handleFlip = () => {
@@ -196,6 +204,14 @@ const TokenSwap = () => {
     }
   };
 
+  const handleHalf = () => {
+    setFromAmount((parseFloat(fromBalance) / 2).toString());
+  };
+  
+  const handleMax = () => {
+    setFromAmount(fromBalance);
+  };
+
   return (
     <div className="token-swap-container">
       <div className="header">
@@ -205,19 +221,42 @@ const TokenSwap = () => {
       <div className='token-swap-body'>
         <div className="token-swap">
           {loading && <p>Loading...</p>}
-          {error && <p className="error">{error}</p>}
           {transactionStatus && <p>{transactionStatus}</p>}
           <div className="token-swap-inputs">
             <div className="token-swap-input">
               <label>You're Selling:</label>
+              <div className="balance-info">
+              <span>Balance: {fromBalance} {fromToken}</span>
+              <div className="balance-actions">
+                <button onClick={handleHalf} className="balance-btn">
+                  <i className="fas fa-divide"></i> Half
+                </button>
+                <button onClick={handleMax} className="balance-btn">
+                  <i className="fas fa-arrow-up"></i> Max
+                </button>
+              </div>
+            </div>
               <div className="input-group">
-                <Dropdown
-                  tokens={tokens}
-                  selectedToken={fromToken}
-                  onSelectToken={(token) => handleSelectToken(token, 'from')}
-                  showDropdown={showFromDropdown}
-                  setShowDropdown={setShowFromDropdown}
-                />
+              <button 
+                  className="token-select-button" 
+                  onClick={() => {
+                    setSelectingFor('from');
+                    setIsTokenSelectModalOpen(true);
+                  }}
+                >
+                  {fromToken ? (
+                    <>
+                      <img 
+                        src={tokens.find(t => t.symbol === fromToken)?.image} 
+                        className="token-icon"
+                      />
+                      <span>{fromToken}</span>
+                    </>
+                  ) : (
+                    'Select Token'
+                  )}
+                  <span className="dropdown-arrow">▼</span>
+                </button>
                 <AmountInput
                   value={fromAmount}
                   onChange={(e) => setFromAmount(e.target.value)}
@@ -231,18 +270,29 @@ const TokenSwap = () => {
                 <img src={toggle}/>
               </div> 
             </div>
-            
-
             <div className="token-swap-input">
               <label>You're Buying:</label>
               <div className="input-group">
-                <Dropdown
-                  tokens={tokens}
-                  selectedToken={toToken}
-                  onSelectToken={(token) => handleSelectToken(token, 'to')}
-                  showDropdown={showToDropdown}
-                  setShowDropdown={setShowToDropdown}
-                />
+              <button 
+                  className="token-select-button" 
+                  onClick={() => {
+                    setSelectingFor('to');
+                    setIsTokenSelectModalOpen(true);
+                  }}
+                >
+                  {toToken ? (
+                    <>
+                      <img 
+                        src={tokens.find(t => t.symbol === toToken)?.image} 
+                        className="token-icon"
+                      />
+                      <span>{toToken}</span>
+                    </>
+                  ) : (
+                    'Select Token'
+                  )}
+                  <span className="dropdown-arrow">▼</span>
+                </button>
                 <AmountInput
                   value={toAmount}
                   readOnly
@@ -259,6 +309,12 @@ const TokenSwap = () => {
             onRequestClose={() => setIsSlippageModalOpen(false)}
             slippage={slippage}
             setSlippage={setSlippage}
+          />
+          <TokenSelectModal
+            isOpen={isTokenSelectModalOpen}
+            tokens={tokens}
+            onSelectToken={(token) => handleSelectToken(token, selectingFor)}
+            onClose={() => setIsTokenSelectModalOpen(false)}
           />
           <PriceDisplay fromToken={fromToken} toToken={toToken} prices={prices} />
         </div>
