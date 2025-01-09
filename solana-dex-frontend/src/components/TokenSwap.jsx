@@ -250,11 +250,16 @@ const TokenSwap = () => {
   };
 
   const handleHalf = () => {
-    setFromAmount((parseFloat(fromBalance) / 2).toString());
+    if (fromBalance) {
+      const halfBalance = (parseFloat(fromBalance) / 2).toString();
+      setFromAmount(halfBalance); // Update the input field with half the balance
+    }
   };
   
   const handleMax = () => {
-    setFromAmount(fromBalance);
+    if (fromBalance) {
+      setFromAmount(fromBalance.toString()); // Update the input field with the full balance
+    }
   };
 
   return (
