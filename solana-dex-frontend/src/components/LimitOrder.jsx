@@ -40,7 +40,6 @@ const LimitOrder = () => {
         const response = await axios.get(`${API_BASE_URL}/api/tokens`);
         setTokens(response.data);
         const res = await axios.get(`https://tokens.jup.ag/tokens?tags=verified`);
-        setAllunknownTokens(res.data);
         const fromTokenMint = response.data.find(token => token.symbol === fromToken)?.address;
         const toTokenMint = response.data.find(token => token.symbol === toToken)?.address;
         
