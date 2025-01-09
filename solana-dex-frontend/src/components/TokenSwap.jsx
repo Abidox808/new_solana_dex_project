@@ -206,7 +206,7 @@ const TokenSwap = () => {
       }
   
       const payload = {
-        fromToken: fromTokenAddress === WRAPPED_SOL_ADDRESS ? 'SOL' : fromTokenAddress,
+        fromToken: fromTokenAddress,
         toToken: toTokenAddress,
         decimals: fromTokenDecimals,
         fromAmount,
