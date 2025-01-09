@@ -77,7 +77,7 @@ const TokenSwap = () => {
 
   const fetchTokenBalance = async (tokenAddress, walletAddress) => {
     try {
-      const connection = new Connection('https://api.mainnet-beta.solana.com'); // Use your Solana connection
+      const connection = new Connection(END_POINT); 
       const publicKey = new PublicKey(walletAddress);
       const tokenPublicKey = new PublicKey(tokenAddress);
   
