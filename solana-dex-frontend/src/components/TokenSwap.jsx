@@ -9,7 +9,8 @@ import PriceDisplay from './PriceDisplay';
 import SlippageModal from './SlippageModal';
 import '../styles/token-swap.css';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { VersionedTransaction, Connection } from '@solana/web3.js';
+import { VersionedTransaction, Connection ,PublicKey } from '@solana/web3.js';
+import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import toggle from '../images/toggle.png';
 import { connection } from '../config';
 import TokenSelectModal from './TokenSelectModal';
@@ -74,6 +75,31 @@ const TokenSwap = () => {
     fetchTokens();
   }, [API_BASE_URL]);
 
+  const fetchTokenBalance = async (tokenAddress, walletAddress) => {
+    try {
+      const connection = new Connection('https://api.mainnet-beta.solana.com'); // Use your Solana connection
+      const publicKey = new PublicKey(walletAddress);
+      const tokenPublicKey = new PublicKey(tokenAddress);
+  
+      const tokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, {
+        programId: TOKEN_PROGRAM_ID,
+      });
+  
+      const tokenAccount = tokenAccounts.value.find(account => 
+        account.account.data.parsed.info.mint === tokenPublicKey.toBase58()
+      );
+  
+      if (tokenAccount) {
+        return tokenAccount.account.data.parsed.info.tokenAmount.uiAmount;
+      } else {
+        return 0;
+      }
+    } catch (error) {
+      console.error('Error fetching token balance:', error);
+      return 0;
+    }
+  };
+
   const fetchPrices = async (tokenIds) => {
     setLoading(true);
     setError(null);
@@ -96,6 +122,17 @@ const TokenSwap = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const fetchBalance = async () => {
+      if (fromTokenAddress && wallet.publicKey) {
+        const balance = await fetchTokenBalance(fromTokenAddress, wallet.publicKey.toBase58());
+        setFromBalance(balance);
+      }
+    };
+  
+    fetchBalance();
+  }, [fromTokenAddress, wallet.publicKey]);
 
   useEffect(() => {
     if (fromToken && toToken && tokens.length > 0) {
