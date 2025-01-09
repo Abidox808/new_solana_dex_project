@@ -41,6 +41,7 @@ const TokenSwap = () => {
   const wallet = useWallet();
 
   const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL || 'http://localhost:3000';
+  const END_POINT = import.meta.env.VITE_APP_RPC_END_POINT || 'https://api.mainnet-beta.solana.com';
 
   useEffect(() => {
     const fetchTokens = async () => {
