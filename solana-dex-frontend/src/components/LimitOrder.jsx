@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import Dropdown from './Dropdown';
 import '../styles/limit-order.css';
-import { Connection, Keypair, Transaction, VersionedTransaction  } from '@solana/web3.js';
+import { VersionedTransaction, Connection ,PublicKey } from '@solana/web3.js';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { getSymbolFromMint, getDecimalOfMint } from '../utils/apiService';
 import tokenAmount from '../images/tokenAmount.png';
@@ -17,8 +16,6 @@ const LimitOrder = () => {
   const [price, setPrice] = useState('');
   const [amount, setAmount] = useState('');
   const [orderStatus, setOrderStatus] = useState('');
-  const [showFromDropdown, setShowFromDropdown] = useState(false);
-  const [showToDropdown, setShowToDropdown] = useState(false);
   const [prices, setPrices] = useState({});
   const [inputMintToken, setInputMintToken] = useState([]);
   const [outputMintToken, setOutputMintToken] = useState([]);
@@ -35,7 +32,6 @@ const LimitOrder = () => {
   const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL || 'http://localhost:5000';
   const END_POINT = import.meta.env.VITE_APP_RPC_END_POINT || 'https://api.mainnet-beta.solana.com';
 
-  const base = Keypair.generate();
   // Fetch tokens
   useEffect(() => {
     const fetchTokens = async () => {
@@ -95,6 +91,7 @@ const LimitOrder = () => {
         }
       }
     };
+  
     updateBalance();
   }, [fromToken, wallet.connected, wallet.publicKey]);
 
@@ -465,7 +462,6 @@ const LimitOrder = () => {
                 value={amount}
                 onChange={handleAmountChange}
                 placeholder="0.5 sol"
-                min={0}
                 style={{ marginLeft: '10px', width: '100px',padding: '10px' }}
               />
             </div>
