@@ -283,7 +283,7 @@ const TokenSwap = () => {
                   {toToken ? (
                     <>
                       <img 
-                        src={tokens.find(t => t.symbol === toToken)?.image} 
+                        src={tokens.find(t => t.symbol === toToken)?.logoURI} 
                         className="token-icon"
                       />
                       <span>{toToken}</span>
