@@ -59,13 +59,13 @@ const TokenSwap = () => {
         const usdcToken = tokenData.find((t) => t.symbol === 'USDC');
   
         if (solToken) {
-          setFromTokenAddress(solToken.address);
-          setFromTokenDecimals(solToken.decimals);
+          setFromTokenAddress('SOL'); // Native SOL
+          setFromTokenDecimals(9); // Native SOL has 9 decimals
         }
-  
+
         if (usdcToken) {
-          setToTokenAddress(usdcToken.address);
-          setToTokenDecimals(usdcToken.decimals);
+          setToTokenAddress(usdcToken.address); // SPL token address
+          setToTokenDecimals(usdcToken.decimals); // SPL token decimals
         }
       } catch (error) {
         console.error('Error fetching tokens:', error);
@@ -80,26 +80,33 @@ const TokenSwap = () => {
     try {
       const connection = new Connection(END_POINT); 
       const publicKey = new PublicKey(walletAddress);
-      const tokenPublicKey = new PublicKey(tokenAddress);
-  
-      const tokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, {
-        programId: TOKEN_PROGRAM_ID,
-      });
-  
-      const tokenAccount = tokenAccounts.value.find(account => 
-        account.account.data.parsed.info.mint === tokenPublicKey.toBase58()
-      );
-  
-      if (tokenAccount) {
-        return tokenAccount.account.data.parsed.info.tokenAmount.uiAmount;
-      } else {
-        return 0;
-      }
-    } catch (error) {
-      console.error('Error fetching token balance:', error);
+
+    // If the token is native SOL, fetch the native balance
+    if (tokenAddress === 'SOL') {
+      const balance = await connection.getBalance(publicKey);
+      return balance / 1e9; // Convert lamports to SOL
+    }
+
+    // For SPL tokens, fetch the token balance
+    const tokenPublicKey = new PublicKey(tokenAddress);
+    const tokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, {
+      programId: TOKEN_PROGRAM_ID,
+    });
+
+    const tokenAccount = tokenAccounts.value.find(account => 
+      account.account.data.parsed.info.mint === tokenPublicKey.toBase58()
+    );
+
+    if (tokenAccount) {
+      return tokenAccount.account.data.parsed.info.tokenAmount.uiAmount;
+    } else {
       return 0;
     }
-  };
+  } catch (error) {
+    console.error('Error fetching token balance:', error);
+    return 0;
+  }
+};
 
   const fetchPrices = async (tokenIds) => {
     setLoading(true);
@@ -131,7 +138,7 @@ const TokenSwap = () => {
         setFromBalance(balance);
       }
     };
-  
+
     fetchBalance();
   }, [fromTokenAddress, wallet.publicKey]);
 
