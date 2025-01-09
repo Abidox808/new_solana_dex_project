@@ -238,7 +238,7 @@ const TokenSwap = () => {
             </div>
               <div className="input-group">
               <button 
-                  className="token-select-button" 
+                  className="token-select-button dropdown-selected" 
                   onClick={() => {
                     setSelectingFor('from');
                     setIsTokenSelectModalOpen(true);
@@ -247,7 +247,7 @@ const TokenSwap = () => {
                   {fromToken ? (
                     <>
                       <img 
-                        src={tokens.find(t => t.symbol === fromToken)?.image} 
+                        src={tokens.find(t => t.symbol === fromToken)?.logoURI} 
                         className="token-icon"
                       />
                       <span>{fromToken}</span>

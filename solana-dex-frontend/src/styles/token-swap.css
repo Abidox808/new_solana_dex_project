@@ -15,7 +15,7 @@
   flex-wrap: wrap;
   gap: 20px;
   width: 100%;
-  max-width: 1200px;
+  max-width: 900px;
 }
 
 .token-swap {
@@ -88,9 +88,7 @@
   border-radius: 8px;
   max-height: 138px;
   justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding: 15px;
+  padding: 24px;
 }
 
 .handle-swap-btn{
