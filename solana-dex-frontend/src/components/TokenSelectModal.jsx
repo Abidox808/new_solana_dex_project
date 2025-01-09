@@ -42,7 +42,7 @@ const TokenSelectModal = ({ isOpen, tokens, onSelectToken, onClose }) => {
                 onClose();
               }}
             >
-              <img src={token.image} alt={token.symbol} className="token-image" />
+              <img src={token.logoURI} alt={token.symbol} className="token-image" />
               <div className="token-info">
                 <span className="token-symbol">{token.symbol}</span>
                 <span className="token-name">{token.name}</span>
