@@ -185,29 +185,31 @@ async function placeLimitOrder(fromToken, toToken, price, FromTokenAmount, walle
     // Check if we can take fees based on the trading pair
     const canTakeFees = await determineFeePossibility(fromMint, toMint, 'ExactIn');
 
-    // Base order structure following Jupiter's Limit Order v2 API exactly
-    let createOrderBody = {
+    // Build the params object first
+    const params = {
+      makingAmount: makingAmount.toString(),
+      takingAmount: takingAmount.toString()
+    };
+
+    // Only add feeBps to params if we can take fees
+    if (canTakeFees.canTakeFee && process.env.REFERRAL_ACCOUNT_PUBKEY) {
+      params.feeBps = platformFeeBps.toString();
+    }
+
+    // Base order structure following Jupiter's Limit Order v2 API
+    const createOrderBody = {
       inputMint: fromMint,
       outputMint: toMint,
       maker: walletAddress,
       payer: walletAddress,
-      params: {
-        makingAmount: makingAmount.toString(),
-        takingAmount: takingAmount.toString()
-      },
-      computeUnitPrice: "auto"
+      params: params,
+      computeUnitPrice: "auto",
+      wrapAndUnwrapSol: true
     };
 
-    // Add fees only if supported and referral account is available
+    // Add referral separately only if we can take fees
     if (canTakeFees.canTakeFee && process.env.REFERRAL_ACCOUNT_PUBKEY) {
-      createOrderBody = {
-        ...createOrderBody,
-        params: {
-          ...createOrderBody.params,
-          feeBps: platformFeeBps.toString()
-        },
-        referral: process.env.REFERRAL_ACCOUNT_PUBKEY
-      };
+      createOrderBody.referral = process.env.REFERRAL_ACCOUNT_PUBKEY;
     }
 
     console.log('Sending limit order request:', JSON.stringify(createOrderBody, null, 2));
