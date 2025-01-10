@@ -64,17 +64,20 @@ const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, s
     const decimal = decimals;
     const outputMint = toToken;
 
+    const amountInSmallestUnit = Math.round(fromAmount * Math.pow(10, decimal));
+
     // Fetch the quote with platform fee
     const quoteResponse = await axios.get(process.env.JUPITER_SWAP_QUOTE_API_URL, {
       params: {
         inputMint: inputMint,
         outputMint: outputMint,
-        amount: fromAmount * Math.pow(10, decimal),
+        amount: amountInSmallestUnit,
         slippageBps: slippage * 100,
         platformFeeBps: platformFeeBps, // Add platform fee in basis points
       }
     });
-
+    
+    console.log(quoteResponse)
     const quoteRes = quoteResponse.data;
     console.log('Jupiter API Response:', quoteRes);
 
