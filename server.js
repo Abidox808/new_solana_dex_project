@@ -201,13 +201,8 @@ async function placeLimitOrder(fromToken, toToken, price, FromTokenAmount, walle
 
     // Add feeBps and referral if supported
     if (canTakeFees.canTakeFee && process.env.REFERRAL_ACCOUNT_PUBKEY) {
-      // Add feeBps to params
-      createOrderBody.params.feeBps = platformFeeBps.toString();
-
-      // Add referral to main body
-      createOrderBody.referral = process.env.REFERRAL_ACCOUNT_PUBKEY;
-
-      // Create fee account (if needed)
+      // Create fee account
+      let feeAccount;
       try {
         const referralPubkey = new PublicKey(process.env.REFERRAL_ACCOUNT_PUBKEY);
         const feeMintPubkey = new PublicKey(canTakeFees.feeMint);
@@ -222,6 +217,12 @@ async function placeLimitOrder(fromToken, toToken, price, FromTokenAmount, walle
         );
 
         console.log('Fee account created successfully:', feeAccount.toBase58());
+
+        // Add feeBps to params
+        createOrderBody.params.feeBps = platformFeeBps.toString();
+
+        // Use the fee account as the referral
+        createOrderBody.referral = feeAccount.toBase58();
       } catch (error) {
         console.error('Error creating fee account:', error);
         // If fee account creation fails, proceed without fees
