@@ -7,8 +7,6 @@ const { Keypair, PublicKey } = require('@solana/web3.js');
 const { combineAndDeduplicateData,  placePerpsOrder } = require('./services/tokenService');
 const axios = require('axios');
 
-
-
 // Load keypair from environment variables
 let keypairData;
 try {
@@ -19,14 +17,15 @@ try {
 }
 
 const keypair = Keypair.fromSecretKey(new Uint8Array(keypairData));
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const client = new MongoClient(process.env.MONGO_CONNECTION_STRING);
-client.connect();
-console.log('db connected');
-const database = client.db('solana_dex');
+const SUPPORTED_FEE_TOKENS = {
+  SOL: 'So11111111111111111111111111111111111111112',
+  USDC: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+  USDT: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
+  // Add more tokens as needed
+};
 
 const fetchMintAddressFromJupiter = async (symbol) => {
   try {
@@ -66,69 +65,86 @@ const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, s
 
     const amountInSmallestUnit = Math.round(fromAmount * Math.pow(10, decimal));
 
-    // Fetch the quote with platform fee
+    // Initial quote request without fee parameters
     const quoteResponse = await axios.get(process.env.JUPITER_SWAP_QUOTE_API_URL, {
       params: {
         inputMint: inputMint,
         outputMint: outputMint,
         amount: amountInSmallestUnit,
         slippageBps: slippage * 100,
-        platformFeeBps: platformFeeBps, // Add platform fee in basis points
       }
     });
 
-    console.log(quoteResponse)
     const quoteRes = quoteResponse.data;
     console.log('Jupiter API Response:', quoteRes);
 
-     // 2. Determine which token will be used for the fee
-     const feeMint = quoteResponse.data.swapMode === 'ExactIn' ? outputMint : inputMint;
-     console.log('Fee Mint:', feeMint);
- 
-     // Ensure we have a valid referral account pubkey
-     if (!process.env.REFERRAL_ACCOUNT_PUBKEY) {
-       throw new Error('Missing REFERRAL_ACCOUNT_PUBKEY in environment variables');
-     }
- 
-     // 3. Find the fee account - with proper error handling
-     let feeAccount;
-     try {
-       const referralPubkey = new PublicKey(process.env.REFERRAL_ACCOUNT_PUBKEY);
-       const feeMintPubkey = new PublicKey(feeMint);
-       
-       [feeAccount] = PublicKey.findProgramAddressSync(
-         [
-           Buffer.from("referral_ata"),
-           referralPubkey.toBuffer(),
-           feeMintPubkey.toBuffer(),
-         ],
-         new PublicKey("REFER4ZgmyYx9c6He5XfaTMiGfdLwRnkV4RPp9t9iF3")
-       );
-     } catch (error) {
-       console.error('Error creating fee account:', error);
-       throw new Error('Failed to create fee account: ' + error.message);
-     }
- 
-     // 4. Ensure wallet address is properly formatted
-     let userPublicKey;
-     try {
-       userPublicKey = new PublicKey(walletAddress).toString();
-     } catch (error) {
-       console.error('Error with wallet address:', error);
-       throw new Error('Invalid wallet address provided');
-     }
+    // Check if we can take fees based on the trading pair and swap mode
+    const canTakeFees = await determineFeePossibility(inputMint, outputMint, quoteRes.swapMode);
 
-    // Perform the swap with the fee account
+    if (!canTakeFees.canTakeFee) {
+      console.log('Proceeding without fees:', canTakeFees.reason);
+      // Perform swap without fee parameters
+      const swapTransaction = await axios.post(process.env.JUPITER_SWAP_API_URL, {
+        quoteResponse: quoteRes,
+        userPublicKey: walletAddress,
+        wrapAndUnwrapSol: true,
+        useSharedAccounts: true
+      });
+
+      return swapTransaction.data.swapTransaction;
+    }
+
+    // If we can take fees, determine which token to use
+    const feeMint = canTakeFees.feeMint;
+    console.log('Fee will be taken in:', feeMint);
+
+    // Calculate fee account
+    let feeAccount;
+    try {
+      const referralPubkey = new PublicKey(process.env.REFERRAL_ACCOUNT_PUBKEY);
+      const feeMintPubkey = new PublicKey(feeMint);
+      
+      [feeAccount] = PublicKey.findProgramAddressSync(
+        [
+          Buffer.from("referral_ata"),
+          referralPubkey.toBuffer(),
+          feeMintPubkey.toBuffer(),
+        ],
+        new PublicKey("REFER4ZgmyYx9c6He5XfaTMiGfdLwRnkV4RPp9t9iF3")
+      );
+    } catch (error) {
+      console.error('Error creating fee account:', error);
+      // If fee account creation fails, proceed without fees
+      const swapTransaction = await axios.post(process.env.JUPITER_SWAP_API_URL, {
+        quoteResponse: quoteRes,
+        userPublicKey: walletAddress,
+        wrapAndUnwrapSol: true,
+        useSharedAccounts: true
+      });
+      return swapTransaction.data.swapTransaction;
+    }
+
+    // Get new quote with fee parameters
+    const quoteWithFeeResponse = await axios.get(process.env.JUPITER_SWAP_QUOTE_API_URL, {
+      params: {
+        inputMint: inputMint,
+        outputMint: outputMint,
+        amount: amountInSmallestUnit,
+        slippageBps: slippage * 100,
+        platformFeeBps: platformFeeBps,
+      }
+    });
+
+    // Perform the swap with fee parameters
     const swapTransaction = await axios.post(process.env.JUPITER_SWAP_API_URL, {
-      quoteResponse: quoteRes,
+      quoteResponse: quoteWithFeeResponse.data,
       userPublicKey: walletAddress,
       wrapAndUnwrapSol: true,
       useSharedAccounts: true,
+      feeAccount: feeAccount.toBase58()
     });
 
-    const swapResult = swapTransaction.data.swapTransaction;
-    console.log('Swap Result:', swapResult);
-    return swapResult;
+    return swapTransaction.data.swapTransaction;
   } catch (error) {
     console.error('Error in performSwap:', error);
     throw new Error(`Swap execution failed: ${error.message}`);
@@ -299,4 +315,53 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   //console.log(`Server running at http://localhost:${PORT}`);
 });
+
+// Helper function to determine if we can take fees and which token to use
+const determineFeePossibility = async (inputMint, outputMint, swapMode) => {
+  // Check if either input or output mint is in our supported list
+  const isInputSupported = Object.values(SUPPORTED_FEE_TOKENS).includes(inputMint);
+  const isOutputSupported = Object.values(SUPPORTED_FEE_TOKENS).includes(outputMint);
+
+  if (!isInputSupported && !isOutputSupported) {
+    return {
+      canTakeFee: false,
+      reason: 'Neither token is in supported fee token list'
+    };
+  }
+
+  // For ExactIn swaps, we can use either input or output mint
+  if (swapMode === 'ExactIn') {
+    // Prefer output token if supported, otherwise use input token
+    if (isOutputSupported) {
+      return {
+        canTakeFee: true,
+        feeMint: outputMint
+      };
+    } else if (isInputSupported) {
+      return {
+        canTakeFee: true,
+        feeMint: inputMint
+      };
+    }
+  }
+  // For ExactOut swaps, we must use input mint
+  else if (swapMode === 'ExactOut') {
+    if (isInputSupported) {
+      return {
+        canTakeFee: true,
+        feeMint: inputMint
+      };
+    } else {
+      return {
+        canTakeFee: false,
+        reason: 'ExactOut swap but input token not supported for fees'
+      };
+    }
+  }
+
+  return {
+    canTakeFee: false,
+    reason: 'Unknown swap mode or unsupported configuration'
+  };
+};
 
