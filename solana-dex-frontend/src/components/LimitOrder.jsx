@@ -363,37 +363,6 @@ const LimitOrder = () => {
     }
   };
 
-  const calculateRate = (fromToken, toToken, prices) => {
-    console.log('Prices:', prices);
-    console.log('From Token:', fromToken);
-    console.log('To Token:', toToken);
-  
-    const isFromTokenStable = ['USDC', 'USDT'].includes(fromToken);
-    const isToTokenStable = ['USDC', 'USDT'].includes(toToken);
-  
-    const fromTokenPrice = parseFloat(prices[fromToken]);
-    const toTokenPrice = parseFloat(prices[toToken]);
-  
-    console.log('From Token Price:', fromTokenPrice);
-    console.log('To Token Price:', toTokenPrice);
-  
-    if (isFromTokenStable && !isToTokenStable) {
-      if (!isNaN(toTokenPrice) && toTokenPrice !== 0) {
-        return (1 / toTokenPrice).toFixed(6);
-      }
-    } else if (!isFromTokenStable && isToTokenStable) {
-      if (!isNaN(fromTokenPrice)) {
-        return fromTokenPrice.toFixed(6);
-      }
-    }
-  
-    if (!isNaN(fromTokenPrice)) {
-      return fromTokenPrice.toFixed(6);
-    }
-  
-    return '0.00';
-  };
-
   const totalUSDC = (amount && price && prices[toToken])
     ? ((amount * price) / prices[toToken]).toFixed(2)
     : '0.00';
@@ -457,7 +426,6 @@ const LimitOrder = () => {
 
   // Generate the TradingView symbol based on the selected tokens
   const tradingViewSymbol = `${fromToken}:${toToken}`;
-  const rate = calculateRate(fromToken, toToken, prices);
 
   return (
     <div>
@@ -546,7 +514,7 @@ const LimitOrder = () => {
               <label>Sell {fromToken} at rate</label>
               <input
                 type="number"
-                value={rate}
+                value={price}
                 onChange={(e) => setPrice(e.target.value)}
                 placeholder="Enter price"
                 className="limit-order-input"
