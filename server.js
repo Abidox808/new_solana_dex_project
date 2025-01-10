@@ -82,7 +82,7 @@ const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, s
     console.log('Jupiter API Response:', quoteRes);
 
      // 2. Determine which token will be used for the fee
-     feeMint = new PublicKey('So11111111111111111111111111111111111111112').toString();
+     const feeMint = quoteResponse.data.swapMode === 'ExactIn' ? outputMint : inputMint;
      console.log('Fee Mint:', feeMint);
  
      // Ensure we have a valid referral account pubkey
@@ -124,7 +124,6 @@ const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, s
       userPublicKey: walletAddress,
       wrapAndUnwrapSol: true,
       useSharedAccounts: true,
-      feeAccount: feeAccount.toBase58(), // Add fee account
     });
 
     const swapResult = swapTransaction.data.swapTransaction;
