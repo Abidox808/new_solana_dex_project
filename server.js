@@ -196,19 +196,19 @@ async function placeLimitOrder(fromToken, toToken, price, FromTokenAmount, walle
         expiredAt: undefined
       },
       computeUnitPrice: "auto",
-      wrapAndUnwrapSol: true
     };
 
     // If we can take fees, add the fee parameters
     if (canTakeFees.canTakeFee) {
       console.log('Adding fees to limit order:', platformFeeBps);
+      const referralPubkey = new PublicKey(process.env.REFERRAL_ACCOUNT_PUBKEY);
       createOrderBody = {
         ...createOrderBody,
         params: {
           ...createOrderBody.params,
           feeBps: platformFeeBps.toString()
         },
-        referral: process.env.REFERRAL_ACCOUNT_PUBKEY
+        referral: referralPubkey.toBase58()
       };
     } else {
       console.log('Proceeding without fees:', canTakeFees.reason);
