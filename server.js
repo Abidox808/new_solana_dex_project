@@ -57,98 +57,88 @@ app.get('/api/tokens', async (req, res) => {
   }
 });
 
-const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, slippage, walletAddress, platformFeeBps) => {
+async function placeLimitOrder(fromToken, toToken, price, FromTokenAmount, walletAddress, ToTokenAmount, sendingBase, platformFeeBps) {
   try {
-    const inputMint = fromToken;
-    const decimal = decimals;
-    const outputMint = toToken;
+    // Fetch mint addresses and decimals for the tokens
+    const fromTokenData = await fetchMintAddressFromJupiter(fromToken);
+    const fromMint = fromTokenData.address;
+    const fromDecimal = fromTokenData.decimal;
 
-    const amountInSmallestUnit = Math.round(fromAmount * Math.pow(10, decimal));
+    const toTokenData = await fetchMintAddressFromJupiter(toToken);
+    const toMint = toTokenData.address;
+    const toDecimal = toTokenData.decimal;
 
-    // Initial quote request without fee parameters
-    const quoteResponse = await axios.get(process.env.JUPITER_SWAP_QUOTE_API_URL, {
+    // Calculate amounts in smallest units
+    const makingAmount = Math.round(FromTokenAmount * Math.pow(10, fromDecimal));
+    const takingAmount = Math.round(ToTokenAmount * Math.pow(10, toDecimal));
+
+    // Check if we can take fees based on the trading pair
+    const canTakeFees = await determineFeePossibility(fromMint, toMint, 'ExactIn');
+
+    // Base order structure
+    let createOrderBody = {
+      inputMint: fromMint,
+      outputMint: toMint,
+      maker: walletAddress,
+      payer: walletAddress,
       params: {
-        inputMint: inputMint,
-        outputMint: outputMint,
-        amount: amountInSmallestUnit,
-        slippageBps: slippage * 100,
+        makingAmount: makingAmount.toString(),
+        takingAmount: takingAmount.toString()
+      },
+      computeUnitPrice: "auto",
+      wrapAndUnwrapSol: true
+    };
+
+    // Add feeBps and referral if supported
+    if (canTakeFees.canTakeFee && process.env.REFERRAL_ACCOUNT_PUBKEY) {
+      // Add feeBps to params
+      createOrderBody.params.feeBps = platformFeeBps.toString();
+
+      // Add referral to main body
+      createOrderBody.referral = process.env.REFERRAL_ACCOUNT_PUBKEY;
+
+      // Create fee account (if needed)
+      try {
+        const referralPubkey = new PublicKey(process.env.REFERRAL_ACCOUNT_PUBKEY);
+        const feeMintPubkey = new PublicKey(canTakeFees.feeMint);
+
+        [feeAccount] = PublicKey.findProgramAddressSync(
+          [
+            Buffer.from("referral_ata"),
+            referralPubkey.toBuffer(),
+            feeMintPubkey.toBuffer(),
+          ],
+          new PublicKey("REFER4ZgmyYx9c6He5XfaTMiGfdLwRnkV4RPp9t9iF3")
+        );
+
+        console.log('Fee account created successfully:', feeAccount.toBase58());
+      } catch (error) {
+        console.error('Error creating fee account:', error);
+        // If fee account creation fails, proceed without fees
+        delete createOrderBody.params.feeBps;
+        delete createOrderBody.referral;
       }
-    });
-
-    const quoteRes = quoteResponse.data;
-    console.log('Jupiter API Response:', quoteRes);
-
-    // Check if we can take fees based on the trading pair and swap mode
-    const canTakeFees = await determineFeePossibility(inputMint, outputMint, quoteRes.swapMode);
-
-    if (!canTakeFees.canTakeFee) {
-      console.log('Proceeding without fees:', canTakeFees.reason);
-      // Perform swap without fee parameters
-      const swapTransaction = await axios.post(process.env.JUPITER_SWAP_API_URL, {
-        quoteResponse: quoteRes,
-        userPublicKey: walletAddress,
-        wrapAndUnwrapSol: true,
-        useSharedAccounts: true
-      });
-
-      return swapTransaction.data.swapTransaction;
     }
 
-    // If we can take fees, determine which token to use
-    const feeMint = canTakeFees.feeMint;
-    console.log('Fee will be taken in:', feeMint);
+    console.log('Sending limit order request:', JSON.stringify(createOrderBody, null, 2));
 
-    // Calculate fee account
-    let feeAccount;
-    try {
-      const referralPubkey = new PublicKey(process.env.REFERRAL_ACCOUNT_PUBKEY);
-      const feeMintPubkey = new PublicKey(feeMint);
-      
-      [feeAccount] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("referral_ata"),
-          referralPubkey.toBuffer(),
-          feeMintPubkey.toBuffer(),
-        ],
-        new PublicKey("REFER4ZgmyYx9c6He5XfaTMiGfdLwRnkV4RPp9t9iF3")
-      );
-    } catch (error) {
-      console.error('Error creating fee account:', error);
-      // If fee account creation fails, proceed without fees
-      const swapTransaction = await axios.post(process.env.JUPITER_SWAP_API_URL, {
-        quoteResponse: quoteRes,
-        userPublicKey: walletAddress,
-        wrapAndUnwrapSol: true,
-        useSharedAccounts: true
-      });
-      return swapTransaction.data.swapTransaction;
-    }
-
-    // Get new quote with fee parameters
-    const quoteWithFeeResponse = await axios.get(process.env.JUPITER_SWAP_QUOTE_API_URL, {
-      params: {
-        inputMint: inputMint,
-        outputMint: outputMint,
-        amount: amountInSmallestUnit,
-        slippageBps: slippage * 100,
-        platformFeeBps: platformFeeBps,
+    // Send request to Jupiter Limit Order v2 API
+    const response = await axios.post(
+      `${process.env.JUPITER_LIMIT_ORDER_API_URL}createOrder`,
+      createOrderBody,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
       }
-    });
+    );
 
-    // Perform the swap with fee parameters
-    const swapTransaction = await axios.post(process.env.JUPITER_SWAP_API_URL, {
-      quoteResponse: quoteWithFeeResponse.data,
-      userPublicKey: walletAddress,
-      wrapAndUnwrapSol: true,
-      feeAccount: feeAccount.toBase58()
-    });
-
-    return swapTransaction.data.swapTransaction;
+    return response.data;
   } catch (error) {
-    console.error('Error in performSwap:', error);
-    throw new Error(`Swap execution failed: ${error.message}`);
+    console.error('Error in placeLimitOrder:', error.response?.data || error);
+    throw new Error(`Limit order placement failed: ${error.response?.data?.message || error.message}`);
   }
-};
+}
 
 app.post('/api/swap', async (req, res) => {
   try {
