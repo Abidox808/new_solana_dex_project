@@ -364,24 +364,34 @@ const LimitOrder = () => {
   };
 
   const calculateRate = (fromToken, toToken, prices) => {
-    // Check if the fromToken is a stablecoin (e.g., USDC, USDT)
-    const isFromTokenStable = ['USDC', 'USDT'].includes(fromToken);
+    console.log('Prices:', prices);
+    console.log('From Token:', fromToken);
+    console.log('To Token:', toToken);
   
-    // Check if the toToken is a stablecoin (e.g., USDC, USDT)
+    const isFromTokenStable = ['USDC', 'USDT'].includes(fromToken);
     const isToTokenStable = ['USDC', 'USDT'].includes(toToken);
   
-    // If selling a stablecoin for a non-stable token, invert the rate
+    const fromTokenPrice = parseFloat(prices[fromToken]);
+    const toTokenPrice = parseFloat(prices[toToken]);
+  
+    console.log('From Token Price:', fromTokenPrice);
+    console.log('To Token Price:', toTokenPrice);
+  
     if (isFromTokenStable && !isToTokenStable) {
-      return (1 / prices[toToken]).toFixed(6); // Rate in terms of the non-stable token
+      if (!isNaN(toTokenPrice) && toTokenPrice !== 0) {
+        return (1 / toTokenPrice).toFixed(6);
+      }
+    } else if (!isFromTokenStable && isToTokenStable) {
+      if (!isNaN(fromTokenPrice)) {
+        return fromTokenPrice.toFixed(6);
+      }
     }
   
-    // If selling a non-stable token for a stablecoin, use the market price directly
-    if (!isFromTokenStable && isToTokenStable) {
-      return prices[fromToken]?.toFixed(6) || '0.00';
+    if (!isNaN(fromTokenPrice)) {
+      return fromTokenPrice.toFixed(6);
     }
   
-    // Default: Use the market price directly
-    return prices[fromToken]?.toFixed(6) || '0.00';
+    return '0.00';
   };
 
   const totalUSDC = (amount && price && prices[toToken])
