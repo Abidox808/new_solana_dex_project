@@ -9,9 +9,9 @@ import ErrorBoundary from './components/ErrorBoundary';
 
 // components
 import Header from './components/Header';
-import Footer from './components/Footer';
-import ProtectedRoute from './components/ProtectedRoute';
-import BalanceChecker from './components/BalanceChecker'; // Import BalanceChecker
+//import Footer from './components/Footer';
+//import ProtectedRoute from './components/ProtectedRoute';
+//import BalanceChecker from './components/BalanceChecker'; // Import BalanceChecker
 import './chartSetup'; // Import the chart setup file
 import "@fontsource/space-grotesk"; // Defaults to weight 400
 
@@ -22,38 +22,38 @@ import './styles/theme.css'; // Import the theme styles
 import './styles/styles.css'; // Ensure the global styles are imported
 
 // Lazy load components
-const Trade = lazy(() => import('./pages/Trade'));
-const Wallet = lazy(() => import('./pages/Wallet'));
-const PortfolioPage = lazy(() => import('./components/PortfolioPage')); // Updated import path
-const UserProfile = lazy(() => import('./components/UserProfile'));
-const News = lazy(() => import('./components/News'));
-const TransactionHistory = lazy(() => import('./components/TransactionHistory'));
-const AnalyticsDashboard = lazy(() => import('./components/AnalyticsDashboard'));
-const TradingDashboard = lazy(() => import('./components/TradingDashboard'));
-const SignIn = lazy(() => import('./components/SignIn'));
-const TrailingStopOrder = lazy(() => import('./components/TrailingStopOrder'));
-const ConditionalOrder = lazy(() => import('./components/ConditionalOrder'));
-const TradingBot = lazy(() => import('./components/TradingBot'));
-const AdvancedAnalytics = lazy(() => import('./components/AdvancedAnalytics'));
-const OrderNotifications = lazy(() => import('./components/OrderNotifications'));
-const PriceAlerts = lazy(() => import('./components/PriceAlerts'));
-const InteractiveTutorials = lazy(() => import('./components/InteractiveTutorials'));
-const SocialTrading = lazy(() => import('./components/SocialTrading'));
-const PortfolioManagement = lazy(() => import('./components/PortfolioManagement'));
-const ExampleChart = lazy(() => import('./components/ExampleChart'));
+//const Trade = lazy(() => import('./pages/Trade'));
+//const Wallet = lazy(() => import('./pages/Wallet'));
+//const PortfolioPage = lazy(() => import('./components/PortfolioPage')); // Updated import path
+//const UserProfile = lazy(() => import('./components/UserProfile'));
+//const News = lazy(() => import('./components/News'));
+//const TransactionHistory = lazy(() => import('./components/TransactionHistory'));
+//const AnalyticsDashboard = lazy(() => import('./components/AnalyticsDashboard'));
+//const TradingDashboard = lazy(() => import('./components/TradingDashboard'));
+//const SignIn = lazy(() => import('./components/SignIn'));
+//const TrailingStopOrder = lazy(() => import('./components/TrailingStopOrder'));
+//const ConditionalOrder = lazy(() => import('./components/ConditionalOrder'));
+//const TradingBot = lazy(() => import('./components/TradingBot'));
+//const AdvancedAnalytics = lazy(() => import('./components/AdvancedAnalytics'));
+//const OrderNotifications = lazy(() => import('./components/OrderNotifications'));
+//const PriceAlerts = lazy(() => import('./components/PriceAlerts'));
+//const InteractiveTutorials = lazy(() => import('./components/InteractiveTutorials'));
+//const SocialTrading = lazy(() => import('./components/SocialTrading'));
+//const PortfolioManagement = lazy(() => import('./components/PortfolioManagement'));
+//const ExampleChart = lazy(() => import('./components/ExampleChart'));
 const LimitOrder = lazy(() => import('./components/LimitOrder'));
-const DCA = lazy(() => import('./components/DCA'));
-const Perps = lazy(() => import('./components/Perps'));
-const CustomizableDashboard = lazy(() => import('./components/CustomizableDashboard'));
+//const DCA = lazy(() => import('./components/DCA'));
+//const Perps = lazy(() => import('./components/Perps'));
+//const CustomizableDashboard = lazy(() => import('./components/CustomizableDashboard'));
 const TokenSwap = lazy(() => import('./components/TokenSwap'));
-const TokenSniper = lazy(() => import('./pages/TokenSniper')); // Corrected import path
-const GamingPage = lazy(() => import('./components/GamingPage')); // Import the new GamingPage component
-const LendingPage = lazy(() => import('./components/LendingPage')); // Import the new LendingPage component
-const MusicPage = lazy(() => import('./components/MusicPage')); // Import the new MusicPage component
-const YieldFarmingPage = lazy(() => import('./components/YieldFarmingPage')); // Import the new YieldFarmingPage component
-const StakingPage = lazy(() => import('./components/StakingPage')); // Import the new StakingPage component
-const LiquidityPage = lazy(() => import('./components/LiquidityPage')); // Import the new LiquidityPage component
-const ComingSoon = lazy(() => import('./components/ComingSoon'));
+//const TokenSniper = lazy(() => import('./pages/TokenSniper')); // Corrected import path
+//const GamingPage = lazy(() => import('./components/GamingPage')); // Import the new GamingPage component
+//const LendingPage = lazy(() => import('./components/LendingPage')); // Import the new LendingPage component
+//const MusicPage = lazy(() => import('./components/MusicPage')); // Import the new MusicPage component
+//const YieldFarmingPage = lazy(() => import('./components/YieldFarmingPage')); // Import the new YieldFarmingPage component
+//const StakingPage = lazy(() => import('./components/StakingPage')); // Import the new StakingPage component
+//const LiquidityPage = lazy(() => import('./components/LiquidityPage')); // Import the new LiquidityPage component
+//const ComingSoon = lazy(() => import('./components/ComingSoon'));
 
 
 function App() {
@@ -73,7 +73,7 @@ function App() {
                   <Route path="/" element={<Navigate to="/swap" />} />
                   <Route path="/swap" element={<TokenSwap />} />
                   <Route path="/limit-order" element={<LimitOrder />} />
-                  <Route path="/dca" element={<ComingSoon />} />
+                  {/*<Route path="/dca" element={<ComingSoon />} />
                   <Route path="/perps" element={<ComingSoon />} />
                   <Route path="/wallet" element={<ComingSoon />} />
                   <Route path="/portfolio" element={<ComingSoon />} />
@@ -101,11 +101,10 @@ function App() {
                   <Route path="/music" element={<ComingSoon />} />
                   <Route path="/yield-farming" element={<ComingSoon />} />
                   <Route path="/staking" element={<ComingSoon />} />
-                  <Route path="/liquidity" element={<ComingSoon />} />
+                  <Route path="/liquidity" element={<ComingSoon />} />*/}
               </Routes>
               </Suspense>
             </ErrorBoundary>
-            <Footer />
           </Router>
         </ThemeProvider>
       </WalletProvider>
