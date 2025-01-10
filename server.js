@@ -96,7 +96,7 @@ const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, s
     console.log('Fee Mint:', feeMint);
 
     // Find the fee account
-    const [feeAccount] = await PublicKey.findProgramAddressSync(
+    const [feeAccount] = PublicKey.findProgramAddressSync(
       [
         Buffer.from("referral_ata"),
         new PublicKey(process.env.REFERRAL_ACCOUNT_PUBKEY).toBuffer(),
@@ -112,7 +112,7 @@ const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, s
       wrapAndUnwrapSol: true,
       feeAccount: feeAccount.toBase58(), // Add fee account
     });
-
+    console.log('Swap Request Body:', swapRequestBody);
     const swapResult = swapTransaction.data.swapTransaction;
     console.log('Swap Result:', swapResult);
     return swapResult;
