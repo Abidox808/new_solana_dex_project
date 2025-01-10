@@ -3,7 +3,7 @@ require('dotenv').config();
 const {MongoClient} = require('mongodb');
 const express = require('express');
 const cors = require('cors');
-const { Keypair } = require('@solana/web3.js');
+const { Keypair, PublicKey } = require('@solana/web3.js');
 const { combineAndDeduplicateData,  placePerpsOrder } = require('./services/tokenService');
 const axios = require('axios');
 
@@ -58,31 +58,42 @@ app.get('/api/tokens', async (req, res) => {
   }
 });
 
-const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, slippage, walletAddress) => {
+const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, slippage, walletAddress, platformFeeBps) => {
   try {
-    
     const inputMint = fromToken;
     const decimal = decimals;
     const outputMint = toToken;
 
-    
+    // Fetch the quote with platform fee
     const quoteResponse = await axios.get(process.env.JUPITER_SWAP_QUOTE_API_URL, {
       params: {
         inputMint: inputMint,
         outputMint: outputMint,
         amount: fromAmount * Math.pow(10, decimal),
         slippageBps: slippage * 100,
+        platformFeeBps: platformFeeBps, // Add platform fee in basis points
       }
     });
 
     const quoteRes = quoteResponse.data;
     console.log('Jupiter API Response:', quoteRes);
 
-    
+    // Find the fee account
+    const [feeAccount] = await PublicKey.findProgramAddressSync(
+      [
+        Buffer.from("referral_ata"),
+        new PublicKey(process.env.REFERRAL_ACCOUNT_PUBKEY).toBuffer(),
+        new PublicKey(inputMint).toBuffer(),
+      ],
+      new PublicKey("REFER4ZgmyYx9c6He5XfaTMiGfdLwRnkV4RPp9t9iF3")
+    );
+
+    // Perform the swap with the fee account
     const swapTransaction = await axios.post(process.env.JUPITER_SWAP_API_URL, {
       quoteResponse: quoteRes,
       userPublicKey: walletAddress,
-      wrapAndUnwrapSol: true
+      wrapAndUnwrapSol: true,
+      feeAccount: feeAccount.toBase58(), // Add fee account
     });
 
     const swapResult = swapTransaction.data.swapTransaction;
@@ -96,13 +107,13 @@ const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, s
 
 app.post('/api/swap', async (req, res) => {
   try {
-    const { fromToken, toToken, decimals, fromAmount, toAmount, slippage, walletAddress } = req.body;
+    const { fromToken, toToken, decimals, fromAmount, toAmount, slippage, walletAddress, platformFeeBps } = req.body;
 
-    if (!fromToken || !toToken || !fromAmount || !decimals || !toAmount || !slippage || !walletAddress) {
+    if (!fromToken || !toToken || !fromAmount || !decimals || !toAmount || !slippage || !walletAddress || !platformFeeBps) {
       return res.status(400).json({ message: 'Invalid input parameters' });
     }
 
-    const swapResult = await performSwap(fromToken, toToken, decimals, fromAmount, toAmount, slippage, walletAddress);
+    const swapResult = await performSwap(fromToken, toToken, decimals, fromAmount, toAmount, slippage, walletAddress, platformFeeBps);
 
     res.json({ message: 'Swap successful', swapResult });
   } catch (error) {
