@@ -93,6 +93,8 @@ const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, s
       throw new Error(`Invalid fee mint address: ${feeMint}`);
     }
 
+    console.log('Fee Mint:', feeMint);
+
     // Find the fee account
     const [feeAccount] = await PublicKey.findProgramAddressSync(
       [
