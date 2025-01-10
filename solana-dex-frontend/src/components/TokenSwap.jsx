@@ -213,6 +213,7 @@ const TokenSwap = () => {
         toAmount,
         walletAddress,
         slippage,
+        walletAddress: wallet.publicKey.toString(),
         platformFeeBps: 20,
       };
       console.log('Swap Payload:', payload);

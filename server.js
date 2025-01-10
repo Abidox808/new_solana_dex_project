@@ -58,7 +58,7 @@ app.get('/api/tokens', async (req, res) => {
   }
 });
 
-const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, slippage, walletAddress, platformFeeBps) => {
+const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, slippage, walletAddress, walletAddress, platformFeeBps) => {
   try {
     const inputMint = fromToken;
     const decimal = decimals;
@@ -81,29 +81,42 @@ const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, s
     const quoteRes = quoteResponse.data;
     console.log('Jupiter API Response:', quoteRes);
 
-    const feeMint = quoteRes.swapMode === 'ExactIn' ? outputMint : inputMint;
-
-    // Validate the feeMint before creating a PublicKey
-    if (!feeMint || typeof feeMint !== 'string') {
-      throw new Error('Invalid fee mint address');
-    }
-
-    // Ensure feeMint is a valid Solana address
-    if (!PublicKey.isOnCurve(feeMint)) {
-      throw new Error(`Invalid fee mint address: ${feeMint}`);
-    }
-
-    console.log('Fee Mint:', feeMint);
-
-    // Find the fee account
-    const [feeAccount] = PublicKey.findProgramAddressSync(
-      [
-        Buffer.from("referral_ata"),
-        new PublicKey(process.env.REFERRAL_ACCOUNT_PUBKEY).toBuffer(),
-        new PublicKey(feeMint).toBuffer(),
-      ],
-      new PublicKey("REFER4ZgmyYx9c6He5XfaTMiGfdLwRnkV4RPp9t9iF3")
-    );
+     // 2. Determine which token will be used for the fee
+     const feeMint = quoteResponse.data.swapMode === 'ExactIn' ? outputMint : inputMint;
+     console.log('Fee Mint:', feeMint);
+ 
+     // Ensure we have a valid referral account pubkey
+     if (!process.env.REFERRAL_ACCOUNT_PUBKEY) {
+       throw new Error('Missing REFERRAL_ACCOUNT_PUBKEY in environment variables');
+     }
+ 
+     // 3. Find the fee account - with proper error handling
+     let feeAccount;
+     try {
+       const referralPubkey = new PublicKey(process.env.REFERRAL_ACCOUNT_PUBKEY);
+       const feeMintPubkey = new PublicKey(feeMint);
+       
+       [feeAccount] = PublicKey.findProgramAddressSync(
+         [
+           Buffer.from("referral_ata"),
+           referralPubkey.toBuffer(),
+           feeMintPubkey.toBuffer(),
+         ],
+         new PublicKey("REFER4ZgmyYx9c6He5XfaTMiGfdLwRnkV4RPp9t9iF3")
+       );
+     } catch (error) {
+       console.error('Error creating fee account:', error);
+       throw new Error('Failed to create fee account: ' + error.message);
+     }
+ 
+     // 4. Ensure wallet address is properly formatted
+     let userPublicKey;
+     try {
+       userPublicKey = new PublicKey(walletAddress).toString();
+     } catch (error) {
+       console.error('Error with wallet address:', error);
+       throw new Error('Invalid wallet address provided');
+     }
 
     // Perform the swap with the fee account
     const swapTransaction = await axios.post(process.env.JUPITER_SWAP_API_URL, {
