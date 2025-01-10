@@ -196,6 +196,9 @@ async function placeLimitOrder(fromToken, toToken, price, FromTokenAmount, walle
         expiredAt: undefined
       },
       computeUnitPrice: "auto",
+      wrapAndUnwrapSol: true,
+      inputTokenProgram: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      outputTokenProgram: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
     };
 
     // If we can take fees, add the fee parameters
