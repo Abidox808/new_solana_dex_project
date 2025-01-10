@@ -140,7 +140,6 @@ const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, s
       quoteResponse: quoteWithFeeResponse.data,
       userPublicKey: walletAddress,
       wrapAndUnwrapSol: true,
-      useSharedAccounts: true,
       feeAccount: feeAccount.toBase58()
     });
 
@@ -179,44 +178,52 @@ async function placeLimitOrder(fromToken, toToken, price, FromTokenAmount, walle
     const toMint = toTokenData.address;
     const toDecimal = toTokenData.decimal;
 
-    console.log('SOL Decimals:', fromDecimal);
-    console.log('USDC Decimals:', toDecimal);
-
-    console.log('totalFromAmount:', ToTokenAmount);
-    console.log('FromTokenAmount:', FromTokenAmount);
-
     // Calculate amounts in lamports (smallest units of the tokens)
-    const makingAmount = Math.round(FromTokenAmount * Math.pow(10, fromDecimal)); // Amount of the "from" token
-    const takingAmount = Math.round(ToTokenAmount * Math.pow(10, toDecimal)); // Amount of the "to" token
+    const makingAmount = Math.round(FromTokenAmount * Math.pow(10, fromDecimal));
+    const takingAmount = Math.round(ToTokenAmount * Math.pow(10, toDecimal));
 
-    // Log the calculated amounts for debugging
-    console.log('Making Amount (lamports):', makingAmount);
-    console.log('Taking Amount (lamports):', takingAmount);
+    // Check if we can take fees based on the trading pair
+    const canTakeFees = await determineFeePossibility(fromMint, toMint, 'ExactIn');
 
-    // Create the request body for the Jupiter Limit Order v2 API
-    const createOrderBody = {
-      inputMint: fromMint, // Mint address of the "from" token (SOL)
-      outputMint: toMint, // Mint address of the "to" token (USDC)
-      maker: walletAddress, // Wallet address of the maker
-      payer: walletAddress, // Wallet address of the payer
+    let createOrderBody = {
+      inputMint: fromMint,
+      outputMint: toMint,
+      maker: walletAddress,
+      payer: walletAddress,
       params: {
-        makingAmount: makingAmount.toString(), // Amount of the "from" token in lamports
-        takingAmount: takingAmount.toString(), // Amount of the "to" token in lamports
-        expiredAt: undefined, // Optional: Set an expiry date for the order
+        makingAmount: makingAmount.toString(),
+        takingAmount: takingAmount.toString(),
+        expiredAt: undefined
       },
-      computeUnitPrice: "auto", // Use "auto" for priority fee
-      wrapAndUnwrapSol: true, // Optional: Wrap/unwrap SOL if needed
+      computeUnitPrice: "auto",
+      wrapAndUnwrapSol: true
     };
 
-    // Log the request body for debugging
-    console.log('Request Body:', createOrderBody);
+    // If we can take fees, add the fee parameters
+    if (canTakeFees.canTakeFee) {
+      console.log('Adding fees to limit order:', platformFeeBps);
+      createOrderBody = {
+        ...createOrderBody,
+        params: {
+          ...createOrderBody.params,
+          feeBps: platformFeeBps.toString()
+        },
+        referral: process.env.REFERRAL_ACCOUNT_PUBKEY
+      };
+    } else {
+      console.log('Proceeding without fees:', canTakeFees.reason);
+    }
 
     // Send the request to the Jupiter Limit Order v2 API
-    const response = await axios.post(`${process.env.JUPITER_LIMIT_ORDER_API_URL}createOrder`, createOrderBody, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const response = await axios.post(
+      `${process.env.JUPITER_LIMIT_ORDER_API_URL}createOrder`,
+      createOrderBody,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
     // Return the transaction data
     return response.data;
