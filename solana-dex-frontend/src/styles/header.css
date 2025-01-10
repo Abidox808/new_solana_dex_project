@@ -330,4 +330,16 @@ body.light .sub-nav ul li a.active {
     padding: 10px;
     box-sizing: border-box;
   }
+  .main-nav nav{
+    display: none;
+  }
+  .main-nav{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+  .header-right {
+    width: 100%;
+    justify-content: end;
+}
 }
