@@ -78,12 +78,17 @@ const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, s
     const quoteRes = quoteResponse.data;
     console.log('Jupiter API Response:', quoteRes);
 
+    // Validate the feeMint before creating a PublicKey
+    if (!feeMint || typeof feeMint !== 'string') {
+      throw new Error('Invalid fee mint address');
+    }
+
     // Find the fee account
     const [feeAccount] = await PublicKey.findProgramAddressSync(
       [
         Buffer.from("referral_ata"),
         new PublicKey(process.env.REFERRAL_ACCOUNT_PUBKEY).toBuffer(),
-        new PublicKey(inputMint).toBuffer(),
+        new PublicKey(feeMint).toBuffer(),
       ],
       new PublicKey("REFER4ZgmyYx9c6He5XfaTMiGfdLwRnkV4RPp9t9iF3")
     );
