@@ -421,19 +421,19 @@ const LimitOrder = () => {
         </div>
         <div className="limit-order-container">
           {orderStatus && <p>{orderStatus}</p>}
+          <div className="balance-info">
+              <span></span>
+              <div className="balance-actions">
+                <button onClick={handleHalf} className="balance-btn">Half</button>
+                <button onClick={handleMax} className="balance-btn">Max</button>
+              </div>
+            </div>
           <div className="limit-order-section">
             <div className="limit-order-section-header">
               <h3>You're Selling</h3>
               <div className="right-section">
                 <img src={tokenAmount} alt="Token" />
                 <span>{fromBalance} {fromToken}</span>
-              </div>
-            </div>
-            <div className="balance-info">
-              <span></span>
-              <div className="balance-actions">
-                <button onClick={handleHalf} className="balance-btn">Half</button>
-                <button onClick={handleMax} className="balance-btn">Max</button>
               </div>
             </div>
             <div className="limit-order-input-group">
@@ -471,7 +471,6 @@ const LimitOrder = () => {
             <div className="limit-order-section-header">
               <h3>You're Buying</h3>
               <div className="right-section">
-                <img src={tokenAmount} alt="Token" />
                 <span>{totalUSDC} {toToken}</span>
               </div>
             </div>

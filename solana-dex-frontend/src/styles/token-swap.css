@@ -448,18 +448,15 @@ body.light .refresh-icon {
   gap: 8px;
 }
 
-.balance-btn {
-  background: transparent;
-  border: 1px solid #333;
-  border-radius: 4px;
-  color: #00C8FF;
+.balance-info .balance-btn {
   padding: 4px 8px;
-  font-size: 12px;
+  background: linear-gradient(to right, #00C0FF, #003FB7);
+  border: none;
+  border-radius: 4px;
+  color: white;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  transition: all 0.3s ease;
+  font-size: 12px;
+  transition: opacity 0.2s;
 }
 
 .balance-btn:hover {
