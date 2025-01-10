@@ -76,10 +76,12 @@ const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, s
         platformFeeBps: platformFeeBps, // Add platform fee in basis points
       }
     });
-    
+
     console.log(quoteResponse)
     const quoteRes = quoteResponse.data;
     console.log('Jupiter API Response:', quoteRes);
+
+    const feeMint = quoteRes.swapMode === 'ExactIn' ? outputMint : inputMint;
 
     // Validate the feeMint before creating a PublicKey
     if (!feeMint || typeof feeMint !== 'string') {
