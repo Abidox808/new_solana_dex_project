@@ -58,7 +58,7 @@ app.get('/api/tokens', async (req, res) => {
   }
 });
 
-const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, slippage, walletAddress, walletAddress, platformFeeBps) => {
+const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, slippage, walletAddress, platformFeeBps) => {
   try {
     const inputMint = fromToken;
     const decimal = decimals;
