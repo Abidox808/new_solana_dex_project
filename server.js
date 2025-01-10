@@ -178,13 +178,14 @@ async function placeLimitOrder(fromToken, toToken, price, FromTokenAmount, walle
     const toMint = toTokenData.address;
     const toDecimal = toTokenData.decimal;
 
-    // Calculate amounts in lamports (smallest units of the tokens)
+    // Calculate amounts in smallest units
     const makingAmount = Math.round(FromTokenAmount * Math.pow(10, fromDecimal));
     const takingAmount = Math.round(ToTokenAmount * Math.pow(10, toDecimal));
 
     // Check if we can take fees based on the trading pair
     const canTakeFees = await determineFeePossibility(fromMint, toMint, 'ExactIn');
 
+    // Base order structure following Jupiter's Limit Order v2 API exactly
     let createOrderBody = {
       inputMint: fromMint,
       outputMint: toMint,
@@ -192,32 +193,26 @@ async function placeLimitOrder(fromToken, toToken, price, FromTokenAmount, walle
       payer: walletAddress,
       params: {
         makingAmount: makingAmount.toString(),
-        takingAmount: takingAmount.toString(),
-        expiredAt: undefined
+        takingAmount: takingAmount.toString()
       },
-      computeUnitPrice: "auto",
-      wrapAndUnwrapSol: true,
-      inputTokenProgram: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-      outputTokenProgram: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      computeUnitPrice: "auto"
     };
 
-    // If we can take fees, add the fee parameters
-    if (canTakeFees.canTakeFee) {
-      console.log('Adding fees to limit order:', platformFeeBps);
-      const referralPubkey = new PublicKey(process.env.REFERRAL_ACCOUNT_PUBKEY);
+    // Add fees only if supported and referral account is available
+    if (canTakeFees.canTakeFee && process.env.REFERRAL_ACCOUNT_PUBKEY) {
       createOrderBody = {
         ...createOrderBody,
         params: {
           ...createOrderBody.params,
           feeBps: platformFeeBps.toString()
         },
-        referral: referralPubkey.toBase58()
+        referral: process.env.REFERRAL_ACCOUNT_PUBKEY
       };
-    } else {
-      console.log('Proceeding without fees:', canTakeFees.reason);
     }
 
-    // Send the request to the Jupiter Limit Order v2 API
+    console.log('Sending limit order request:', JSON.stringify(createOrderBody, null, 2));
+
+    // Send request to Jupiter Limit Order v2 API
     const response = await axios.post(
       `${process.env.JUPITER_LIMIT_ORDER_API_URL}createOrder`,
       createOrderBody,
@@ -228,11 +223,10 @@ async function placeLimitOrder(fromToken, toToken, price, FromTokenAmount, walle
       }
     );
 
-    // Return the transaction data
     return response.data;
   } catch (error) {
-    console.error('Error in placeLimitOrder:', error.response ? JSON.stringify(error.response.data, null, 2) : error.message);
-    throw new Error('Limit order placement failed');
+    console.error('Error in placeLimitOrder:', error.response?.data || error);
+    throw new Error(`Limit order placement failed: ${error.response?.data?.message || error.message}`);
   }
 }
 
