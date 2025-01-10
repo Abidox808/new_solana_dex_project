@@ -185,29 +185,32 @@ async function placeLimitOrder(fromToken, toToken, price, FromTokenAmount, walle
     // Check if we can take fees based on the trading pair
     const canTakeFees = await determineFeePossibility(fromMint, toMint, 'ExactIn');
 
-    // Build the params object first following exact order from API docs
+    // Basic params without fees
     const params = {
       makingAmount: makingAmount.toString(),
       takingAmount: takingAmount.toString()
     };
 
-    // Only add feeBps to params if we can take fees
-    if (canTakeFees.canTakeFee && process.env.REFERRAL_ACCOUNT_PUBKEY) {
-      params.feeBps = platformFeeBps.toString();
-    }
-
-    // Create order body following exact order from API docs
-    const createOrderBody = {
+    // Base order structure following exact API docs order
+    let createOrderBody = {
       inputMint: fromMint,
       outputMint: toMint,
       maker: walletAddress,
       payer: walletAddress,
       params: params,
-      computeUnitPrice: "auto",
-      // Add referral before wrapAndUnwrapSol as per API docs order
-      ...(canTakeFees.canTakeFee && process.env.REFERRAL_ACCOUNT_PUBKEY ? { referral: process.env.REFERRAL_ACCOUNT_PUBKEY } : {}),
-      wrapAndUnwrapSol: true
+      computeUnitPrice: "auto"
     };
+
+    // Add both feeBps and referral together if supported
+    if (canTakeFees.canTakeFee && process.env.REFERRAL_ACCOUNT_PUBKEY) {
+      // Add feeBps to params
+      createOrderBody.params.feeBps = platformFeeBps.toString();
+      // Add referral to main body
+      createOrderBody.referral = process.env.REFERRAL_ACCOUNT_PUBKEY;
+    }
+
+    // Add wrapAndUnwrapSol last
+    createOrderBody.wrapAndUnwrapSol = true;
 
     console.log('Sending limit order request:', JSON.stringify(createOrderBody, null, 2));
 
