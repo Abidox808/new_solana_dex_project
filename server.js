@@ -88,6 +88,11 @@ const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, s
       throw new Error('Invalid fee mint address');
     }
 
+    // Ensure feeMint is a valid Solana address
+    if (!PublicKey.isOnCurve(feeMint)) {
+      throw new Error(`Invalid fee mint address: ${feeMint}`);
+    }
+
     // Find the fee account
     const [feeAccount] = await PublicKey.findProgramAddressSync(
       [
