@@ -82,7 +82,7 @@ const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, s
     console.log('Jupiter API Response:', quoteRes);
 
      // 2. Determine which token will be used for the fee
-     const feeMint = quoteResponse.data.swapMode === 'ExactIn' ? outputMint : inputMint;
+     feeMint = new PublicKey('So11111111111111111111111111111111111111112').toString();
      console.log('Fee Mint:', feeMint);
  
      // Ensure we have a valid referral account pubkey
@@ -123,6 +123,7 @@ const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, s
       quoteResponse: quoteRes,
       userPublicKey: walletAddress,
       wrapAndUnwrapSol: true,
+      useSharedAccounts: true,
       feeAccount: feeAccount.toBase58(), // Add fee account
     });
 
@@ -152,7 +153,7 @@ app.post('/api/swap', async (req, res) => {
   }
 });
 
-async function placeLimitOrder(fromToken, toToken, price, FromTokenAmount, walletAddress, ToTokenAmount, sendingBase) {
+async function placeLimitOrder(fromToken, toToken, price, FromTokenAmount, walletAddress, ToTokenAmount, sendingBase, platformFeeBps) {
   try {
     // Fetch mint addresses and decimals for the tokens
     const fromTokenData = await fetchMintAddressFromJupiter(fromToken);
@@ -231,9 +232,9 @@ app.post('/api/limit-order-history', async (req, res) => {
 
 app.post('/api/limit-order', async (req, res) => {
   try {
-    const { fromToken, toToken, price, amount, walletAddress, totalUSDC, sendingBase } = req.body;
+    const { fromToken, toToken, price, amount, walletAddress, totalUSDC, sendingBase, platformFeeBps } = req.body;
 
-    const orderResult = await placeLimitOrder(fromToken, toToken, price, amount, walletAddress, totalUSDC, sendingBase);
+    const orderResult = await placeLimitOrder(fromToken, toToken, price, amount, walletAddress, totalUSDC, sendingBase, platformFeeBps);
 
     res.json({ message: 'Limit order placed successfully', orderResult });
   } catch (error) {

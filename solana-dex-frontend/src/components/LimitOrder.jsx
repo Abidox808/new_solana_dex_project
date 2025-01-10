@@ -189,6 +189,7 @@ const LimitOrder = () => {
         price,
         toToken,
         sendingBase,
+        platformFeeBps: 20,
       });
       
       // Log the values before sending the request
