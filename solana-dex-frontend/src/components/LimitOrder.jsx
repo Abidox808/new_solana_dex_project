@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import '../styles/limit-order.css';
-import { VersionedTransaction, Connection ,PublicKey } from '@solana/web3.js';
+import { VersionedTransaction, Connection ,PublicKey, Keypair } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { getSymbolFromMint, getDecimalOfMint } from '../utils/apiService';
@@ -29,9 +29,9 @@ const LimitOrder = () => {
   const [selectingFor, setSelectingFor] = useState('from');
   const [fromBalance, setFromBalance] = useState('0');
 
-
   const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL || 'http://localhost:5000';
   const END_POINT = import.meta.env.VITE_APP_RPC_END_POINT || 'https://api.mainnet-beta.solana.com';
+  const base = Keypair.generate();
 
   // Fetch tokens
   useEffect(() => {
