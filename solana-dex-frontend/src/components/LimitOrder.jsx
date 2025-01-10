@@ -49,7 +49,6 @@ const LimitOrder = () => {
         }
       } catch (error) {
         console.error('Error fetching tokens:', error);
-        setOrderStatus('Failed to fetch tokens');
       }
     };
     fetchTokens();
@@ -160,7 +159,6 @@ const LimitOrder = () => {
         }
       } catch (error) {
         console.error('Error fetching prices:', error);
-        setOrderStatus('Failed to fetch prices');
       }
     };
     if(tokens.length > 0) {
@@ -234,7 +232,7 @@ const LimitOrder = () => {
         signature: txid,
       });
 
-      setOrderStatus(`Transaction succeeded! Transaction ID: ${txid}`);
+      setOrderStatus(`Transaction succeeded!`);
       // Fetch and update open orders after placing the order
       const orders = await fetchOpenOrders(wallet.publicKey.toString());
       setOpenOrders(orders);
@@ -537,7 +535,7 @@ const LimitOrder = () => {
               <label>{totalUSDC} {toToken}</label>
             </div>
             <div className="limit-order-input-group">
-              <label>Buy SOL at Rate</label>
+              <label>Buy {toToken} at Rate</label>
               <label>${parseInt(price) || 0}</label>
             </div>
             <div className="limit-order-input-group">
