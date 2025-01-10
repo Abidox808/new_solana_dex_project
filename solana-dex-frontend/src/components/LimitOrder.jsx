@@ -363,6 +363,27 @@ const LimitOrder = () => {
     }
   };
 
+  const calculateRate = (fromToken, toToken, prices) => {
+    // Check if the fromToken is a stablecoin (e.g., USDC, USDT)
+    const isFromTokenStable = ['USDC', 'USDT'].includes(fromToken);
+  
+    // Check if the toToken is a stablecoin (e.g., USDC, USDT)
+    const isToTokenStable = ['USDC', 'USDT'].includes(toToken);
+  
+    // If selling a stablecoin for a non-stable token, invert the rate
+    if (isFromTokenStable && !isToTokenStable) {
+      return (1 / prices[toToken]).toFixed(6); // Rate in terms of the non-stable token
+    }
+  
+    // If selling a non-stable token for a stablecoin, use the market price directly
+    if (!isFromTokenStable && isToTokenStable) {
+      return prices[fromToken]?.toFixed(6) || '0.00';
+    }
+  
+    // Default: Use the market price directly
+    return prices[fromToken]?.toFixed(6) || '0.00';
+  };
+
   const totalUSDC = (amount && price && prices[toToken])
     ? ((amount * price) / prices[toToken]).toFixed(2)
     : '0.00';
@@ -426,6 +447,7 @@ const LimitOrder = () => {
 
   // Generate the TradingView symbol based on the selected tokens
   const tradingViewSymbol = `${fromToken}:${toToken}`;
+  const rate = calculateRate(fromToken, toToken, prices);
 
   return (
     <div>
@@ -514,7 +536,7 @@ const LimitOrder = () => {
               <label>Sell {fromToken} at rate</label>
               <input
                 type="number"
-                value={price}
+                value={rate}
                 onChange={(e) => setPrice(e.target.value)}
                 placeholder="Enter price"
                 className="limit-order-input"
