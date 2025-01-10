@@ -81,6 +81,21 @@ const LimitOrder = () => {
   };
 
   useEffect(() => {
+    const fetchDefaultTokenBalance = async () => {
+      if (wallet.connected && wallet.publicKey) {
+        const token = tokens.find(t => t.symbol === fromToken);
+        if (token) {
+          const balance = await fetchTokenBalance(token.address, wallet.publicKey.toString());
+          setFromBalance(balance);
+        }
+      }
+    };
+
+    fetchDefaultTokenBalance();
+  }, [wallet.connected, wallet.publicKey, tokens, fromToken]);
+  
+  // Fetch balance whenever fromToken changes
+  useEffect(() => {
     const updateBalance = async () => {
       if (wallet.connected && wallet.publicKey) {
         const token = tokens.find(t => t.symbol === fromToken);
@@ -90,9 +105,9 @@ const LimitOrder = () => {
         }
       }
     };
-  
+
     updateBalance();
-  }, [fromToken, wallet.connected, wallet.publicKey]);
+  }, [fromToken, wallet.connected, wallet.publicKey, tokens]);
 
   useEffect(() => {
     const fetchOrders = async () => {
