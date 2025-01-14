@@ -8,6 +8,8 @@ import { getSymbolFromMint, getDecimalOfMint } from '../utils/apiService';
 import tokenAmount from '../images/tokenAmount.png';
 import TradingViewWidget from './TradingViewWidget';
 import TokenSelectModal from './TokenSelectModal';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 
 const LimitOrder = () => {
   const wallet = useWallet();
@@ -28,10 +30,25 @@ const LimitOrder = () => {
   const [isTokenSelectModalOpen, setIsTokenSelectModalOpen] = useState(false);
   const [selectingFor, setSelectingFor] = useState('from');
   const [fromBalance, setFromBalance] = useState('0');
+  const [isOpen, setIsOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL || 'http://localhost:5000';
   const END_POINT = import.meta.env.VITE_APP_RPC_END_POINT || 'https://api.mainnet-beta.solana.com';
   const base = Keypair.generate();
+
+  useEffect(() => {
+    // Function to check if screen is mobile (less than 768px)
+    const checkMobile = () => {
+      const isMobileScreen = window.innerWidth < 768;
+      setIsMobile(isMobileScreen);
+      setIsOpen(!isMobileScreen);
+    };
+    checkMobile();
+
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Fetch tokens
   useEffect(() => {
@@ -206,16 +223,6 @@ const LimitOrder = () => {
         sendingBase,
         platformFeeBps: 20,
       });
-      
-      // Log the values before sending the request
-      console.log("Values being sent to the backend:");
-      console.log("fromToken:", fromToken);
-      console.log("walletAddress:", walletAddress.toString());
-      console.log("amount: (e.g., 0.026 SOL)", amount); // Should be the amount of fromToken (e.g., 0.026 SOL)
-      console.log("totalUSDC: (e.g., 6.50 U)", totalUSDC); // Should be the total amount of toToken (e.g., 6.50 U)
-
-      // Log the API response for debugging
-      console.log('API Response:', res.data);
 
       // Check if the transaction data is valid
       if (!res.data.orderResult || !res.data.orderResult.tx) {
@@ -304,9 +311,6 @@ const LimitOrder = () => {
     try {
       const openOrdersResponse = await axios.get(`https://api.jup.ag/limit/v2/openOrders?wallet=${walletAddress}`);
       const orderHistoryResponse = await axios.get(`https://api.jup.ag/limit/v2/orderHistory?wallet=${walletAddress}`);
-  
-      console.log('Open Orders Response:', openOrdersResponse.data);
-      console.log('Order History Response:', orderHistoryResponse.data);
   
       return {
         openOrders: openOrdersResponse.data || [],
@@ -538,31 +542,42 @@ const LimitOrder = () => {
             onClose={() => setIsTokenSelectModalOpen(false)}
           />
 
-          <div className="limit-order-section">
-            <div className="limit-order-section-header">
-              <h3>Limit Order Summary</h3>
-            </div>
-            <div className="limit-order-input-group">
-              <label>Sell Order</label>
-              <label>{amount} {fromToken}</label>
-            </div>
-            <div className="limit-order-input-group">
-              <label>To buy</label>
-              <label>{totalUSDC} {toToken}</label>
-            </div>
-            <div className="limit-order-input-group">
-              <label>Buy {toToken} at Rate</label>
-              <label>${parseInt(price) || 0}</label>
-            </div>
-            <div className="limit-order-input-group">
-              <label>Expiry</label>
-              <label>Never</label>
-            </div>
-            <div className="limit-order-input-group">
-              <label>Platform Fee</label>
-              <label>0.10%</label>
-            </div>
+<div className="limit-order-section">
+      <div className="limit-order-section-header" 
+           onClick={() => setIsOpen(!isOpen)} 
+           style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h3>Limit Order Summary</h3>
+        <FontAwesomeIcon 
+          icon={isOpen ? faChevronUp : faChevronDown}
+          style={{ width: '14px', height: '14px' }}
+        />
+      </div>
+      
+      {isOpen && (
+        <>
+          <div className="limit-order-input-group">
+            <label>Sell Order</label>
+            <label>{amount} {fromToken}</label>
           </div>
+          <div className="limit-order-input-group">
+            <label>To buy</label>
+            <label>{totalUSDC} {toToken}</label>
+          </div>
+          <div className="limit-order-input-group">
+            <label>Buy {toToken} at Rate</label>
+            <label>${parseInt(price) || 0}</label>
+          </div>
+          <div className="limit-order-input-group">
+            <label>Expiry</label>
+            <label>Never</label>
+          </div>
+          <div className="limit-order-input-group">
+            <label>Platform Fee</label>
+            <label>0.10%</label>
+          </div>
+        </>
+      )}
+    </div>
         
         </div>
       </div>

@@ -1,16 +1,6 @@
 /* Header and Navigation Styles */
 header {
   color: inherit; /* Inherit color from body */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* Light and Dark Mode Specific Styles */
-body.light header {
-  background: #000000; 
-}
-
-body.dark header {
-  background-color: #1f1f1f; /* Slightly lighter dark for header */
 }
 
 .main-nav {
@@ -147,11 +137,10 @@ body.light .theme-switcher {
 }
 
 .sub-nav {
-  padding: 0.5rem 2rem;
+  padding: 0.5rem;
   display: flex;
   justify-content: center; /* Center the sub-nav content */
   background-color: #1A1A1A;
-  margin-top: 50px;
   border-radius: 8px;
 }
 
@@ -293,7 +282,6 @@ body.light .sub-nav ul li a.active {
   .sub-nav ul {
     overflow-x: auto;
     justify-content: flex-start;
-    padding-bottom: 0.5rem;
   }
 
   .sub-nav ul li a {
