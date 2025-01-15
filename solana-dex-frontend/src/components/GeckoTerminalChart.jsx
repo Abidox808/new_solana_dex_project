@@ -6,16 +6,17 @@ const GeckoTerminalChart = ({ fromToken, toToken }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // SOL token address
+  const SOL_ADDRESS = 'So11111111111111111111111111111111111111112';
+
   useEffect(() => {
-    const fetchPoolAddress = async () => {
-      if (!fromToken) return;
-      
+    const fetchPoolAddress = async (tokenAddress) => {
       try {
         setLoading(true);
         setError(null);
         
         const response = await axios.get(
-          `https://api.geckoterminal.com/api/v2/networks/solana/tokens/${fromToken}/pools?page=1`
+          `https://api.geckoterminal.com/api/v2/networks/solana/tokens/${tokenAddress}/pools?page=1`
         );
 
         if (response.data?.data?.[0]?.attributes?.address) {
@@ -31,8 +32,10 @@ const GeckoTerminalChart = ({ fromToken, toToken }) => {
       }
     };
 
-    fetchPoolAddress();
-  }, [fromToken]);
+    // If no token is selected, use SOL as default
+    const tokenToFetch = fromToken || SOL_ADDRESS;
+    fetchPoolAddress(tokenToFetch);
+  }, [fromToken]); // Only depend on fromToken
 
   if (loading) {
     return (
@@ -53,7 +56,7 @@ const GeckoTerminalChart = ({ fromToken, toToken }) => {
   if (!poolAddress) {
     return (
       <div className="w-full h-full flex items-center justify-center">
-        <div className="text-lg">Select a token to view chart</div>
+        <div className="text-lg">No chart available</div>
       </div>
     );
   }
