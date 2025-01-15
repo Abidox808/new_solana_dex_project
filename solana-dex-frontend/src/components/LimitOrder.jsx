@@ -6,7 +6,7 @@ import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { getSymbolFromMint, getDecimalOfMint } from '../utils/apiService';
 import tokenAmount from '../images/tokenAmount.png';
-import TradingViewWidget from './TradingViewWidget';
+import GeckoTerminalChart from './GeckoTerminalChart';
 import TokenSelectModal from './TokenSelectModal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
@@ -435,7 +435,7 @@ const LimitOrder = () => {
     <div>
       <div className="limit-order-page">
         <div className="limit-order-price-chart-container">
-          <TradingViewWidget fromToken={fromToken} toToken={toToken} />
+          <GeckoTerminalChart fromToken={inputMintToken} toToken={outputMintToken} />
         </div>
         <div className="limit-order-container">
           {orderStatus && <p>{orderStatus}</p>}
