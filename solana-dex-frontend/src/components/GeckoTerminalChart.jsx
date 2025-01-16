@@ -45,7 +45,7 @@ const GeckoTerminalChart = ({ fromToken }) => {
     };
 
     // Only fetch if we have a non-SOL token
-    if (fromToken && fromToken.trim() !== '') {
+    if (typeof fromToken === 'string' && fromToken.length > 0) {
       fetchPoolAddress(fromToken);
     }
   }, [fromToken]);
