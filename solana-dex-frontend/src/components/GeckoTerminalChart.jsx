@@ -47,32 +47,32 @@ const GeckoTerminalChart = ({ fromToken }) => {
 
   if (!fromToken) {
     return (
-      <div className="w-full h-full flex items-center justify-center">
-        <div className="text-lg">Waiting for token selection...</div>
+      <div className="msg-container">
+        <div className="message">Waiting for token selection...</div>
       </div>
     );
   }
 
   if (loading) {
     return (
-      <div className="w-full h-full flex items-center justify-center">
-        <div className="text-lg">Loading chart...</div>
+      <div className="msg-container">
+        <div className="message">Loading chart...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="w-full h-full flex items-center justify-center">
-        <div className="text-lg text-red-500">{error}</div>
+      <div className="msg-container">
+        <div className="message error">{error}</div>
       </div>
     );
   }
 
   if (!poolAddress) {
     return (
-      <div className="w-full h-full flex items-center justify-center">
-        <div className="text-lg">No chart available</div>
+      <div className="msg-container">
+        <div className="message error">No chart available</div>
       </div>
     );
   }
