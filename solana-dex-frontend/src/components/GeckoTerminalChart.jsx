@@ -2,17 +2,11 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
 const GeckoTerminalChart = ({ fromToken }) => {
-  const [poolAddress, setPoolAddress] = useState('424kbbJyt6VkSn7GeKT9Vh5yetuTR1sbeyoya2nmBJpw'); // Default SOL pool
+  const [poolAddress, setPoolAddress] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Skip fetching if no token is provided (show default SOL chart)
-    // or if the token is SOL (already showing SOL chart)
-    if (!fromToken || fromToken === 'So11111111111111111111111111111111111111112') {
-      return;
-    }
-
     const fetchPoolAddress = async (tokenAddress) => {
       try {
         setLoading(true);
@@ -31,53 +25,69 @@ const GeckoTerminalChart = ({ fromToken }) => {
           setPoolAddress(response.data.data[0].attributes.address);
         } else {
           setError('No pool found for this token');
-          // Fallback to SOL chart if no pool found
-          setPoolAddress('424kbbJyt6VkSn7GeKT9Vh5yetuTR1sbeyoya2nmBJpw');
         }
       } catch (err) {
         console.error('Error fetching pool address:', err);
         setError('Failed to fetch pool data');
-        // Fallback to SOL chart on error
-        setPoolAddress('424kbbJyt6VkSn7GeKT9Vh5yetuTR1sbeyoya2nmBJpw');
       } finally {
         setLoading(false);
       }
     };
 
-    // Only fetch if we have a non-SOL token
-    if (typeof fromToken === 'string' && fromToken.length > 0) {
+    // Only fetch if fromToken is provided and is a non-empty string
+    if (fromToken && typeof fromToken === 'string') {
       fetchPoolAddress(fromToken);
+    } else {
+      // Reset states when no valid token is provided
+      setPoolAddress('');
+      setError(null);
+      setLoading(false);
     }
   }, [fromToken]);
 
-  // Always render iframe, show loading overlay if needed
+  if (!fromToken) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <div className="text-lg">Waiting for token selection...</div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <div className="text-lg">Loading chart...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <div className="text-lg text-red-500">{error}</div>
+      </div>
+    );
+  }
+
+  if (!poolAddress) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <div className="text-lg">No chart available</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="relative w-full h-full">
-      <iframe
-        height="100%"
-        width="100%"
-        id="geckoterminal-embed"
-        title="GeckoTerminal Embed"
-        src={`https://www.geckoterminal.com/solana/pools/${poolAddress}?embed=1&info=0&swaps=0&grayscale=0&light_chart=0`}
-        frameBorder="0"
-        allow="clipboard-write"
-        allowFullScreen
-      />
-      
-      {/* Loading overlay */}
-      {loading && (
-        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="text-white text-lg">Loading chart...</div>
-        </div>
-      )}
-      
-      {/* Error overlay */}
-      {error && (
-        <div className="absolute top-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow">
-          {error}
-        </div>
-      )}
-    </div>
+    <iframe
+      height="100%"
+      width="100%"
+      id="geckoterminal-embed"
+      title="GeckoTerminal Embed"
+      src={`https://www.geckoterminal.com/solana/pools/${poolAddress}?embed=1&info=0&swaps=0&grayscale=0&light_chart=0`}
+      frameBorder="0"
+      allow="clipboard-write"
+      allowFullScreen
+    />
   );
 };
 
