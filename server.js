@@ -76,7 +76,6 @@ const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, s
     });
 
     const quoteRes = quoteResponse.data;
-    console.log('Jupiter API Response:', quoteRes);
 
     // Check if we can take fees based on the trading pair and swap mode
     const canTakeFees = await determineFeePossibility(inputMint, outputMint, quoteRes.swapMode);
@@ -216,8 +215,6 @@ async function placeLimitOrder(fromToken, toToken, price, FromTokenAmount, walle
           new PublicKey("REFER4ZgmyYx9c6He5XfaTMiGfdLwRnkV4RPp9t9iF3")
         );
 
-        console.log('Fee account created successfully:', feeAccount.toBase58());
-
         // Add feeBps to params
         createOrderBody.params.feeBps = platformFeeBps.toString();
 
@@ -230,8 +227,6 @@ async function placeLimitOrder(fromToken, toToken, price, FromTokenAmount, walle
         delete createOrderBody.referral;
       }
     }
-
-    console.log('Sending limit order request:', JSON.stringify(createOrderBody, null, 2));
 
     // Send request to Jupiter Limit Order v2 API
     const response = await axios.post(

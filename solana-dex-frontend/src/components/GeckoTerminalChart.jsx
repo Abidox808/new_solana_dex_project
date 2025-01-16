@@ -3,13 +3,11 @@ import axios from 'axios';
 
 const GeckoTerminalChart = ({ fromToken }) => {
   const [poolAddress, setPoolAddress] = useState('');
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchPoolAddress = async (tokenAddress) => {
       try {
-        setLoading(true);
         setError(null);
         
         const response = await axios.get(
@@ -41,7 +39,6 @@ const GeckoTerminalChart = ({ fromToken }) => {
       // Reset states when no valid token is provided
       setPoolAddress('');
       setError(null);
-      setLoading(false);
     }
   }, [fromToken]);
 
