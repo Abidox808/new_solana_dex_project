@@ -221,7 +221,7 @@ const LimitOrder = () => {
         price,
         toToken,
         sendingBase,
-        platformFeeBps: 20,
+        platformFeeBps: 50,
       });
 
       // Check if the transaction data is valid

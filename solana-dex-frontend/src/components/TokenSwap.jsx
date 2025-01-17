@@ -214,7 +214,7 @@ const TokenSwap = () => {
         walletAddress,
         slippage,
         walletAddress: walletAddress.toString(),
-        platformFeeBps: 20,
+        platformFeeBps: 50,
       };
       console.log('Swap Payload:', payload);
   
