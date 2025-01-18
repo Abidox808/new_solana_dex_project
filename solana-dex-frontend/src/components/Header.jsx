@@ -34,7 +34,7 @@ const Header = () => {
           <div className="header-logo">
             <img src={logo} />
             <h1>
-              <Link to="/trade" className="logo-link">
+              <Link to="/swap" className="logo-link">
                 Cryptosion
               </Link>
             </h1>
