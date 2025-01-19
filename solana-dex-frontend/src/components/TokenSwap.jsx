@@ -191,9 +191,6 @@ const fetchPrices = async (tokenIds) => {
     setError('Failed to fetch prices');
     return null;
   } finally {
-    setTimeout(() => {
-      setIsPriceLoading(false);
-    }, 500);
     setLoading(false);
   }
   };
