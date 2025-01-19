@@ -89,7 +89,9 @@ const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, s
         wrapAndUnwrapSol: true,
         useSharedAccounts: true,
         dynamicComputeUnitLimit: true,
-        dynamicSlippage: {"minBps": 50, "maxBps": 300},
+        dynamicSlippage: {
+          maxBps: 300
+        },
       });
 
       return swapTransaction.data.swapTransaction;
@@ -122,7 +124,9 @@ const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, s
         wrapAndUnwrapSol: true,
         useSharedAccounts: true,
         dynamicComputeUnitLimit: true,
-        dynamicSlippage: {"minBps": 50, "maxBps": 300},
+        dynamicSlippage: {
+          maxBps: 300
+        },
       });
       return swapTransaction.data.swapTransaction;
     }
@@ -145,7 +149,9 @@ const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, s
       wrapAndUnwrapSol: true,
       feeAccount: feeAccount.toBase58(),
       dynamicComputeUnitLimit: true,
-      dynamicSlippage: {"minBps": 50, "maxBps": 300},
+      dynamicSlippage: {
+        maxBps: 300
+      },
       prioritizationFeeLamports: {
         priorityLevelWithMaxLamports: {
           maxLamports: 4000000,
