@@ -87,6 +87,7 @@ const TokenSelectModal = ({ isOpen, tokens, onSelectToken, onClose }) => {
               <div className="token-info">
                 <span className="token-symbol">{token.symbol}</span>
                 <span className="token-name">{token.name}</span>
+                <span className="token-name">{token.address}</span>
               </div>
             </div>
           ))}
