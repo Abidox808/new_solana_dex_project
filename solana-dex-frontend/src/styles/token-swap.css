@@ -508,3 +508,48 @@ body.light .refresh-icon {
     font-size: 12px;
   }
 }
+.loading-price {
+  opacity: 0.5;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.refresh-button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.refresh-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+}
+
+.refresh-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.refresh-icon {
+  color: #666;
+  font-size: 18px;
+  transition: transform 0.5s ease;
+}
+
+.refreshing .refresh-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -42,6 +42,7 @@ const TokenSwap = () => {
   const wallet = useWallet();
   const priceRefreshInterval = useRef(null);
   const [debouncedFromAmount, setDebouncedFromAmount] = useState(fromAmount);
+  const [isPriceLoading, setIsPriceLoading] = useState(false);
 
   const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL || 'http://localhost:3000';
   const END_POINT = import.meta.env.VITE_APP_RPC_END_POINT || 'https://api.mainnet-beta.solana.com';
@@ -67,9 +68,28 @@ const TokenSwap = () => {
     return () => clearTimeout(timer);
   }, [fromAmount]);
 
+  useEffect(() => {
+    const savedTokens = localStorage.getItem('selectedTokens');
+    if (savedTokens) {
+      const { from, to } = JSON.parse(savedTokens);
+      setFromToken(from);
+      setToToken(to);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (fromToken && toToken) {
+      localStorage.setItem('selectedTokens', JSON.stringify({
+        from: fromToken,
+        to: toToken
+      }));
+    }
+  }, [fromToken, toToken]);
+
   const handleAmountChange = async (value) => {
     setFromAmount(value);
     if (value && fromToken && toToken && tokens.length > 0) {
+      setIsPriceLoading(true);
       const token1 = tokens.find(t => t.symbol === fromToken);
       const token2 = tokens.find(t => t.symbol === toToken);
       const tokenIds = [token1?.address, token2?.address].filter(Boolean);
@@ -143,6 +163,7 @@ const TokenSwap = () => {
 };
 
 const fetchPrices = async (tokenIds) => {
+  setIsPriceLoading(true);
   setError(null);
   try {
     const jupiterResponse = await axios.get(`https://api.jup.ag/price/v2?ids=${tokenIds.join(',')}`);
@@ -150,8 +171,8 @@ const fetchPrices = async (tokenIds) => {
     // Extract prices from the response
     const newPrices = {};
     for (const tokenId of tokenIds) {
-        const token = tokens.find(t => t.address === tokenId);
-        newPrices[token.symbol] = jupiterResponse.data.data[tokenId]?.price || 'Price not available';
+      const token = tokens.find(t => t.address === tokenId);
+      newPrices[token.symbol] = jupiterResponse.data.data[tokenId]?.price || 'Price not available';
     }
 
     setPrices(newPrices);
@@ -170,6 +191,9 @@ const fetchPrices = async (tokenIds) => {
     setError('Failed to fetch prices');
     return null;
   } finally {
+    setTimeout(() => {
+      setIsPriceLoading(false);
+    }, 500);
     setLoading(false);
   }
   };
@@ -326,6 +350,7 @@ const fetchPrices = async (tokenIds) => {
 
   const handleRefresh = async () => {
     if (fromToken && toToken && tokens.length > 0) {
+      setIsPriceLoading(true);
       const token1 = tokens.find(t => t.symbol === fromToken);
       const token2 = tokens.find(t => t.symbol === toToken);
       const tokenIds = [token1?.address, token2?.address].filter(Boolean);
@@ -424,12 +449,21 @@ const fetchPrices = async (tokenIds) => {
                   <span className="dropdown-arrow">▼</span>
                 </button>
                 <AmountInput
-                  value={toAmount}
+                  value={isPriceLoading ? '' : toAmount}
                   readOnly
-                  placeholder="0.0"
+                  placeholder={isPriceLoading ? 'Fetching price...' : '0.0'}
+                  className={isPriceLoading ? 'loading-price' : ''}
                 />
               </div>
             </div>
+            <div className="refresh-button-container">
+            <button 
+              onClick={handleRefresh} 
+              className={`refresh-button ${isPriceLoading ? 'refreshing' : ''}`}
+            >
+              <FaSync className="refresh-icon" />
+            </button>
+          </div>
           </div>
           <div className='handle-swap-btn'>
             <button onClick={handleSwap}>
