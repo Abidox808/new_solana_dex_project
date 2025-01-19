@@ -124,7 +124,6 @@ const TokenSwap = () => {
 };
 
 const fetchPrices = async (tokenIds) => {
-  setLoading(true);
   setError(null);
   try {
     const jupiterResponse = await axios.get(`https://api.jup.ag/price/v2?ids=${tokenIds.join(',')}`);
