@@ -2,27 +2,17 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
 const GeckoTerminalChart = ({ fromToken }) => {
-  const [poolAddress, setPoolAddress] = useState('Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE');
+  const SOL_POOL_ADDRESS = 'Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE';
+  const [poolAddress, setPoolAddress] = useState(SOL_POOL_ADDRESS);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!fromToken) {
-      return;
-    }
-
-    if (fromToken === 'So11111111111111111111111111111111111111112') {
-      setPoolAddress('Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE');
-      return;
-    }
-
-    const fetchPoolAddress = async () => {
+    // Function to fetch pool address
+    const fetchPoolAddress = async (tokenAddress) => {
+      setLoading(true);
       try {
-        setLoading(true);
-        setError(null);
-        
         const response = await axios.get(
-          `https://api.geckoterminal.com/api/v2/networks/solana/tokens/${fromToken}/pools?page=1`,
+          `https://api.geckoterminal.com/api/v2/networks/solana/tokens/${tokenAddress}/pools?page=1`,
           {
             headers: {
               'Accept': 'application/json',
@@ -33,19 +23,26 @@ const GeckoTerminalChart = ({ fromToken }) => {
         if (response.data?.data?.[0]?.attributes?.address) {
           setPoolAddress(response.data.data[0].attributes.address);
         } else {
-          setError('No pool found for this token');
-          setPoolAddress('Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE');
+          // Fallback to SOL pool if no pool found
+          setPoolAddress(SOL_POOL_ADDRESS);
         }
       } catch (err) {
-        console.error('Error fetching pool address:', err);
-        setError('Failed to fetch pool data');
-        setPoolAddress('Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE');
+        // Fallback to SOL pool on error
+        setPoolAddress(SOL_POOL_ADDRESS);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchPoolAddress();
+    // Only fetch if it's a valid token address and not SOL
+    if (fromToken && 
+        fromToken !== 'So11111111111111111111111111111111111111112' && 
+        fromToken.length > 0) {
+      fetchPoolAddress(fromToken);
+    } else {
+      // Reset to SOL pool for default or SOL token
+      setPoolAddress(SOL_POOL_ADDRESS);
+    }
   }, [fromToken]);
 
   if (loading) {
