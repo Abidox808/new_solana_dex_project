@@ -41,6 +41,7 @@ const TokenSwap = () => {
   const [selectingFor, setSelectingFor] = useState('from'); // 'from' or 'to'
   const wallet = useWallet();
   const priceRefreshInterval = useRef(null);
+  const [debouncedFromAmount, setDebouncedFromAmount] = useState(fromAmount);
 
   const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL || 'http://localhost:3000';
   const END_POINT = import.meta.env.VITE_APP_RPC_END_POINT || 'https://api.mainnet-beta.solana.com';
@@ -55,6 +56,24 @@ const TokenSwap = () => {
     } catch (error) {
       console.error('Error connecting wallet:', error);
       setTransactionStatus('Failed to connect wallet. Please try again.');
+    }
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedFromAmount(fromAmount);
+    }, 500); // 500ms delay
+
+    return () => clearTimeout(timer);
+  }, [fromAmount]);
+
+  const handleAmountChange = async (value) => {
+    setFromAmount(value);
+    if (value && fromToken && toToken && tokens.length > 0) {
+      const token1 = tokens.find(t => t.symbol === fromToken);
+      const token2 = tokens.find(t => t.symbol === toToken);
+      const tokenIds = [token1?.address, token2?.address].filter(Boolean);
+      await fetchPrices(tokenIds);
     }
   };
 
@@ -134,7 +153,6 @@ const fetchPrices = async (tokenIds) => {
         const token = tokens.find(t => t.address === tokenId);
         newPrices[token.symbol] = jupiterResponse.data.data[tokenId]?.price || 'Price not available';
     }
-    console.log('Updated prices:', newPrices);
 
     setPrices(newPrices);
     
@@ -167,23 +185,28 @@ const fetchPrices = async (tokenIds) => {
           clearInterval(priceRefreshInterval.current);
         }
 
-        fetchPrices(tokenIds);
-
-        priceRefreshInterval.current = setInterval(() => {
+        // Initial fetch
+        if (debouncedFromAmount) {
           fetchPrices(tokenIds);
+        }
+
+        // Set up interval for background refresh
+        priceRefreshInterval.current = setInterval(() => {
+          if (debouncedFromAmount) {
+            fetchPrices(tokenIds);
+          }
         }, 12000); // 12 seconds
       }
     };
 
     startPriceRefresh();
 
-    // Cleanup function
     return () => {
       if (priceRefreshInterval.current) {
         clearInterval(priceRefreshInterval.current);
       }
     };
-  }, [fromToken, toToken, tokens]);
+  }, [fromToken, toToken, tokens, debouncedFromAmount]);
 
   useEffect(() => {
     const fetchBalance = async () => {
@@ -395,7 +418,7 @@ const fetchPrices = async (tokenIds) => {
                 </button>
                 <AmountInput
                   value={fromAmount}
-                  onChange={(e) => setFromAmount(e.target.value)}
+                  onChange={(e) => handleAmountChange(e.target.value)}
                   placeholder="0.0"
                 />
               </div>
