@@ -33,7 +33,7 @@ const TokenSwap = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [transactionStatus, setTransactionStatus] = useState('');
-  const [slippage, setSlippage] = useState(0.7); // default slippage tolerance
+  const [slippage, setSlippage] = useState(0.5); // default slippage tolerance
   const [isSlippageModalOpen, setIsSlippageModalOpen] = useState(false);
   const [fromBalance, setFromBalance] = useState('0'); // Example balance
   const [toBalance, setToBalance] = useState('0'); // Example balance
@@ -273,77 +273,49 @@ const fetchPrices = async (tokenIds) => {
   const handleSwap = async () => {
     if (!wallet.connected) {
       await handleConnectWallet();
-      return;
+      return; 
     }
-
-    setTransactionStatus('Checking latest prices...');
+    
+    setTransactionStatus('Initiating transaction...');
+    const walletAddress = wallet.publicKey;
+  
     try {
-      // Fetch latest prices before swap
-      const token1 = tokens.find(t => t.symbol === fromToken);
-      const token2 = tokens.find(t => t.symbol === toToken);
-      const tokenIds = [token1?.address, token2?.address].filter(Boolean);
-      const latestPrices = await fetchPrices(tokenIds);
-      
-      if (!latestPrices) {
-        throw new Error('Failed to fetch latest prices');
-      }
-
-      // Calculate price impact
-      const currentToAmount = (fromAmount * latestPrices[fromToken] / latestPrices[toToken]).toFixed(10);
-      const priceImpact = Math.abs((currentToAmount - toAmount) / toAmount * 100);
-
-      // If price impact exceeds slippage, ask for confirmation
-      if (priceImpact > slippage) {
-        const shouldProceed = window.confirm(
-          `Price has moved ${priceImpact.toFixed(2)}% which exceeds your slippage tolerance of ${slippage}%. Do you want to proceed?`
-        );
-        if (!shouldProceed) {
-          setTransactionStatus('Swap cancelled due to price movement');
-          return;
-        }
-        // Update toAmount with current price
-        setToAmount(currentToAmount);
-      }
-
-      setTransactionStatus('Initiating transaction...');
-      const walletAddress = wallet.publicKey;
-
       if (!fromTokenAddress || !toTokenAddress || !fromTokenDecimals) {
         throw new Error('Token information is missing. Please reselect the tokens.');
       }
-
+      
       const payload = {
         fromToken: fromTokenAddress,
         toToken: toTokenAddress,
         decimals: fromTokenDecimals,
         fromAmount,
-        toAmount: currentToAmount, // Use the updated amount
-        walletAddress: walletAddress.toString(),
+        toAmount,
+        walletAddress,
         slippage,
+        walletAddress: walletAddress.toString(),
         platformFeeBps: 50,
       };
-      
       console.log('Swap Payload:', payload);
+  
       const res = await axios.post(`${API_BASE_URL}/api/swap`, payload);
       console.log('Swap Response:', res.data);
-
+  
       setTransactionStatus('Signing transaction...');
       const swapTransaction = res.data.swapResult;
       const swapTransactionBuf = Buffer.from(swapTransaction, 'base64');
       const transaction = VersionedTransaction.deserialize(swapTransactionBuf);
       const signTransaction = await wallet.signTransaction(transaction);
-      
       setTransactionStatus('Sending signed transaction to Solana Network');
       const latestBlockhash = await connection.getLatestBlockhash();
       const txid = await connection.sendRawTransaction(signTransaction.serialize());
-
+  
       setTransactionStatus('Confirming...');
       await connection.confirmTransaction({
         blockhash: latestBlockhash,
         lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
         signature: txid,
       });
-
+  
       setTransactionStatus(`Transaction succeed! Transaction ID: ${txid}`);
       console.log(`https://solscan.io/tx/${txid}`);
     } catch (error) {
