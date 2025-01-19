@@ -14,6 +14,7 @@ import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import toggle from '../images/toggle.png';
 import { connection } from '../config';
 import TokenSelectModal from './TokenSelectModal';
+import { PhantomWalletName } from '@solana/wallet-adapter-wallets';
 
 const TokenSwap = () => {
   const [tokens, setTokens] = useState([]);
@@ -43,6 +44,18 @@ const TokenSwap = () => {
   const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL || 'http://localhost:3000';
   const END_POINT = import.meta.env.VITE_APP_RPC_END_POINT || 'https://api.mainnet-beta.solana.com';
   const WRAPPED_SOL_ADDRESS = 'So11111111111111111111111111111111111111112';
+
+  const handleConnectWallet = async () => {
+    try {
+      if (!wallet.connected) {
+        await wallet.select(PhantomWalletName);
+        await wallet.connect();
+      }
+    } catch (error) {
+      console.error('Error connecting wallet:', error);
+      setTransactionStatus('Failed to connect wallet. Please try again.');
+    }
+  };
 
   useEffect(() => {
     const fetchTokens = async () => {
@@ -195,7 +208,10 @@ const TokenSwap = () => {
   };
 
   const handleSwap = async () => {
-    console.log(connection);
+    if (!wallet.connected) {
+      await handleConnectWallet();
+      return; // Return early to wait for connection state to update
+    }
     setTransactionStatus('Initiating transaction...');
     const walletAddress = wallet.publicKey;
   
@@ -354,8 +370,10 @@ const TokenSwap = () => {
               </div>
             </div>
           </div>
-          <div  className='handle-swap-btn'>
-            <button onClick={handleSwap}>Swap</button>
+          <div className='handle-swap-btn'>
+            <button onClick={handleSwap}>
+              {wallet.connected ? 'Swap' : 'Connect Wallet'}
+            </button>
           </div>
           <SlippageModal
             isOpen={isSlippageModalOpen}

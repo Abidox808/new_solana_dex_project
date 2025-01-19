@@ -10,6 +10,7 @@ import GeckoTerminalChart from './GeckoTerminalChart';
 import TokenSelectModal from './TokenSelectModal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
+import { PhantomWalletName } from '@solana/wallet-adapter-wallets';
 
 const LimitOrder = () => {
   const wallet = useWallet();
@@ -202,9 +203,9 @@ const LimitOrder = () => {
   // Handle placing the order
   const handlePlaceOrder = async () => {
 
-    if (!wallet) {
-      setOrderStatus('Please Connect Wallet!');
-      return;
+    if (!wallet.connected) {
+      await handleConnectWallet(); // Try to connect wallet first
+      return; // Return early to wait for connection state to update
     }
     try {
       setOrderStatus('Initiating transaction...');
@@ -342,6 +343,7 @@ const LimitOrder = () => {
   const handleConnectWallet = async () => {
     try {
       if (!wallet.connected) {
+        await wallet.select(PhantomWalletName);
         await wallet.connect();
       }
     } catch (error) {
@@ -528,11 +530,10 @@ const LimitOrder = () => {
           </div>
 
           <button 
-            disabled={!wallet.connected} 
-            onClick={wallet.connected ? handlePlaceOrder : handleConnectWallet} 
+            onClick={handlePlaceOrder}
             className="limit-order-button wallet-adapter-button"
           >
-            {wallet.connected ? 'Place limit order': 'Connect wallet'}
+            {wallet.connected ? 'Place limit order' : 'Connect wallet'}
           </button>
 
           <TokenSelectModal
