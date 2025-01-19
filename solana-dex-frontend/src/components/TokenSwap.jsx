@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { FaSync } from 'react-icons/fa';
 import Dropdown from './Dropdown';
@@ -40,6 +40,7 @@ const TokenSwap = () => {
   const [isTokenSelectModalOpen, setIsTokenSelectModalOpen] = useState(false);
   const [selectingFor, setSelectingFor] = useState('from'); // 'from' or 'to'
   const wallet = useWallet();
+  const priceRefreshInterval = useRef(null);
 
   const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL || 'http://localhost:3000';
   const END_POINT = import.meta.env.VITE_APP_RPC_END_POINT || 'https://api.mainnet-beta.solana.com';
@@ -122,28 +123,72 @@ const TokenSwap = () => {
   }
 };
 
-  const fetchPrices = async (tokenIds) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const jupiterResponse = await axios.get(`https://api.jup.ag/price/v2?ids=${tokenIds.join(',')}`);
-      
-      // Extract prices from the response
-      const prices = {};
-      for (const tokenId of tokenIds) {
-          const token = tokens.find(t => t.address === tokenId);
-          prices[token.symbol] = jupiterResponse.data.data[tokenId]?.price || 'Price not available';
-      }
-      console.log(prices);
-
-      setPrices(prices);
-    } catch (error) {
-      console.error('Error fetching prices from Jupiter API:', error);
-      setError('Failed to fetch prices');
-    } finally {
-      setLoading(false);
+const fetchPrices = async (tokenIds) => {
+  setLoading(true);
+  setError(null);
+  try {
+    const jupiterResponse = await axios.get(`https://api.jup.ag/price/v2?ids=${tokenIds.join(',')}`);
+    
+    // Extract prices from the response
+    const newPrices = {};
+    for (const tokenId of tokenIds) {
+        const token = tokens.find(t => t.address === tokenId);
+        newPrices[token.symbol] = jupiterResponse.data.data[tokenId]?.price || 'Price not available';
     }
+    console.log('Updated prices:', newPrices);
+
+    setPrices(newPrices);
+    
+    // Update toAmount with new prices
+    if (fromAmount && newPrices[fromToken] && newPrices[toToken]) {
+      const fromPrice = newPrices[fromToken];
+      const toPrice = newPrices[toToken];
+      const convertedAmount = (fromAmount * fromPrice / toPrice).toFixed(10);
+      setToAmount(convertedAmount);
+    }
+
+    return newPrices;
+  } catch (error) {
+    console.error('Error fetching prices from Jupiter API:', error);
+    setError('Failed to fetch prices');
+    return null;
+  } finally {
+    setLoading(false);
+  }
   };
+
+  useEffect(() => {
+    // Function to start price refresh interval
+    const startPriceRefresh = () => {
+      if (fromToken && toToken && tokens.length > 0) {
+        const token1 = tokens.find(t => t.symbol === fromToken);
+        const token2 = tokens.find(t => t.symbol === toToken);
+        const tokenIds = [token1?.address, token2?.address].filter(Boolean);
+
+        // Clear any existing interval
+        if (priceRefreshInterval.current) {
+          clearInterval(priceRefreshInterval.current);
+        }
+
+        // Initial fetch
+        fetchPrices(tokenIds);
+
+        // Set up new interval
+        priceRefreshInterval.current = setInterval(() => {
+          fetchPrices(tokenIds);
+        }, 12000); // 12 seconds
+      }
+    };
+
+    startPriceRefresh();
+
+    // Cleanup function
+    return () => {
+      if (priceRefreshInterval.current) {
+        clearInterval(priceRefreshInterval.current);
+      }
+    };
+  }, [fromToken, toToken, tokens]);
 
   useEffect(() => {
     const fetchBalance = async () => {
@@ -262,9 +307,12 @@ const TokenSwap = () => {
     }
   };
 
-  const handleRefresh = () => {
-    if (fromToken && toToken) {
-      fetchPrices([fromToken, toToken]);
+  const handleRefresh = async () => {
+    if (fromToken && toToken && tokens.length > 0) {
+      const token1 = tokens.find(t => t.symbol === fromToken);
+      const token2 = tokens.find(t => t.symbol === toToken);
+      const tokenIds = [token1?.address, token2?.address].filter(Boolean);
+      await fetchPrices(tokenIds);
     }
   };
 
@@ -283,10 +331,6 @@ const TokenSwap = () => {
 
   return (
     <div className="token-swap-container">
-      <div className="header">
-        {/* <FaSync className="refresh-icon" onClick={handleRefresh} />
-        <Slippage slippage={slippage} setIsSlippageModalOpen={setIsSlippageModalOpen} /> */}
-      </div>
       <div className='token-swap-body'>
         <div className="token-swap">
           {loading && <p>Loading...</p>}
