@@ -89,9 +89,8 @@ const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, s
         wrapAndUnwrapSol: true,
         useSharedAccounts: true,
         dynamicComputeUnitLimit: true,
-        dynamicSlippage: {
-          maxBps: 300
-        },
+        dynamicSlippage: {"minBps": 50, "maxBps": 300},
+        prioritizationFeeLamports: 'auto',
       });
 
       return swapTransaction.data.swapTransaction;
@@ -124,9 +123,8 @@ const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, s
         wrapAndUnwrapSol: true,
         useSharedAccounts: true,
         dynamicComputeUnitLimit: true,
-        dynamicSlippage: {
-          maxBps: 300
-        },
+        dynamicSlippage: {"minBps": 50, "maxBps": 300},
+        prioritizationFeeLamports: 'auto',
       });
       return swapTransaction.data.swapTransaction;
     }
@@ -149,10 +147,15 @@ const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, s
       wrapAndUnwrapSol: true,
       feeAccount: feeAccount.toBase58(),
       dynamicComputeUnitLimit: true,
-      dynamicSlippage: {
-        maxBps: 300
+      dynamicSlippage: { // This will set an optimized slippage to ensure high success rate
+        maxBps: 300 // Make sure to set a reasonable cap here to prevent MEV
       },
-      prioritizationFeeLamports: 'auto',
+        prioritizationFeeLamports: {
+        priorityLevelWithMaxLamports: {
+          maxLamports: 10000000,
+          priorityLevel: "veryHigh" // If you want to land transaction fast, set this to use `veryHigh`. You will pay on average higher priority fee.
+        }
+      }
     });
 
     return swapTransaction.data.swapTransaction;
