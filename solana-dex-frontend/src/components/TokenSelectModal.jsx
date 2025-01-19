@@ -9,6 +9,13 @@ const TokenSelectModal = ({ isOpen, tokens, onSelectToken, onClose }) => {
     'SOL', 'USDC', 'USDT', 'ETH', 'BTC', 'BONK', 'RAY', 'SRM'
   ], []);
 
+  const truncateAddress = (address) => {
+    if (!address) return '';
+    const start = address.slice(0, 4);
+    const end = address.slice(-4);
+    return `${start}...${end}`;
+  };
+
   // Filter and sort tokens
   const filteredTokens = useMemo(() => {
     const searchTerm = searchQuery.toLowerCase().trim();
@@ -87,7 +94,7 @@ const TokenSelectModal = ({ isOpen, tokens, onSelectToken, onClose }) => {
               <div className="token-info">
                 <span className="token-symbol">{token.symbol}</span>
                 <span className="token-name">{token.name}</span>
-                <span className="token-name">{token.address}</span>
+                <span className="token-address">{truncateAddress(token.address)}</span>
               </div>
             </div>
           ))}
