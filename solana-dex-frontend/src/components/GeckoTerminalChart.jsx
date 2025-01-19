@@ -2,26 +2,30 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
 const GeckoTerminalChart = ({ fromToken }) => {
-  const [poolAddress, setPoolAddress] = useState('Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE'); // Default SOL pool
+  // Initialize with SOL pool address and no loading state
+  const [poolAddress, setPoolAddress] = useState('Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Only fetch new pool address if it's not the default SOL token
-    const fetchPoolAddress = async (tokenAddress) => {
-      // If no token provided or it's the SOL address, use default pool
-      if (!tokenAddress || tokenAddress === 'So11111111111111111111111111111111111111112') {
-        setPoolAddress('Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE');
-        setLoading(false);
-        return;
-      }
+    // Skip the API call if fromToken is empty/null/undefined
+    if (!fromToken) {
+      return;
+    }
 
+    // Skip the API call if it's the default SOL token
+    if (fromToken === 'So11111111111111111111111111111111111111112') {
+      setPoolAddress('Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE');
+      return;
+    }
+
+    const fetchPoolAddress = async () => {
       try {
         setLoading(true);
         setError(null);
         
         const response = await axios.get(
-          `https://api.geckoterminal.com/api/v2/networks/solana/tokens/${tokenAddress}/pools?page=1`,
+          `https://api.geckoterminal.com/api/v2/networks/solana/tokens/${fromToken}/pools?page=1`,
           {
             headers: {
               'Accept': 'application/json',
@@ -33,41 +37,27 @@ const GeckoTerminalChart = ({ fromToken }) => {
           setPoolAddress(response.data.data[0].attributes.address);
         } else {
           setError('No pool found for this token');
+          // Fallback to SOL pool if no pool found
+          setPoolAddress('Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE');
         }
       } catch (err) {
         console.error('Error fetching pool address:', err);
         setError('Failed to fetch pool data');
+        // Fallback to SOL pool on error
+        setPoolAddress('Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE');
       } finally {
         setLoading(false);
       }
     };
 
-    // Only fetch if fromToken is provided and is not SOL's address
-    if (fromToken && fromToken !== 'So11111111111111111111111111111111111111112') {
-      fetchPoolAddress(fromToken);
-    }
+    // Only fetch if it's not SOL and not empty
+    fetchPoolAddress();
   }, [fromToken]);
 
   if (loading) {
     return (
       <div className="msg-container">
         <div className="message">Loading chart...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="msg-container">
-        <div className="message error">{error}</div>
-      </div>
-    );
-  }
-
-  if (!poolAddress) {
-    return (
-      <div className="msg-container">
-        <div className="message error">No chart available</div>
       </div>
     );
   }
