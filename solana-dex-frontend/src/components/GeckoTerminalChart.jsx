@@ -7,7 +7,6 @@ const GeckoTerminalChart = ({ fromToken }) => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Function to fetch pool address
     const fetchPoolAddress = async (tokenAddress) => {
       setLoading(true);
       try {
@@ -23,24 +22,20 @@ const GeckoTerminalChart = ({ fromToken }) => {
         if (response.data?.data?.[0]?.attributes?.address) {
           setPoolAddress(response.data.data[0].attributes.address);
         } else {
-          // Fallback to SOL pool if no pool found
           setPoolAddress(SOL_POOL_ADDRESS);
         }
       } catch (err) {
-        // Fallback to SOL pool on error
         setPoolAddress(SOL_POOL_ADDRESS);
       } finally {
         setLoading(false);
       }
     };
 
-    // Only fetch if it's a valid token address and not SOL
     if (fromToken && 
         fromToken !== 'So11111111111111111111111111111111111111112' && 
         fromToken.length > 0) {
       fetchPoolAddress(fromToken);
     } else {
-      // Reset to SOL pool for default or SOL token
       setPoolAddress(SOL_POOL_ADDRESS);
     }
   }, [fromToken]);
