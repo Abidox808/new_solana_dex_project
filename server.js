@@ -152,13 +152,7 @@ const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, s
       dynamicSlippage: {
         maxBps: 300
       },
-      prioritizationFeeLamports: {
-        priorityLevelWithMaxLamports: {
-          maxLamports: 4000000,
-          global: false,
-          priorityLevel: "High"
-        }
-      },
+      prioritizationFeeLamports: 'auto',
     });
 
     return swapTransaction.data.swapTransaction;
