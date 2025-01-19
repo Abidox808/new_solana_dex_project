@@ -157,22 +157,18 @@ const fetchPrices = async (tokenIds) => {
   };
 
   useEffect(() => {
-    // Function to start price refresh interval
     const startPriceRefresh = () => {
       if (fromToken && toToken && tokens.length > 0) {
         const token1 = tokens.find(t => t.symbol === fromToken);
         const token2 = tokens.find(t => t.symbol === toToken);
         const tokenIds = [token1?.address, token2?.address].filter(Boolean);
 
-        // Clear any existing interval
         if (priceRefreshInterval.current) {
           clearInterval(priceRefreshInterval.current);
         }
 
-        // Initial fetch
         fetchPrices(tokenIds);
 
-        // Set up new interval
         priceRefreshInterval.current = setInterval(() => {
           fetchPrices(tokenIds);
         }, 12000); // 12 seconds
@@ -254,49 +250,77 @@ const fetchPrices = async (tokenIds) => {
   const handleSwap = async () => {
     if (!wallet.connected) {
       await handleConnectWallet();
-      return; // Return early to wait for connection state to update
+      return;
     }
-    setTransactionStatus('Initiating transaction...');
-    const walletAddress = wallet.publicKey;
-  
+
+    setTransactionStatus('Checking latest prices...');
     try {
+      // Fetch latest prices before swap
+      const token1 = tokens.find(t => t.symbol === fromToken);
+      const token2 = tokens.find(t => t.symbol === toToken);
+      const tokenIds = [token1?.address, token2?.address].filter(Boolean);
+      const latestPrices = await fetchPrices(tokenIds);
       
+      if (!latestPrices) {
+        throw new Error('Failed to fetch latest prices');
+      }
+
+      // Calculate price impact
+      const currentToAmount = (fromAmount * latestPrices[fromToken] / latestPrices[toToken]).toFixed(10);
+      const priceImpact = Math.abs((currentToAmount - toAmount) / toAmount * 100);
+
+      // If price impact exceeds slippage, ask for confirmation
+      if (priceImpact > slippage) {
+        const shouldProceed = window.confirm(
+          `Price has moved ${priceImpact.toFixed(2)}% which exceeds your slippage tolerance of ${slippage}%. Do you want to proceed?`
+        );
+        if (!shouldProceed) {
+          setTransactionStatus('Swap cancelled due to price movement');
+          return;
+        }
+        // Update toAmount with current price
+        setToAmount(currentToAmount);
+      }
+
+      setTransactionStatus('Initiating transaction...');
+      const walletAddress = wallet.publicKey;
+
       if (!fromTokenAddress || !toTokenAddress || !fromTokenDecimals) {
         throw new Error('Token information is missing. Please reselect the tokens.');
       }
-  
+
       const payload = {
         fromToken: fromTokenAddress,
         toToken: toTokenAddress,
         decimals: fromTokenDecimals,
         fromAmount,
-        toAmount,
-        walletAddress,
-        slippage,
+        toAmount: currentToAmount, // Use the updated amount
         walletAddress: walletAddress.toString(),
+        slippage,
         platformFeeBps: 50,
       };
+      
       console.log('Swap Payload:', payload);
-  
       const res = await axios.post(`${API_BASE_URL}/api/swap`, payload);
       console.log('Swap Response:', res.data);
-  
+
       setTransactionStatus('Signing transaction...');
       const swapTransaction = res.data.swapResult;
       const swapTransactionBuf = Buffer.from(swapTransaction, 'base64');
       const transaction = VersionedTransaction.deserialize(swapTransactionBuf);
       const signTransaction = await wallet.signTransaction(transaction);
+      
       setTransactionStatus('Sending signed transaction to Solana Network');
       const latestBlockhash = await connection.getLatestBlockhash();
       const txid = await connection.sendRawTransaction(signTransaction.serialize());
-  
+
       setTransactionStatus('Confirming...');
       await connection.confirmTransaction({
         blockhash: latestBlockhash,
         lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
         signature: txid,
       });
-  
+
       setTransactionStatus(`Transaction succeed! Transaction ID: ${txid}`);
       console.log(`https://solscan.io/tx/${txid}`);
     } catch (error) {
