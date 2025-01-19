@@ -87,7 +87,11 @@ const performSwap = async (fromToken, toToken, decimals, fromAmount, toAmount, s
         quoteResponse: quoteRes,
         userPublicKey: walletAddress,
         wrapAndUnwrapSol: true,
-        useSharedAccounts: true
+        useSharedAccounts: true,
+        dynamicComputeUnitLimit: true,
+        dynamicSlippage: {
+          maxBps: 300
+        },
       });
 
       return swapTransaction.data.swapTransaction;
