@@ -2,12 +2,20 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
 const GeckoTerminalChart = ({ fromToken }) => {
-  const [poolAddress, setPoolAddress] = useState('');
+  const [poolAddress, setPoolAddress] = useState('Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE'); // Default SOL pool
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    // Only fetch new pool address if it's not the default SOL token
     const fetchPoolAddress = async (tokenAddress) => {
+      // If no token provided or it's the SOL address, use default pool
+      if (!tokenAddress || tokenAddress === 'So11111111111111111111111111111111111111112') {
+        setPoolAddress('Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE');
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
         setError(null);
@@ -34,24 +42,11 @@ const GeckoTerminalChart = ({ fromToken }) => {
       }
     };
 
-    // Only fetch if fromToken is provided and is a non-empty string
-    if (fromToken && typeof fromToken === 'string') {
+    // Only fetch if fromToken is provided and is not SOL's address
+    if (fromToken && fromToken !== 'So11111111111111111111111111111111111111112') {
       fetchPoolAddress(fromToken);
-    } else {
-      // Reset states when no valid token is provided
-      setPoolAddress('');
-      setError(null);
-      setLoading(false);
     }
   }, [fromToken]);
-
-  if (!fromToken) {
-    return (
-      <div className="msg-container">
-        <div className="message">Waiting for token selection...</div>
-      </div>
-    );
-  }
 
   if (loading) {
     return (
