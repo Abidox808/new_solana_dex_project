@@ -33,7 +33,7 @@ const TokenSwap = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [transactionStatus, setTransactionStatus] = useState('');
-  const [slippage, setSlippage] = useState(0.5); // default slippage tolerance
+  const [slippage, setSlippage] = useState(0.7); // default slippage tolerance
   const [isSlippageModalOpen, setIsSlippageModalOpen] = useState(false);
   const [fromBalance, setFromBalance] = useState('0'); // Example balance
   const [toBalance, setToBalance] = useState('0'); // Example balance
