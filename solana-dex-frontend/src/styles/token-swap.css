@@ -508,15 +508,9 @@ body.light .refresh-icon {
     font-size: 12px;
   }
 }
-.loading-price {
-  opacity: 0.5;
+.price-loading {
+  opacity: 0;
   transition: opacity 0.3s ease-in-out;
-}
-
-.refresh-button-container {
-  display: flex;
-  justify-content: center;
-  margin-top: 10px;
 }
 
 .refresh-button {
@@ -528,17 +522,21 @@ body.light .refresh-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
 }
 
-.refresh-button:hover {
+.refresh-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.refresh-button:hover:not(:disabled) {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
 .refresh-icon {
   color: #666;
   font-size: 18px;
-  transition: transform 0.5s ease;
 }
 
 .refreshing .refresh-icon {
