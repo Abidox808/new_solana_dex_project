@@ -42,7 +42,6 @@ const TokenSwap = () => {
   const wallet = useWallet();
   const priceRefreshInterval = useRef(null);
   const [debouncedFromAmount, setDebouncedFromAmount] = useState(fromAmount);
-  const [isPriceLoading, setIsPriceLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL || 'http://localhost:3000';
@@ -163,13 +162,11 @@ const TokenSwap = () => {
 };
 
 const fetchPrices = async (tokenIds) => {
-  setIsPriceLoading(true);
   setIsRefreshing(true);
   setError(null);
   try {
     setToAmount('');
     const jupiterResponse = await axios.get(`https://api.jup.ag/price/v2?ids=${tokenIds.join(',')}`);
-    await new Promise(resolve => setTimeout(resolve, 1000));
     
     // Extract prices from the response
     const newPrices = {};
@@ -188,15 +185,16 @@ const fetchPrices = async (tokenIds) => {
       setToAmount(convertedAmount);
     }
 
+    await new Promise(resolve => setTimeout(resolve, 1000));
     return newPrices;
   } catch (error) {
     console.error('Error fetching prices from Jupiter API:', error);
     setError('Failed to fetch prices');
     return null;
   } finally {
-    setIsPriceLoading(false);
-    setIsRefreshing(false);
-    setLoading(false);
+    setTimeout(() => {
+        setIsRefreshing(false);
+      }, 2000);
   }
   };
 
@@ -453,20 +451,19 @@ const fetchPrices = async (tokenIds) => {
                   value={toAmount}
                   readOnly
                   placeholder="0.0"
-                  className={isPriceLoading ? 'price-loading' : ''}
                 />
               </div>
             </div>
             <div className="refresh-button-container">
-            <button 
-              onClick={handleRefresh} 
-              className={`refresh-button ${isRefreshing ? 'refreshing' : ''}`}
-              disabled={isRefreshing}
-            >
-              <FaSync className="refresh-icon" />
-            </button>
-          </div>
-          </div>
+              <button 
+                onClick={handleRefresh} 
+                className={`refresh-button ${isRefreshing ? 'refreshing' : ''}`}
+                disabled={isRefreshing}
+              >
+                <FaSync className="refresh-icon" />
+              </button>
+            </div>
+            </div>
           <div className='handle-swap-btn'>
             <button onClick={handleSwap}>
               {wallet.connected ? 'Swap' : 'Connect Wallet'}

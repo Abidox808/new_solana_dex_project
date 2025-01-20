@@ -508,10 +508,6 @@ body.light .refresh-icon {
     font-size: 12px;
   }
 }
-.price-loading {
-  opacity: 0;
-  transition: opacity 0.3s ease-in-out;
-}
 
 .refresh-button {
   background: none;
@@ -526,8 +522,7 @@ body.light .refresh-icon {
 }
 
 .refresh-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.7;
+  cursor: wait;
 }
 
 .refresh-button:hover:not(:disabled) {
@@ -540,14 +535,14 @@ body.light .refresh-icon {
 }
 
 .refreshing .refresh-icon {
-  animation: spin 1s linear infinite;
+  animation: quickSpin 2s ease-out forwards;
 }
 
-@keyframes spin {
-  from {
+@keyframes quickSpin {
+  0% {
     transform: rotate(0deg);
   }
-  to {
-    transform: rotate(360deg);
+  100% {
+    transform: rotate(720deg);
   }
 }
