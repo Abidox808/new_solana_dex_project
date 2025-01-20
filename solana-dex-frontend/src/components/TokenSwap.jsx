@@ -43,6 +43,7 @@ const TokenSwap = () => {
   const priceRefreshInterval = useRef(null);
   const [debouncedFromAmount, setDebouncedFromAmount] = useState(fromAmount);
   const [isPriceLoading, setIsPriceLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL || 'http://localhost:3000';
   const END_POINT = import.meta.env.VITE_APP_RPC_END_POINT || 'https://api.mainnet-beta.solana.com';
@@ -89,7 +90,6 @@ const TokenSwap = () => {
   const handleAmountChange = async (value) => {
     setFromAmount(value);
     if (value && fromToken && toToken && tokens.length > 0) {
-      setIsPriceLoading(true);
       const token1 = tokens.find(t => t.symbol === fromToken);
       const token2 = tokens.find(t => t.symbol === toToken);
       const tokenIds = [token1?.address, token2?.address].filter(Boolean);
@@ -164,9 +164,12 @@ const TokenSwap = () => {
 
 const fetchPrices = async (tokenIds) => {
   setIsPriceLoading(true);
+  setIsRefreshing(true);
   setError(null);
   try {
+    setToAmount('');
     const jupiterResponse = await axios.get(`https://api.jup.ag/price/v2?ids=${tokenIds.join(',')}`);
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
     // Extract prices from the response
     const newPrices = {};
@@ -191,6 +194,8 @@ const fetchPrices = async (tokenIds) => {
     setError('Failed to fetch prices');
     return null;
   } finally {
+    setIsPriceLoading(false);
+    setIsRefreshing(false);
     setLoading(false);
   }
   };
@@ -347,7 +352,6 @@ const fetchPrices = async (tokenIds) => {
 
   const handleRefresh = async () => {
     if (fromToken && toToken && tokens.length > 0) {
-      setIsPriceLoading(true);
       const token1 = tokens.find(t => t.symbol === fromToken);
       const token2 = tokens.find(t => t.symbol === toToken);
       const tokenIds = [token1?.address, token2?.address].filter(Boolean);
@@ -446,17 +450,18 @@ const fetchPrices = async (tokenIds) => {
                   <span className="dropdown-arrow">▼</span>
                 </button>
                 <AmountInput
-                  value={isPriceLoading ? '' : toAmount}
+                  value={toAmount}
                   readOnly
-                  placeholder={isPriceLoading ? 'Fetching price...' : '0.0'}
-                  className={isPriceLoading ? 'loading-price' : ''}
+                  placeholder="0.0"
+                  className={isPriceLoading ? 'price-loading' : ''}
                 />
               </div>
             </div>
             <div className="refresh-button-container">
             <button 
               onClick={handleRefresh} 
-              className={`refresh-button ${isPriceLoading ? 'refreshing' : ''}`}
+              className={`refresh-button ${isRefreshing ? 'refreshing' : ''}`}
+              disabled={isRefreshing}
             >
               <FaSync className="refresh-icon" />
             </button>
