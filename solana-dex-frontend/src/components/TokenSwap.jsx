@@ -483,35 +483,6 @@ const fetchPrices = async (tokenIds) => {
           />
           <PriceDisplay fromToken={fromToken} toToken={toToken} prices={prices} />
         </div>
-        <div className="settings-container">
-          <div className="settings-item">
-              <label className="setting-label">
-                  MEV Protection
-                  <span className="info-icon">i</span>
-              </label>
-              <label className="switch">
-                  <input type="checkbox"/>
-                  <span className="slider round"></span>
-              </label>
-          </div>
-          
-          <div className="settings-item">
-              <label className="setting-label">
-                  Slippage Settings
-                  <span className="info-icon">i</span>
-              </label>
-              <div className="slippage-options">
-                <Slippage slippage={slippage} setIsSlippageModalOpen={setIsSlippageModalOpen} />
-              </div>
-          </div>
-
-          <div className="settings-item">
-              <label className="setting-label">Max Slippage:</label>
-              <input type="text" className="slippage-input" value="3%" readOnly/>
-          </div>
-
-          <button className="save-btn">Save Settings</button>
-        </div>
       </div>
     </div>
   );
