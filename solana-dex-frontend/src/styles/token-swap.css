@@ -44,6 +44,7 @@
 }
 
 .slippage-label {
+  display: block;
   font-size: 0.8rem;
   margin-bottom: 0.25rem;
 }
@@ -545,4 +546,43 @@ body.light .refresh-icon {
   100% {
     transform: rotate(720deg);
   }
+}
+
+.slippage-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin: 0;
+  padding: 0;
+}
+
+.slippage-label {
+  font-size: 0.8rem;
+  margin-bottom: 0.25rem;
+}
+
+.slippage-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.slippage-value {
+  font-size: 1rem;
+}
+
+.slippage-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: #666;
+}
+
+.slippage-toggle.manual .info-icon {
+  color: #00C8FF;
+}
+
+.info-icon {
+  font-size: 1rem;
 }

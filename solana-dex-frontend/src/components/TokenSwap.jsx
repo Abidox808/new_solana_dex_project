@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { FaSync } from 'react-icons/fa';
 import { FaRedoAlt } from 'react-icons/fa';
+import { FaInfoCircle } from 'react-icons/fa';
 import Dropdown from './Dropdown';
 import AmountInput from './AmountInput';
 import SwapButton from './SwapButton';
@@ -44,6 +45,7 @@ const TokenSwap = () => {
   const priceRefreshInterval = useRef(null);
   const [debouncedFromAmount, setDebouncedFromAmount] = useState(fromAmount);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isSlippageManual, setIsSlippageManual] = useState(false);
 
   const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL || 'http://localhost:3000';
   const END_POINT = import.meta.env.VITE_APP_RPC_END_POINT || 'https://api.mainnet-beta.solana.com';
@@ -371,6 +373,13 @@ const fetchPrices = async (tokenIds) => {
     }
   };
 
+  const handleSlippageToggle = () => {
+    setIsSlippageManual((prevState) => !prevState);
+    if (!isSlippageManual) {
+      setIsSlippageModalOpen(true);
+    }
+  };
+
   return (
     <div className="token-swap-container">
       <div className='token-swap-body'>
@@ -378,6 +387,19 @@ const fetchPrices = async (tokenIds) => {
           {loading && <p>Loading...</p>}
           {transactionStatus && <p>{transactionStatus}</p>}
           <div className="token-swap-inputs">
+          <div className="slippage-container">
+                  <div className="slippage-info">
+                    <span className="slippage-value">
+                      {isSlippageManual ? `${slippage}%` : 'Dynamic'}
+                    </span>
+                    <button
+                      className={`slippage-toggle ${isSlippageManual ? 'manual' : 'dynamic'}`}
+                      onClick={handleSlippageToggle}
+                    >
+                      <FaInfoCircle className="info-icon" />
+                    </button>
+                  </div>
+                </div>
             <div className="token-swap-input">
               <label>You're Selling:</label>
               <div className="balance-info">
