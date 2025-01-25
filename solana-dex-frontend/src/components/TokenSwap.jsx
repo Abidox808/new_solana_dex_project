@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { FaSync } from 'react-icons/fa';
+import { FaRedoAlt } from 'react-icons/fa';
 import Dropdown from './Dropdown';
 import AmountInput from './AmountInput';
 import SwapButton from './SwapButton';
@@ -388,6 +389,13 @@ const fetchPrices = async (tokenIds) => {
                 <button onClick={handleMax} className="balance-btn">
                   <i className="fas fa-arrow-up"></i> Max
                 </button>
+                <button 
+                onClick={handleRefresh} 
+                className={`balance-btn refresh-button ${isRefreshing ? 'refreshing' : ''}`}
+                disabled={isRefreshing}
+              >
+                <FaRedoAlt className="refresh-icon" />
+              </button>
               </div>
             </div>
               <div className="input-group">
@@ -453,15 +461,6 @@ const fetchPrices = async (tokenIds) => {
                   placeholder="0.0"
                 />
               </div>
-            </div>
-            <div className="refresh-button-container">
-              <button 
-                onClick={handleRefresh} 
-                className={`refresh-button ${isRefreshing ? 'refreshing' : ''}`}
-                disabled={isRefreshing}
-              >
-                <FaSync className="refresh-icon" />
-              </button>
             </div>
             </div>
           <div className='handle-swap-btn'>
