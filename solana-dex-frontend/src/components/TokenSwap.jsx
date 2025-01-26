@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { FaSync } from 'react-icons/fa';
 import { FaRedoAlt } from 'react-icons/fa';
-import { FaInfoCircle } from 'react-icons/fa';
+import { FaGear } from 'react-icons/fa6';
 import Dropdown from './Dropdown';
 import AmountInput from './AmountInput';
 import SwapButton from './SwapButton';
@@ -317,7 +317,6 @@ const fetchPrices = async (tokenIds) => {
         decimals: fromTokenDecimals,
         fromAmount,
         toAmount,
-        walletAddress,
         slippage,
         walletAddress: walletAddress.toString(),
         platformFeeBps: 50,
@@ -396,7 +395,7 @@ const fetchPrices = async (tokenIds) => {
                       className={`slippage-toggle ${isSlippageManual ? 'manual' : 'dynamic'}`}
                       onClick={handleSlippageToggle}
                     >
-                      <FaInfoCircle className="info-icon" />
+                      <FaGear className="info-icon" />
                     </button>
                   </div>
                 </div>
