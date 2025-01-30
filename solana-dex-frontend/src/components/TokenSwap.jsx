@@ -117,6 +117,8 @@ const TokenSwap = () => {
   
       const solToken = tokenData.find((t) => t.symbol === 'SOL');
       const usdcToken = tokenData.find((t) => t.symbol === 'USDC');
+      const savedTokens = localStorage.getItem('selectedTokens');
+      console.log(savedTokens)
 
       if (solToken) {
         setFromTokenAddress(WRAPPED_SOL_ADDRESS); // Use wrapped SOL address for native SOL
