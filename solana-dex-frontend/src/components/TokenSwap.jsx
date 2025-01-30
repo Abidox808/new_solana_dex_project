@@ -340,8 +340,9 @@ const fetchPrices = async (tokenIds) => {
         Transaction succeeded! Click here to view on Solscan
         </a>
         );
-        fetchBalance(); // Refetch balance after successful swap
+        fetchBalance();
       }, 12000);
+      fetchBalance();
       console.log(`https://solscan.io/tx/${txid}`);
     } catch (error) {
       console.error('Error during transaction:', error);
@@ -356,6 +357,7 @@ const fetchPrices = async (tokenIds) => {
       const tokenIds = [token1?.address, token2?.address].filter(Boolean);
       await fetchPrices(tokenIds);
     }
+    fetchBalance();
   };
 
   const handleHalf = () => {
