@@ -333,8 +333,10 @@ const fetchPrices = async (tokenIds) => {
         signature: txid,
       });
   
-      setTransactionStatus(`Transaction succeed! Transaction ID: ${txid}`);
-      fetchBalance();
+      setTimeout(() => {
+        fetchBalance(); // Refetch balance after successful swap
+        setTransactionStatus(`Transaction succeed! Transaction ID: ${txid}`);
+      }, 10000);
       console.log(`https://solscan.io/tx/${txid}`);
     } catch (error) {
       console.error('Error during transaction:', error);
