@@ -64,26 +64,6 @@ const TokenSwap = () => {
   };
 
   useEffect(() => {
-    if (wallet.connected && fromTokenAddress && toTokenAddress) {
-      const refreshBalances = async () => {
-        try {
-          const [newFromBalance, newToBalance] = await Promise.all([
-            fetchTokenBalance(fromTokenAddress, wallet.publicKey.toBase58()),
-            fetchTokenBalance(toTokenAddress, wallet.publicKey.toBase58())
-          ]);
-
-          setFromBalance(newFromBalance.toString());
-          setToBalance(newToBalance.toString());
-        } catch (error) {
-          console.error('Error refreshing balances:', error);
-        }
-      };
-
-      refreshBalances();
-    }
-  }, [wallet.connected, fromTokenAddress, toTokenAddress]);
-
-  useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedFromAmount(fromAmount);
     }, 500); // 500ms delay
@@ -92,13 +72,45 @@ const TokenSwap = () => {
   }, [fromAmount]);
 
   useEffect(() => {
-    const savedTokens = localStorage.getItem('selectedTokens');
-    if (savedTokens) {
-      const { from, to } = JSON.parse(savedTokens);
-      setFromToken(from);
-      setToToken(to);
-    }
-  }, []);
+    const loadSavedTokens = async () => {
+      const savedTokens = localStorage.getItem('selectedTokens');
+      if (savedTokens && tokens.length > 0) {
+        const { from, to } = JSON.parse(savedTokens);
+        
+        // Find the full token objects
+        const fromTokenObj = tokens.find(t => t.symbol === from);
+        const toTokenObj = tokens.find(t => t.symbol === to);
+  
+        if (fromTokenObj && toTokenObj) {
+          // Set token symbols
+          setFromToken(from);
+          setToToken(to);
+  
+          // Set token addresses based on whether it's SOL or not
+          const fromAddress = from === 'SOL' ? WRAPPED_SOL_ADDRESS : fromTokenObj.address;
+          const toAddress = to === 'SOL' ? WRAPPED_SOL_ADDRESS : toTokenObj.address;
+          
+          setFromTokenAddress(fromAddress);
+          setToTokenAddress(toAddress);
+          
+          // Set decimals
+          setFromTokenDecimals(fromTokenObj.decimals);
+          setToTokenDecimals(toTokenObj.decimals);
+  
+          // Fetch balances if wallet is connected
+          if (wallet.publicKey) {
+            const fromBalance = await fetchTokenBalance(fromAddress, wallet.publicKey.toBase58());
+            const toBalance = await fetchTokenBalance(toAddress, wallet.publicKey.toBase58());
+            
+            setFromBalance(fromBalance.toString());
+            setToBalance(toBalance.toString());
+          }
+        }
+      }
+    };
+  
+    loadSavedTokens();
+  }, [tokens, wallet.publicKey]);
 
   useEffect(() => {
     if (fromToken && toToken) {
