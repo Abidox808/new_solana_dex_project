@@ -22,11 +22,11 @@ const TokenSwap = () => {
   const [tokens, setTokens] = useState([]);
   const [fromToken, setFromToken] = useState('SOL');
   const [toToken, setToToken] = useState('USDC');
-  const [fromTokenAddress, setFromTokenAddress] = useState('');
-  const [toTokenAddress, setToTokenAddress] = useState('');
+  const [fromTokenAddress, setFromTokenAddress] = useState('So11111111111111111111111111111111111111112');
+  const [toTokenAddress, setToTokenAddress] = useState('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
   const [Decimals, setDecimals] = useState('');
-  const [fromTokenDecimals, setFromTokenDecimals] = useState(0);
-  const [toTokenDecimals, setToTokenDecimals] = useState(0);
+  const [fromTokenDecimals, setFromTokenDecimals] = useState(9);
+  const [toTokenDecimals, setToTokenDecimals] = useState(6);
   const [fromAmount, setFromAmount] = useState('');
   const [toAmount, setToAmount] = useState('');
   const [showFromDropdown, setShowFromDropdown] = useState(false);
@@ -73,19 +73,14 @@ const TokenSwap = () => {
   }, [fromAmount]);
 
   useEffect(() => {
-    const initializeTokens = async () => {
-      const savedTokens = localStorage.getItem('selectedTokens');
-      if (savedTokens) {
-        const { from, to, fromTokenAddress, toTokenAddress } = JSON.parse(savedTokens);
-        setFromToken(from);
-        setToToken(to);
-        setFromTokenAddress(fromTokenAddress);
-        setToTokenAddress(toTokenAddress);
-      }
-      setIsInitialized(true);
-    };
-
-    initializeTokens();
+    const savedTokens = localStorage.getItem('selectedTokens');
+    if (savedTokens) {
+      const { from, to, fromTokenAddress, toTokenAddress } = JSON.parse(savedTokens);
+      setFromToken(from);
+      setToToken(to);
+      setFromTokenAddress(fromTokenAddress);
+      setToTokenAddress(toTokenAddress);
+    }
   }, []);
 
   useEffect(() => {
@@ -120,22 +115,6 @@ const TokenSwap = () => {
         }
   
         setTokens(tokenData);
-  
-        // Only set default tokens if there are no saved tokens
-        if (!localStorage.getItem('selectedTokens')) {
-          const solToken = tokenData.find((t) => t.symbol === 'SOL');
-          const usdcToken = tokenData.find((t) => t.symbol === 'USDC');
-
-          if (solToken) {
-            setFromTokenAddress(WRAPPED_SOL_ADDRESS);
-            setFromTokenDecimals(9);
-          }
-
-          if (usdcToken) {
-            setToTokenAddress(usdcToken.address);
-            setToTokenDecimals(usdcToken.decimals);
-          }
-        }
       } catch (error) {
         console.error('Error fetching tokens:', error);
         setError('Failed to fetch tokens');
