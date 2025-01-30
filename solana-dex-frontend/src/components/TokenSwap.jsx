@@ -342,7 +342,7 @@ const fetchPrices = async (tokenIds) => {
         );
         fetchBalance();
       }, 12000);
-      fetchBalance();
+      handleRefresh();
       console.log(`https://solscan.io/tx/${txid}`);
     } catch (error) {
       console.error('Error during transaction:', error);
