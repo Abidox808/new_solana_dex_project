@@ -235,7 +235,7 @@ const fetchPrices = async (tokenIds) => {
     };
 
     fetchBalance();
-  }, [fromTokenAddress, wallet.publicKey]);
+  }, [fromTokenAddress, transactionStatus, wallet.publicKey]);
 
   useEffect(() => {
     if (fromToken && toToken && tokens.length > 0) {
