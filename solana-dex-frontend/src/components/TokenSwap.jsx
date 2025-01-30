@@ -46,6 +46,7 @@ const TokenSwap = () => {
   const [debouncedFromAmount, setDebouncedFromAmount] = useState(fromAmount);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isSlippageManual, setIsSlippageManual] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL || 'http://localhost:3000';
   const END_POINT = import.meta.env.VITE_APP_RPC_END_POINT || 'https://api.mainnet-beta.solana.com';
@@ -72,14 +73,19 @@ const TokenSwap = () => {
   }, [fromAmount]);
 
   useEffect(() => {
-    const savedTokens = localStorage.getItem('selectedTokens');
-    if (savedTokens) {
-      const { from, to, fromTokenAddress, toTokenAddress } = JSON.parse(savedTokens);
-      setFromToken(from);
-      setToToken(to);
-      setFromTokenAddress(fromTokenAddress);
-      setToTokenAddress(toTokenAddress);
-    }
+    const initializeTokens = async () => {
+      const savedTokens = localStorage.getItem('selectedTokens');
+      if (savedTokens) {
+        const { from, to, fromTokenAddress, toTokenAddress } = JSON.parse(savedTokens);
+        setFromToken(from);
+        setToToken(to);
+        setFromTokenAddress(fromTokenAddress);
+        setToTokenAddress(toTokenAddress);
+      }
+      setIsInitialized(true);
+    };
+
+    initializeTokens();
   }, []);
 
   useEffect(() => {
@@ -115,23 +121,21 @@ const TokenSwap = () => {
   
         setTokens(tokenData);
   
-      const solToken = tokenData.find((t) => t.symbol === 'SOL');
-      const usdcToken = tokenData.find((t) => t.symbol === 'USDC');
-      const savedTokens = localStorage.getItem('selectedTokens');
-      console.log(savedTokens)
+        // Only set default tokens if there are no saved tokens
+        if (!localStorage.getItem('selectedTokens')) {
+          const solToken = tokenData.find((t) => t.symbol === 'SOL');
+          const usdcToken = tokenData.find((t) => t.symbol === 'USDC');
 
-      if (solToken) {
-        setFromTokenAddress(WRAPPED_SOL_ADDRESS); // Use wrapped SOL address for native SOL
-        setFromTokenDecimals(9); // Native SOL has 9 decimals
-      }
+          if (solToken) {
+            setFromTokenAddress(WRAPPED_SOL_ADDRESS);
+            setFromTokenDecimals(9);
+          }
 
-      if (usdcToken) {
-        setToTokenAddress(usdcToken.address); // SPL token address
-        setToTokenDecimals(usdcToken.decimals); // SPL token decimals
-      }
-      if(savedTokens){
-        setFromTokenAddress(savedTokens.fromTokenAddress);
-      }
+          if (usdcToken) {
+            setToTokenAddress(usdcToken.address);
+            setToTokenDecimals(usdcToken.decimals);
+          }
+        }
       } catch (error) {
         console.error('Error fetching tokens:', error);
         setError('Failed to fetch tokens');
@@ -246,14 +250,14 @@ const fetchPrices = async (tokenIds) => {
 
   useEffect(() => {
     const fetchBalance = async () => {
-      if (fromTokenAddress && wallet.publicKey) {
+      if (fromTokenAddress && wallet.publicKey && isInitialized) {
         const balance = await fetchTokenBalance(fromTokenAddress, wallet.publicKey.toBase58());
         setFromBalance(balance);
       }
     };
 
     fetchBalance();
-  }, [fromTokenAddress, wallet.publicKey, toTokenAddress]);
+  }, [fromTokenAddress, wallet.publicKey, isInitialized]);
 
   useEffect(() => {
     if (fromToken && toToken && tokens.length > 0) {
