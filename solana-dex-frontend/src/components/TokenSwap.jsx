@@ -115,20 +115,18 @@ const TokenSwap = () => {
   
         setTokens(tokenData);
   
-        if (!localStorage.getItem('selectedTokens')) {
-          const solToken = tokenData.find((t) => t.symbol === 'SOL');
-          const usdcToken = tokenData.find((t) => t.symbol === 'USDC');
+      const solToken = tokenData.find((t) => t.symbol === 'SOL');
+      const usdcToken = tokenData.find((t) => t.symbol === 'USDC');
 
-          if (solToken) {
-            setFromTokenAddress(WRAPPED_SOL_ADDRESS);
-            setFromTokenDecimals(9);
-          }
+      if (solToken) {
+        setFromTokenAddress(WRAPPED_SOL_ADDRESS); // Use wrapped SOL address for native SOL
+        setFromTokenDecimals(9); // Native SOL has 9 decimals
+      }
 
-          if (usdcToken) {
-            setToTokenAddress(usdcToken.address);
-            setToTokenDecimals(usdcToken.decimals);
-          }
-        }
+      if (usdcToken) {
+        setToTokenAddress(usdcToken.address); // SPL token address
+        setToTokenDecimals(usdcToken.decimals); // SPL token decimals
+      }
       } catch (error) {
         console.error('Error fetching tokens:', error);
         setError('Failed to fetch tokens');
