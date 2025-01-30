@@ -74,17 +74,11 @@ const TokenSwap = () => {
   useEffect(() => {
     const savedTokens = localStorage.getItem('selectedTokens');
     if (savedTokens) {
-      const { from, to } = JSON.parse(savedTokens);
+      const { from, to, fromTokenAddress, toTokenAddress } = JSON.parse(savedTokens);
       setFromToken(from);
       setToToken(to);
-
-      if (wallet.publicKey) {
-        const fromBalance = await fetchTokenBalance(fromAddress, wallet.publicKey.toBase58());
-        const toBalance = await fetchTokenBalance(toAddress, wallet.publicKey.toBase58());
-        
-        setFromBalance(fromBalance.toString());
-        setToBalance(toBalance.toString());
-      }
+      setFromTokenAddress(fromTokenAddress);
+      setToTokenAddress(toTokenAddress);
     }
   }, []);
 
@@ -92,7 +86,9 @@ const TokenSwap = () => {
     if (fromToken && toToken) {
       localStorage.setItem('selectedTokens', JSON.stringify({
         from: fromToken,
-        to: toToken
+        to: toToken,
+        fromTokenAddress: fromTokenAddress,
+        toTokenAddress: toTokenAddress
       }));
     }
   }, [fromToken, toToken]);
