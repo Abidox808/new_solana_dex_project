@@ -46,7 +46,6 @@ const TokenSwap = () => {
   const [debouncedFromAmount, setDebouncedFromAmount] = useState(fromAmount);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isSlippageManual, setIsSlippageManual] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
 
   const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL || 'http://localhost:3000';
   const END_POINT = import.meta.env.VITE_APP_RPC_END_POINT || 'https://api.mainnet-beta.solana.com';
@@ -229,14 +228,14 @@ const fetchPrices = async (tokenIds) => {
 
   useEffect(() => {
     const fetchBalance = async () => {
-      if (fromTokenAddress && wallet.publicKey && isInitialized) {
+      if (fromTokenAddress && wallet.publicKey) {
         const balance = await fetchTokenBalance(fromTokenAddress, wallet.publicKey.toBase58());
         setFromBalance(balance);
       }
     };
 
     fetchBalance();
-  }, [fromTokenAddress, wallet.publicKey, isInitialized]);
+  }, [fromTokenAddress, wallet.publicKey]);
 
   useEffect(() => {
     if (fromToken && toToken && tokens.length > 0) {
