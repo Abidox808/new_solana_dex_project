@@ -317,16 +317,16 @@ const fetchPrices = async (tokenIds) => {
       const res = await axios.post(`${API_BASE_URL}/api/swap`, payload);
       console.log('Swap Response:', res.data);
   
-      setTransactionStatus('Signing transaction...');
+      setTransactionStatus(<span style={{ color: 'white', fontWeight: 300 }}>Signing transaction...</span>);
       const swapTransaction = res.data.swapResult;
       const swapTransactionBuf = Buffer.from(swapTransaction, 'base64');
       const transaction = VersionedTransaction.deserialize(swapTransactionBuf);
       const signTransaction = await wallet.signTransaction(transaction);
-      setTransactionStatus('Sending signed transaction to Solana Network');
+      setTransactionStatus(<span style={{ color: 'white', fontWeight: 300 }}>Sending signed transaction to Solana Network</span>);
       const latestBlockhash = await connection.getLatestBlockhash();
       const txid = await connection.sendRawTransaction(signTransaction.serialize());
   
-      setTransactionStatus(<span>Confirming ... </span>);
+      setTransactionStatus(<span style={{ color: 'white', fontWeight: 300 }}>Confirming ...</span>);
       await connection.confirmTransaction({
         blockhash: latestBlockhash,
         lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
