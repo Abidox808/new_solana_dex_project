@@ -129,6 +129,9 @@ const TokenSwap = () => {
         setToTokenAddress(usdcToken.address); // SPL token address
         setToTokenDecimals(usdcToken.decimals); // SPL token decimals
       }
+      if(savedTokens){
+        setFromTokenAddress(savedTokens.fromTokenAddress);
+      }
       } catch (error) {
         console.error('Error fetching tokens:', error);
         setError('Failed to fetch tokens');
