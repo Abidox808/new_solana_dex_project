@@ -64,6 +64,26 @@ const TokenSwap = () => {
   };
 
   useEffect(() => {
+    if (wallet.connected && fromTokenAddress && toTokenAddress) {
+      const refreshBalances = async () => {
+        try {
+          const [newFromBalance, newToBalance] = await Promise.all([
+            fetchTokenBalance(fromTokenAddress, wallet.publicKey.toBase58()),
+            fetchTokenBalance(toTokenAddress, wallet.publicKey.toBase58())
+          ]);
+
+          setFromBalance(newFromBalance.toString());
+          setToBalance(newToBalance.toString());
+        } catch (error) {
+          console.error('Error refreshing balances:', error);
+        }
+      };
+
+      refreshBalances();
+    }
+  }, [wallet.connected, fromTokenAddress, toTokenAddress]);
+
+  useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedFromAmount(fromAmount);
     }, 500); // 500ms delay
