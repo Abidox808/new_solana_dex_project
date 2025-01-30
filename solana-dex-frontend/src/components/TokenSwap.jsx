@@ -81,48 +81,13 @@ const TokenSwap = () => {
   }, []);
 
   useEffect(() => {
-    const loadSavedTokensAndBalances = async () => {
-      const savedTokens = localStorage.getItem('selectedTokens');
-      if (savedTokens && tokens.length > 0) {
-        const { from, to } = JSON.parse(savedTokens);
-        
-        // Find the token objects
-        const fromTokenObj = tokens.find(t => t.symbol === from);
-        const toTokenObj = tokens.find(t => t.symbol === to);
-        
-        if (fromTokenObj) {
-          setFromToken(from);
-          setFromTokenAddress(from === 'SOL' ? WRAPPED_SOL_ADDRESS : fromTokenObj.address);
-          setFromTokenDecimals(fromTokenObj.decimals);
-        }
-        
-        if (toTokenObj) {
-          setToToken(to);
-          setToTokenAddress(toTokenObj.address);
-          setToTokenDecimals(toTokenObj.decimals);
-        }
-
-        // Fetch balances for saved tokens if wallet is connected
-        if (wallet.publicKey && fromTokenObj && toTokenObj) {
-          const fromBalance = await fetchTokenBalance(
-            from === 'SOL' ? WRAPPED_SOL_ADDRESS : fromTokenObj.address,
-            wallet.publicKey.toBase58()
-          );
-          const toBalance = await fetchTokenBalance(
-            toTokenObj.address,
-            wallet.publicKey.toBase58()
-          );
-          
-          setFromBalance(fromBalance.toString());
-          setToBalance(toBalance.toString());
-        }
-      }
-    };
-
-    if (tokens.length > 0) {
-      loadSavedTokensAndBalances();
+    if (fromToken && toToken) {
+      localStorage.setItem('selectedTokens', JSON.stringify({
+        from: fromToken,
+        to: toToken
+      }));
     }
-  }, [tokens, wallet.publicKey]);
+  }, [fromToken, toToken]);
 
   const handleAmountChange = async (value) => {
     setFromAmount(value);
@@ -271,21 +236,15 @@ const fetchPrices = async (tokenIds) => {
   }, [fromToken, toToken, tokens, debouncedFromAmount]);
 
   useEffect(() => {
-    const fetchBalances = async () => {
-      if (wallet.publicKey) {
-        if (fromTokenAddress) {
-          const fromBalance = await fetchTokenBalance(fromTokenAddress, wallet.publicKey.toBase58());
-          setFromBalance(fromBalance.toString());
-        }
-        if (toTokenAddress) {
-          const toBalance = await fetchTokenBalance(toTokenAddress, wallet.publicKey.toBase58());
-          setToBalance(toBalance.toString());
-        }
+    const fetchBalance = async () => {
+      if (fromTokenAddress && wallet.publicKey) {
+        const balance = await fetchTokenBalance(fromTokenAddress, wallet.publicKey.toBase58());
+        setFromBalance(balance);
       }
     };
 
-    fetchBalances();
-  }, [fromTokenAddress, toTokenAddress, wallet.publicKey, transactionStatus]);
+    fetchBalance();
+  }, [fromTokenAddress, wallet.publicKey, toTokenAddress]);
 
   useEffect(() => {
     if (fromToken && toToken && tokens.length > 0) {
@@ -385,17 +344,6 @@ const fetchPrices = async (tokenIds) => {
   
       setTransactionStatus(`Transaction succeed! Transaction ID: ${txid}`);
       console.log(`https://solscan.io/tx/${txid}`);
-
-      // Add delay before refreshing balances to allow blockchain to update
-      setTimeout(async () => {
-        if (wallet.publicKey) {
-          const newFromBalance = await fetchTokenBalance(fromTokenAddress, wallet.publicKey.toBase58());
-          const newToBalance = await fetchTokenBalance(toTokenAddress, wallet.publicKey.toBase58());
-          setFromBalance(newFromBalance.toString());
-          setToBalance(newToBalance.toString());
-        }
-      }, 2000); // 2 second delay
-
     } catch (error) {
       console.error('Error during transaction:', error);
       setTransactionStatus('Transaction failed. Please try again.');
