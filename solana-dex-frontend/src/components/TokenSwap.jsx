@@ -326,7 +326,7 @@ const fetchPrices = async (tokenIds) => {
       const latestBlockhash = await connection.getLatestBlockhash();
       const txid = await connection.sendRawTransaction(signTransaction.serialize());
   
-      setTransactionStatus('Confirming...');
+      setTransactionStatus(<span>Confirming ... </span>);
       await connection.confirmTransaction({
         blockhash: latestBlockhash,
         lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
@@ -335,9 +335,10 @@ const fetchPrices = async (tokenIds) => {
   
       setTimeout(() => {
         setTransactionStatus(
-          <span><a href={`https://solscan.io/tx/${txid}`} target="_blank" rel="noopener noreferrer">
-          Transaction succeeded! Click here to view on Solscan
-        </a></span>
+        <a style={{ color: 'white', fontWeight: 600, textDecoration: 'underline' }}
+        href={`https://solscan.io/tx/${txid}`} target="_blank" rel="noopener noreferrer">
+        Transaction succeeded! Click here to view on Solscan
+        </a>
         );
         fetchBalance(); // Refetch balance after successful swap
       }, 12000);
