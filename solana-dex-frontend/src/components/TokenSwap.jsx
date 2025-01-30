@@ -341,7 +341,8 @@ const fetchPrices = async (tokenIds) => {
         </a>
         );
         fetchBalance();
-      }, 12000);
+        handleRefresh();
+      }, 15000);
       handleRefresh();
       console.log(`https://solscan.io/tx/${txid}`);
     } catch (error) {
