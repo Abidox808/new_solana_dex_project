@@ -118,7 +118,7 @@ const TokenSwap = () => {
       const solToken = tokenData.find((t) => t.symbol === 'SOL');
       const usdcToken = tokenData.find((t) => t.symbol === 'USDC');
 
-      if (solToken) {
+      if (!localStorage.getItem('selectedTokens')) {
         setFromTokenAddress(WRAPPED_SOL_ADDRESS); // Use wrapped SOL address for native SOL
         setFromTokenDecimals(9); // Native SOL has 9 decimals
       }
