@@ -334,7 +334,11 @@ const fetchPrices = async (tokenIds) => {
       });
   
       setTimeout(() => {
-        setTransactionStatus(`Transaction succeed!: <a href="https://solscan.io/tx/${txid}">Transaction ID</a>`);
+        setTransactionStatus(
+          <a href={`https://solscan.io/tx/${txid}`} target="_blank" rel="noopener noreferrer">
+            Transaction succeeded! Click here to view on Solscan
+          </a>
+        );
         fetchBalance(); // Refetch balance after successful swap
       }, 12000);
       console.log(`https://solscan.io/tx/${txid}`);
