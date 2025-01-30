@@ -235,7 +235,7 @@ const fetchPrices = async (tokenIds) => {
     };
 
     fetchBalance();
-  }, [fromTokenAddress, transactionStatus, wallet.publicKey]);
+  }, [fromTokenAddress, wallet.publicKey]);
 
   useEffect(() => {
     if (fromToken && toToken && tokens.length > 0) {
@@ -334,6 +334,7 @@ const fetchPrices = async (tokenIds) => {
       });
   
       setTransactionStatus(`Transaction succeed! Transaction ID: ${txid}`);
+      setFromToken(fromToken);
       console.log(`https://solscan.io/tx/${txid}`);
     } catch (error) {
       console.error('Error during transaction:', error);
