@@ -109,6 +109,14 @@ const Header = () => {
                       Limit
                     </Link>
                   </li>
+                  <li>
+                    <Link
+                      to="/ai-tracker"
+                      className={location.pathname === '/ai-tracker' ? 'active' : ''}
+                    >
+                      Advanced Ai Tracker
+                    </Link>
+                  </li>
                   {/*<li>
                     <Link to="/dca" className={location.pathname === '/dca' ? 'active' : ''}>
                       DCA

@@ -1,11 +1,12 @@
 require('dotenv').config();
 
-const {MongoClient} = require('mongodb');
+const mongoose = require('mongoose');
 const express = require('express');
 const cors = require('cors');
 const { Keypair, PublicKey } = require('@solana/web3.js');
 const { combineAndDeduplicateData,  placePerpsOrder } = require('./services/tokenService');
 const axios = require('axios');
+const Waitlist = require('./models/Waitlist');
 
 // Load keypair from environment variables
 let keypairData;
@@ -15,6 +16,13 @@ try {
     //console.error('Invalid JSON format for MY_DEX_PROJECT_PRIVATE_KEY:', error.message);
     process.exit(1);
 }
+
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log('Connected to MongoDB'))
+.catch(err => console.error('MongoDB connection error:', err));
 
 const keypair = Keypair.fromSecretKey(new Uint8Array(keypairData));
 const app = express();
@@ -305,6 +313,41 @@ app.post('/api/limit-order', async (req, res) => {
   } catch (error) {
     console.error('Error placing limit order:', error);
     res.status(500).json({ error: 'Failed to place limit order', details: error.message });
+  }
+});
+
+app.post('/api/waitlist', async (req, res) => {
+  try {
+    const { email, discord, telegram } = req.body;
+    
+    // new waitlist entry
+    const waitlistEntry = new Waitlist({
+      email,
+      discord,
+      telegram
+    });
+
+    // Save to database
+    await waitlistEntry.save();
+
+    res.status(201).json({ 
+      success: true, 
+      message: 'Successfully added to waitlist' 
+    });
+  } catch (error) {
+    // Check for duplicate email error
+    if (error.code === 11000) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'This email is already on the waitlist' 
+      });
+    }
+
+    console.error('Waitlist submission error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error adding to waitlist' 
+    });
   }
 });
 

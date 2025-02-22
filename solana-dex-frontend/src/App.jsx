@@ -46,6 +46,7 @@ const LimitOrder = lazy(() => import('./components/LimitOrder'));
 //const Perps = lazy(() => import('./components/Perps'));
 //const CustomizableDashboard = lazy(() => import('./components/CustomizableDashboard'));
 const TokenSwap = lazy(() => import('./components/TokenSwap'));
+const AITrackerWaitlist  = lazy(() => import('./components/AITrackerWaitlist'));
 //const TokenSniper = lazy(() => import('./pages/TokenSniper')); // Corrected import path
 //const GamingPage = lazy(() => import('./components/GamingPage')); // Import the new GamingPage component
 //const LendingPage = lazy(() => import('./components/LendingPage')); // Import the new LendingPage component
@@ -73,6 +74,7 @@ function App() {
                   <Route path="/" element={<Navigate to="/swap" />} />
                   <Route path="/swap" element={<TokenSwap />} />
                   <Route path="/limit-order" element={<LimitOrder />} />
+                  <Route path="/ai-tracker" element={<AITrackerWaitlist />} />
                   {/*<Route path="/dca" element={<ComingSoon />} />
                   <Route path="/perps" element={<ComingSoon />} />
                   <Route path="/wallet" element={<ComingSoon />} />
