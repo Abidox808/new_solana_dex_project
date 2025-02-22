@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from 'react'
+import React, { useEffect, lazy, Suspense } from 'react'
 import bgVideo from './images/background.mp4';
 
 // provider
@@ -53,6 +53,10 @@ import './styles/styles.css'; // Ensure the global styles are imported
 //const StakingPage = lazy(() => import('./components/StakingPage')); // Import the new StakingPage component
 //const LiquidityPage = lazy(() => import('./components/LiquidityPage')); // Import the new LiquidityPage component
 //const ComingSoon = lazy(() => import('./components/ComingSoon'));
+
+const TokenSwap = lazy(() => import('./components/TokenSwap'));
+const LimitOrder = lazy(() => import('./components/LimitOrder'));
+const AITrackerWaitlist = lazy(() => import('./components/AITrackerWaitlist'));
 
 
 function App() {
