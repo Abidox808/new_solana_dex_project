@@ -78,7 +78,7 @@ const AITrackerWaitlist = () => {
         </div>
         <div className="feature-card">
           <h3 className="feature-title">💎 Early Access Pricing</h3>
-          <p className="feature-description">$30/month for early adopters (Regular $50/month)</p>
+          <p className="feature-description">Free for Early Adopters</p>
         </div>
       </div>
 
@@ -103,39 +103,7 @@ const AITrackerWaitlist = () => {
             </div>
           </div>
 
-          <div className="form-group">
-            <label className="form-label">
-              Discord Handle (Optional)
-            </label>
-            <div className="input-container">
-              <FaDiscord className="input-icon" />
-              <input
-                type="text"
-                name="discord"
-                value={formData.discord}
-                onChange={handleChange}
-                className="form-input"
-                placeholder="Your Discord username"
-              />
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">
-              Telegram Username (Optional)
-            </label>
-            <div className="input-container">
-              <IoSend className="input-icon" />
-              <input
-                type="text"
-                name="telegram"
-                value={formData.telegram}
-                onChange={handleChange}
-                className="form-input"
-                placeholder="Your Telegram username"
-              />
-            </div>
-          </div>
+          
 
           <button
             type="submit"
@@ -167,11 +135,11 @@ const AITrackerWaitlist = () => {
 
       {/* Social Links */}
       <div className="social-links">
-        <a href="https://discord.gg/yourdiscord" target="_blank" rel="noopener noreferrer"
+        <a href="https://discord.gg/QArDnWtSSA" target="_blank" rel="noopener noreferrer"
            className="social-link">
           <FaDiscord />
         </a>
-        <a href="https://twitter.com/yourhandle" target="_blank" rel="noopener noreferrer"
+        <a href="https://x.com/CryptosionDEX" target="_blank" rel="noopener noreferrer"
            className="social-link">
           <FaTwitter />
         </a>

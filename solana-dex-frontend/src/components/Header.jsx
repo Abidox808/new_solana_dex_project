@@ -114,7 +114,7 @@ const Header = () => {
                       to="/ai-tracker"
                       className={location.pathname === '/ai-tracker' ? 'active' : ''}
                     >
-                      Advanced Ai Tracker
+                      Advanced Token Tracker
                     </Link>
                   </li>
                   {/*<li>
