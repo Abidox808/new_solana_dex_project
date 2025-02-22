@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { FaDiscord } from "react-icons/fa6";
 import { CiMail } from "react-icons/ci";
-import { IoSend } from "react-icons/io5";
 import { FaTwitter } from "react-icons/fa";
 import '../styles/AITrackerWaitlist.css';
 import Alert from './Alert';
@@ -13,8 +12,6 @@ const AITrackerWaitlist = () => {
 
   const [formData, setFormData] = useState({
     email: '',
-    discord: '',
-    telegram: ''
   });
   const [status, setStatus] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -28,7 +25,7 @@ const AITrackerWaitlist = () => {
 
       if (response.status === 201) {
         setStatus('success');
-        setFormData({ email: '', discord: '', telegram: '' });
+        setFormData({ email: ''});
       } else {
         setStatus('error');
       }
@@ -102,8 +99,6 @@ const AITrackerWaitlist = () => {
               />
             </div>
           </div>
-
-          
 
           <button
             type="submit"
