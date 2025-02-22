@@ -33,8 +33,11 @@ const AITrackerWaitlist = () => {
         setStatus('error');
       }
     } catch (error) {
-      console.error('Submission error:', error.response?.data || error.message);
-      setStatus('error');
+      if (error.response?.data?.message === 'This email is already on the waitlist') {
+        setStatus('duplicate');
+      } else {
+        setStatus('error');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -154,6 +157,12 @@ const AITrackerWaitlist = () => {
             Oops! Something went wrong. Please try again.
           </Alert>
         )}
+
+        {status === 'duplicate' && (
+                  <Alert variant="danger">
+                    This email is already on the waitlist..
+                  </Alert>
+                )}
       </div>
 
       {/* Social Links */}
