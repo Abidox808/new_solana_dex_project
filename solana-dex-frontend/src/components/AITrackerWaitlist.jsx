@@ -6,7 +6,10 @@ import { FaTwitter } from "react-icons/fa";
 import '../styles/AITrackerWaitlist.css';
 import Alert from './Alert';
 
+
 const AITrackerWaitlist = () => {
+  const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL || 'http://localhost:3000';
+  
   const [formData, setFormData] = useState({
     email: '',
     discord: '',
