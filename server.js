@@ -318,9 +318,11 @@ app.post('/api/limit-order', async (req, res) => {
 
 app.post('/api/waitlist', async (req, res) => {
   try {
+    console.log('Received waitlist submission:', req.body); // Add this log
+
     const { email, discord, telegram } = req.body;
     
-    // new waitlist entry
+    // Create new waitlist entry
     const waitlistEntry = new Waitlist({
       email,
       discord,
@@ -329,12 +331,15 @@ app.post('/api/waitlist', async (req, res) => {
 
     // Save to database
     await waitlistEntry.save();
+    console.log('Saved to database:', waitlistEntry); // Add this log
 
     res.status(201).json({ 
       success: true, 
       message: 'Successfully added to waitlist' 
     });
   } catch (error) {
+    console.error('Server error:', error); // Add this log
+
     // Check for duplicate email error
     if (error.code === 11000) {
       return res.status(400).json({ 
@@ -343,10 +348,10 @@ app.post('/api/waitlist', async (req, res) => {
       });
     }
 
-    console.error('Waitlist submission error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Error adding to waitlist' 
+      message: 'Error adding to waitlist',
+      error: error.message 
     });
   }
 });

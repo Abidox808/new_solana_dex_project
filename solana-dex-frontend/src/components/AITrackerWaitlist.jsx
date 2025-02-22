@@ -28,14 +28,26 @@ const AITrackerWaitlist = () => {
         body: JSON.stringify(formData),
       });
   
-      const data = await response.json();
+      // Log the raw response
+      const responseText = await response.text();
+      console.log('Raw response:', responseText);
+  
+      // Try to parse JSON only if there's content
+      let data;
+      if (responseText) {
+        try {
+          data = JSON.parse(responseText);
+        } catch (e) {
+          console.error('JSON parse error:', e);
+        }
+      }
   
       if (response.ok) {
         setStatus('success');
         setFormData({ email: '', discord: '', telegram: '' });
       } else {
         setStatus('error');
-        console.error('Submission error:', data.message);
+        console.error('Error response:', data || responseText);
       }
     } catch (error) {
       setStatus('error');
