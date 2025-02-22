@@ -18,40 +18,19 @@ const AITrackerWaitlist = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-  
+
     try {
-      const response = await fetch('/api/waitlist', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-  
-      // Log the raw response
-      const responseText = await response.text();
-      console.log('Raw response:', responseText);
-  
-      // Try to parse JSON only if there's content
-      let data;
-      if (responseText) {
-        try {
-          data = JSON.parse(responseText);
-        } catch (e) {
-          console.error('JSON parse error:', e);
-        }
-      }
-  
-      if (response.ok) {
+      const response = await axios.post(`${API_BASE_URL}/api/waitlist`, formData);
+
+      if (response.status === 201) {
         setStatus('success');
         setFormData({ email: '', discord: '', telegram: '' });
       } else {
         setStatus('error');
-        console.error('Error response:', data || responseText);
       }
     } catch (error) {
+      console.error('Submission error:', error.response?.data || error.message);
       setStatus('error');
-      console.error('Submission error:', error);
     } finally {
       setIsLoading(false);
     }
