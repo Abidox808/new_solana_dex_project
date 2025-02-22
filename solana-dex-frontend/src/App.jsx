@@ -69,7 +69,6 @@ function App() {
           <Router>
             <Header/>
             <ErrorBoundary>
-              <Suspense fallback={<div>Loading...</div>}>
               <Routes>
                   <Route path="/" element={<Navigate to="/swap" />} />
                   <Route path="/swap" element={<TokenSwap />} />
@@ -105,7 +104,6 @@ function App() {
                   <Route path="/staking" element={<ComingSoon />} />
                   <Route path="/liquidity" element={<ComingSoon />} />*/}
               </Routes>
-              </Suspense>
             </ErrorBoundary>
           </Router>
         </ThemeProvider>

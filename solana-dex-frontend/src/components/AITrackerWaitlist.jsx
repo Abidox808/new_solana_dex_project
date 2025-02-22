@@ -159,7 +159,7 @@ const AITrackerWaitlist = () => {
         )}
 
         {status === 'duplicate' && (
-                  <Alert variant="danger">
+                  <Alert variant="warning">
                     This email is already on the waitlist..
                   </Alert>
                 )}
