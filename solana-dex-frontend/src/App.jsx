@@ -68,7 +68,6 @@ function App() {
           </video>
           <Router>
             <Header/>
-            <ErrorBoundary>
               <Routes>
                   <Route path="/" element={<Navigate to="/swap" />} />
                   <Route path="/swap" element={<TokenSwap />} />
@@ -104,7 +103,6 @@ function App() {
                   <Route path="/staking" element={<ComingSoon />} />
                   <Route path="/liquidity" element={<ComingSoon />} />*/}
               </Routes>
-            </ErrorBoundary>
           </Router>
         </ThemeProvider>
       </WalletProvider>
