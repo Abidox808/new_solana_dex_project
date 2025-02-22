@@ -41,12 +41,10 @@ import './styles/styles.css'; // Ensure the global styles are imported
 //const SocialTrading = lazy(() => import('./components/SocialTrading'));
 //const PortfolioManagement = lazy(() => import('./components/PortfolioManagement'));
 //const ExampleChart = lazy(() => import('./components/ExampleChart'));
-const LimitOrder = lazy(() => import(/* webpackPrefetch: true */'./components/LimitOrder'));
 //const DCA = lazy(() => import('./components/DCA'));
 //const Perps = lazy(() => import('./components/Perps'));
 //const CustomizableDashboard = lazy(() => import('./components/CustomizableDashboard'));
-const TokenSwap = lazy(() => import('./components/TokenSwap'));
-const AITrackerWaitlist  = lazy(() => import(/* webpackPrefetch: true */'./components/AITrackerWaitlist'));
+
 //const TokenSniper = lazy(() => import('./pages/TokenSniper')); // Corrected import path
 //const GamingPage = lazy(() => import('./components/GamingPage')); // Import the new GamingPage component
 //const LendingPage = lazy(() => import('./components/LendingPage')); // Import the new LendingPage component
@@ -58,6 +56,11 @@ const AITrackerWaitlist  = lazy(() => import(/* webpackPrefetch: true */'./compo
 
 
 function App() {
+  useEffect(() => {
+    import('./components/LimitOrder');
+    import('./components/TokenSwap');
+    import('./components/AITrackerWaitlist');
+  }, []);
 
   return (
     <GlobalProvider>
