@@ -2,6 +2,17 @@
   "version": 2,
   "routes": [
     {
+      "src": "/(.*)",
+      "has": [
+        {
+          "type": "header",
+          "key": "host",
+          "value": "new-solana-dex-project-3q7hfqeo0-soxrok66-gmailcoms-projects.vercel.app"
+        }
+      ],
+      "dest": "/api"
+    },
+    {
       "handle": "filesystem"
     },
     {
