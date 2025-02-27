@@ -2,17 +2,6 @@
   "version": 2,
   "routes": [
     {
-      "src": "/(.*)",
-      "has": [
-        {
-          "type": "header",
-          "key": "host",
-          "value": "waitlist.cryptosion.io"
-        }
-      ],
-      "dest": "/api"
-    },
-    {
       "handle": "filesystem"
     },
     {
