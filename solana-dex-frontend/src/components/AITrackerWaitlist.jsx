@@ -1,7 +1,10 @@
+
 import React, { useState } from 'react';
 import { FaDiscord } from "react-icons/fa6";
 import { CiMail } from "react-icons/ci";
 import { FaTwitter } from "react-icons/fa";
+import { FaWallet, FaChartLine } from "react-icons/fa";
+import { MdDashboard } from "react-icons/md";
 import '../styles/AITrackerWaitlist.css';
 import Alert from './Alert';
 import axios from 'axios';
@@ -48,94 +51,120 @@ const AITrackerWaitlist = () => {
   };
 
   return (
-    <div className="waitlist-container">
+    <div className="cosmic-container">
       {/* Hero Section */}
-      <div className="hero-section">
-        <h1 className="hero-title">
-          AI Powered Crypto Trading Alerts
+      <div className="cosmic-hero">
+        <h1 className="cosmic-title">
+          MASTER AI TRADING<br />BEFORE EVERYONE ELSE
         </h1>
-        <p className="hero-subtitle">
-          Get In Before the Public!
+        <p className="cosmic-subtitle">
+          Join the waitlist for all-in-one AI trading
         </p>
       </div>
 
       {/* Features Grid */}
-      <div className="features-grid">
-        <div className="feature-card">
-          <h3 className="feature-title">🔍 Smart Money Tracking</h3>
-          <p className="feature-description">Track whale movements and smart money flows in real-time</p>
+      <div className="cosmic-features-grid">
+        <div className="cosmic-feature-card">
+          <div className="feature-icon">
+            <FaWallet />
+          </div>
+          <h3 className="cosmic-feature-title">Wallet Tracking</h3>
+          <p className="cosmic-feature-description">
+            Track public wallets, smart trades & detect emerging trends in real-time.
+          </p>
         </div>
-        <div className="feature-card">
-          <h3 className="feature-title">🤖 AI-Powered Analysis</h3>
-          <p className="feature-description">Get insights from our advanced AI algorithms</p>
+        
+        <div className="cosmic-feature-card">
+          <div className="feature-icon">
+            <FaTwitter />
+          </div>
+          <h3 className="cosmic-feature-title">AI Twitter Sync</h3>
+          <p className="cosmic-feature-description">
+          Utilize AI to link Trading wallets, to X accounts (formerly twitter) to find common trends. Find alpha trades without needing to be in Alpha trading groups.
+          </p>
         </div>
-        <div className="feature-card">
-          <h3 className="feature-title">⚡ Instant Alerts</h3>
-          <p className="feature-description">Receive notifications for new opportunities instantly</p>
+        
+        <div className="cosmic-feature-card">
+          <div className="feature-icon">
+            <FaChartLine />
+          </div>
+          <h3 className="cosmic-feature-title">Backtesting & Paper Trading</h3>
+          <p className="cosmic-feature-description">
+            Build and test your trading strategies with integrated simulators.
+          </p>
         </div>
-        <div className="feature-card">
-          <h3 className="feature-title">💎 Early Access Pricing</h3>
-          <p className="feature-description">Free for Early Adopters</p>
+        
+        <div className="cosmic-feature-card">
+          <div className="feature-icon">
+            <MdDashboard />
+          </div>
+          <h3 className="cosmic-feature-title">Profitable Dashboard</h3>
+          <p className="cosmic-feature-description">
+            Gain access to a modern interface to create and optimize strategies for max profits.
+          </p>
         </div>
       </div>
 
-      {/* Waitlist Form */}
-      <div className="form-container">
-        <form onSubmit={handleSubmit} className="waitlist-form">
-          <div className="form-group">
-            <label className="form-label">
-              Email Address *
-            </label>
-            <div className="input-container">
-              <CiMail className="input-icon" />
-              <input
-                type="email"
-                name="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                className="form-input"
-                placeholder="Enter your email"
-              />
+      {/* CTA Section */}
+      <div className="cosmic-cta">
+        <h2 className="cosmic-cta-title">
+          LOCK IN YOUR SPOT BEFORE IT'S TOO LATE
+        </h2>
+        
+        {/* Waitlist Form */}
+        <div className="cosmic-form-container">
+          <form onSubmit={handleSubmit} className="cosmic-form">
+            <div className="cosmic-form-group">
+              <div className="cosmic-input-container">
+                <CiMail className="cosmic-input-icon" />
+                <input
+                  type="email"
+                  name="email"
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="cosmic-input"
+                  placeholder="Enter your email"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className={`cosmic-button ${isLoading ? 'disabled' : ''}`}
+              >
+                {isLoading ? 'SECURING SPOT...' : 'LOCK IN YOUR SPOT'}
+              </button>
             </div>
-          </div>
+          </form>
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className={`submit-button ${isLoading ? 'disabled' : ''}`}
-          >
-            {isLoading ? 'Securing Your Spot...' : '🔒 Secure My Spot Now'}
-          </button>
-        </form>
+          {status === 'success' && (
+            <Alert variant="success">
+              Thanks for joining! We'll be in touch soon with exclusive access.
+            </Alert>
+          )}
 
-        {status === 'success' && (
-          <Alert variant="success">
-            Thanks for joining! We'll be in touch soon with exclusive access.
-          </Alert>
-        )}
+          {status === 'error' && (
+            <Alert variant="error">
+              Oops! Something went wrong. Please try again.
+            </Alert>
+          )}
 
-        {status === 'error' && (
-          <Alert variant="error">
-            Oops! Something went wrong. Please try again.
-          </Alert>
-        )}
-
-        {status === 'duplicate' && (
-                  <Alert variant="warning">
-                    This email is already on the waitlist..
-                  </Alert>
-                )}
+          {status === 'duplicate' && (
+            <Alert variant="warning">
+              This email is already on the waitlist.
+            </Alert>
+          )}
+        </div>
       </div>
 
       {/* Social Links */}
-      <div className="social-links">
+      <div className="cosmic-social-links">
         <a href="https://discord.gg/QArDnWtSSA" target="_blank" rel="noopener noreferrer"
-           className="social-link">
+           className="cosmic-social-link">
           <FaDiscord />
         </a>
         <a href="https://x.com/CryptosionDEX" target="_blank" rel="noopener noreferrer"
-           className="social-link">
+           className="cosmic-social-link">
           <FaTwitter />
         </a>
       </div>
